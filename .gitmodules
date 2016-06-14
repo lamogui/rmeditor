@@ -1,3 +1,6 @@
 [submodule "dependencies/rtaudio"]
 	path = dependencies/rtaudio
 	url = https://github.com/thestk/rtaudio
+[submodule "tools/python-midi"]
+	path = tools/python-midi
+	url = https://github.com/vishnubob/python-midi

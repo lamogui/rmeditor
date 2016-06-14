@@ -3,8 +3,8 @@ QT += opengl xml network widgets core
 CONFIG += c++11
 
 LIBS += -L$$PWD/lib/
-Release: LIBS += -lrtaudio_static -ltunefish4
-Debug: LIBS += -lrtaudio_staticd -ltunefish4d
+release: LIBS += -lrtaudio_static -ltunefish4
+debug: LIBS += -lrtaudio_staticd -ltunefish4d
 
 win32: LIBS += \
     -luuid -lksuser -ldsound
@@ -22,10 +22,10 @@ INCLUDEPATH += \
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/lib/rtaudio_static.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/lib/librtaudio_static.a
 
-Release:DEFINES += \
+release:DEFINES += \
     eRELEASE
 
-Debug:DEFINES += \
+debug:DEFINES += \
     eDEBUG
 
 win32: DEFINES += \
