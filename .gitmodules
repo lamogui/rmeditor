@@ -1,0 +1,3 @@
+[submodule "dependencies/rtaudio"]
+	path = dependencies/rtaudio
+	url = https://github.com/thestk/rtaudio
