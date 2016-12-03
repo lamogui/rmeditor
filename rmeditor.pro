@@ -3,7 +3,7 @@ QT += opengl xml network widgets core
 CONFIG += c++11
 
 LIBS += -L$$PWD/lib/
-release: LIBS += -lrtaudio_static -ltunefish4
+#release: LIBS += -lrtaudio_static -ltunefish4
 debug: LIBS += -lrtaudio_staticd -ltunefish4d
 
 win32: LIBS += \
@@ -18,9 +18,15 @@ INCLUDEPATH += \
     $$PWD/dependencies/tunefish4/include/ \
     $$PWD/dependencies/rtaudio/
 
+#RtAudio Visual Studio 2015
+win32:!win32-g++: INCLUDEPATH += "C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt"
+win32:!win32-g++: LIBS += -L"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10240.0\ucrt\x86"
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/lib/rtaudio_static.lib
-else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/lib/librtaudio_static.a
+#Lib windows
+win32:!win32-g++: LIBS += -lrtaudio_staticd -ltunefish4d -lopengl32 -lole32 -luser32
+
+win32:!win32-g++: PRE_TARGETDEPS += $$PWD/lib/rtaudio_static.lib $$PWD/lib/rtaudio_staticd.lib
+else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/lib/librtaudio_static.a $$PWD/lib/librtaudio_staticd.a
 
 release:DEFINES += \
     eRELEASE
@@ -65,7 +71,10 @@ HEADERS += \
     include/timeline.hpp \
     include/timelinedockwidget.hpp \
     include/timelinewidget.hpp \
-    include/tunefish4music.hpp
+    include/tunefish4music.hpp \
+    include/juce_Path.h \
+    include/juce_PathIterator.h \
+    include/juce_HeapBlock.h
 
 SOURCES += \
     src/camera.cpp \
@@ -97,7 +106,9 @@ SOURCES += \
     src/timeline.cpp \
     src/timelinedockwidget.cpp \
     src/timelinewidget.cpp \
-    src/tunefish4music.cpp
+    src/tunefish4music.cpp \
+    src/juce_Path.cpp \
+    src/juce_PathIterator.cpp
 
 FORMS += \
     ui/editorwidget.ui \
