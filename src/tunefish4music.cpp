@@ -31,7 +31,7 @@ bool Tunefish4Music::createRtAudioStream()
     unsigned int sampleRate = 44100;
     unsigned int bufferFrames = TF_FRAMESIZE;
     m_bytesPerFrame = sizeof(eS16) * parameters.nChannels;
-    m_audio.openStream(&parameters,NULL,RTAUDIO_SINT16,sampleRate,&bufferFrames, rtAudioCallback, (void*) this);
+    m_audio.openStream(&parameters,NULL,RTAUDIO_SINT16,sampleRate,&bufferFrames, rtAudioCallback, (void*) this, 0, Music::rtAudioError);
     if (bufferFrames != TF_FRAMESIZE)
     {
       emit error("[" + fileName() + "] Canno't set bufferFrames to " + QString::number(TF_FRAMESIZE));
@@ -77,7 +77,7 @@ bool Tunefish4Music::load()
   m_noteVelocityBuffer.resize(TF_NUMFREQS * instrumentCount());
   m_noteVelocityTex.create(TF_NUMFREQS,instrumentCount(),(const GLvoid*) m_noteVelocityBuffer.data(),GL_R32F,GL_RED, GL_FLOAT);
 
-
+  return true;
 }
 
 void Tunefish4Music::setPosition(double time)

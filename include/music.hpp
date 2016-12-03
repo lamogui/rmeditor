@@ -55,6 +55,8 @@ protected:
   static int rtAudioCallback( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
                               double streamTime, RtAudioStreamStatus status, void *userData );
 
+  static void rtAudioError(RtAudioError::Type type, const std::string &errorText);
+
   size_t m_bytesPerFrame; //Rt audio bytes per frame
   RtAudio m_audio;
   Texture2D m_noteVelocityTex;

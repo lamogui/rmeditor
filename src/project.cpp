@@ -316,7 +316,8 @@ bool Project::parseTagMusic(QDomNode node)
     m_music = new Tunefish4Music(filename,length,node,*m_log,this);
     emit info(QString("[") + fileName() + "]" + " loading music '" + name + "' (file: " + filename + ")");
     bool s =  m_music->load();
-    if (s) s = m_music->createRtAudioStream();
+    if (s)
+        s = m_music->createRtAudioStream();
     return s;
   }
   else

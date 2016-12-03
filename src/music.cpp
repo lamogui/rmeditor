@@ -48,5 +48,9 @@ int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int n
   return 0;
 }
 
+void Music::rtAudioError(RtAudioError::Type type, const std::string &errorText)
+{
+  qDebug() << tr("rtAudio error: ") + QString::fromStdString(errorText);
+}
 
 
