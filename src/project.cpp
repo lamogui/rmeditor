@@ -9,7 +9,7 @@
 #include "scene.hpp"
 #include "shaderminifier.hpp"
 #include "tunefish4music.hpp"
-
+#include "4klangmusic.hpp"
 
 Project::Project(const QDir &dir, const QString &filename, LogWidget &log, QObject *parent):
   TextEditable(filename, QDomNode() ,log,parent),
@@ -290,12 +290,7 @@ bool Project::parseTagMusic(QDomNode node)
   }
 
   QString filename = element.attribute("file");
-  QString name = element.attribute("name", filename.section(".",0,-2));
-  QString ext = filename.section(".",-1);
-  element.setAttribute("name",name);
   QString lstr = element.attribute("length","");
-
-
   bool lok = false;
   double length = lstr.toDouble(&lok);
   if (!lok)
@@ -310,6 +305,17 @@ bool Project::parseTagMusic(QDomNode node)
               "(" + element.nodeName() +  ")  '" + filename + "' invalid length '" + QString::number(length) + "'");
     return false;
   }
+
+
+  if (filename=="4klang") // Special case for 4klang
+  {
+      m_music = new _4KlangMusic(filename,length,node,*m_log,this);
+      return m_music->load() && m_music->createRtAudioStream();
+  }
+
+  QString name = element.attribute("name", filename.section(".",0,-2));
+  QString ext = filename.section(".",-1);
+  element.setAttribute("name",name);
 
   if (ext == "tf4m")
   {
