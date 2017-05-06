@@ -20,15 +20,15 @@ set(CMAKE_CXX_STANDARD 11)
 project(rmeditor-dependencies)
 
 
-if (MSVC)
-  foreach(flag
-          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    if(${flag} MATCHES "/MD")
-      string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")
-    endif()
-  endforeach()
-endif()
+#if (MSVC)
+#  foreach(flag
+#          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+#          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+#    if(${flag} MATCHES "/MD")
+#      string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")
+#    endif()
+#  endforeach()
+#endif()
 
 # enable project folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
