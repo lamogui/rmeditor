@@ -306,12 +306,13 @@ bool Project::parseTagMusic(QDomNode node)
     return false;
   }
 
-
+#ifdef Q_OS_WIN32
   if (filename=="4klang") // Special case for 4klang
   {
       m_music = new _4KlangMusic(filename,length,node,*m_log,this);
       return m_music->load() && m_music->createRtAudioStream();
   }
+#endif // Q_OS_WIN32
 
   QString name = element.attribute("name", filename.section(".",0,-2));
   QString ext = filename.section(".",-1);

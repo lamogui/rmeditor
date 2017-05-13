@@ -2,10 +2,15 @@
 #ifndef _4KLANGMUSIC_HPP
 #define _4KLANGMUSIC_HPP
 
+#include <QtGlobal> // for Q_OS_WIN32
+#ifdef Q_OS_WIN32
+
 #include "music.hpp"
 #include "system.hpp"
 #include "tf4.hpp"
 #include <thread>
+
+
 
 class _4KlangMusic : public Music
 {
@@ -41,4 +46,6 @@ protected:
   std::thread _thread;
 };
 
-#endif
+#endif // Q_OS_WIN32
+
+#endif // !_4KLANGMUSIC_HPP

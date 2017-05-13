@@ -1,4 +1,9 @@
-﻿#include <QDebug>
+﻿
+#include <QtGlobal> // for Q_OS_WIN32
+
+#ifdef Q_OS_WIN32
+
+#include <QDebug>
 
 #include "4klangmusic.hpp"
 #include <cassert>
@@ -7,8 +12,8 @@
 _4KlangMusic::_4KlangMusic(const QString& filename, double length, QDomNode node ,LogWidget& log,QObject* parent):
   Music(filename,length,node,log,parent),
 _buffer(new float[MAX_SAMPLES*2]),
-_bufferPos(0),
-_thread(_4klang_render, ((void*)_buffer))
+_bufferPos(0)/*,
+_thread(_4klang_render, ((void*)_buffer))*/
 {
 
 }
@@ -101,3 +106,5 @@ void _4KlangMusic::exportMusicCData(const QFile&, const QFile&) const
 {
     // TODO
 }
+
+#endif // Q_OS_WIN32

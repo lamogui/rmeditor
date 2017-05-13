@@ -23,7 +23,7 @@ win32:!win32-g++: INCLUDEPATH += "C:\Program Files (x86)\Windows Kits\10\Include
 win32:!win32-g++: LIBS += -L"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10240.0\ucrt\x86"
 
 #Lib windows
-win32:!win32-g++: LIBS += -lrtaudio_staticd -ltunefish4d -lopengl32 -lole32 -luser32 $$PWD/src/4klang.obj
+win32:!win32-g++: LIBS += -lrtaudio_staticd -ltunefish4d -lopengl32 -lole32 -luser32 $$PWD/src/4klang_win32.obj
 
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/lib/rtaudio_static.lib $$PWD/lib/rtaudio_staticd.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/lib/librtaudio_static.a $$PWD/lib/librtaudio_staticd.a

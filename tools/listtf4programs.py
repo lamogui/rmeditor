@@ -4,7 +4,7 @@ from os import listdir
 from os.path import isfile, join
 
 if len(sys.argv) < 2:
-    print "Usage: {0} <program_dir>".format(sys.argv[0])
+    print("Usage:" + sys.argv[0] + " <program_dir>")
     sys.exit(2)
 
 mypath = sys.argv[1];

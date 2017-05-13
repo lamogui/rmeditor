@@ -193,7 +193,7 @@ void FFmpegEncoder::run()
 
     qint64 writted = 0;
     size_t tot_writted = 0;
-    while (writted !=-1 && (tot_writted += writted) != image.byteCount())
+    while (writted != (qint64)-1 && (tot_writted += writted) != image.byteCount())
     {
       writted = videoSocket.write((char*)(image.bits() + tot_writted),image.byteCount()-tot_writted);
     }
@@ -230,7 +230,7 @@ void FFmpegEncoder::run()
 
   //Lets' go !
   void* outputBuffer = malloc(audioBufferSize);
-  for (size_t i = startFrame + 1; !_cancel && i < endFrame; ++i)
+  for (size_t i = startFrame + 1; !_cancel && (qint64)i < endFrame; ++i)
   {
     double track_time = (double)i/_timeline->framerate();
     while (track_time >= music->getTime())
@@ -262,7 +262,7 @@ void FFmpegEncoder::run()
 
     qint64 writted = 0;
     size_t tot_writted = 0;
-    while (writted !=-1 && (tot_writted += writted) != image.byteCount())
+    while (writted != (quint64)-1 && (tot_writted += writted) != image.byteCount())
     {
       writted = videoSocket.write((char*)(image.bits() + tot_writted),image.byteCount()-tot_writted);
       QCoreApplication::processEvents();
