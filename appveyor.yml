@@ -7,7 +7,10 @@ configuration:
 
 platform:
  - x64
-
+ 
+clone_script:
+- cmd: git clone --recursive https://github.com/lamogui/rmeditor
+ 
 build_script:
  - cmd: mkdir build
  - cmd: cd build
