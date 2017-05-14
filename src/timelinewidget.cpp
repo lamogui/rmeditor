@@ -10,6 +10,7 @@
 #include <QScrollBar>
 #include <QTime>
 #include <QTimer>
+#include <cmath> // fmod
 
 #include "music.hpp"
 #include "timeline.hpp"
