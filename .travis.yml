@@ -33,7 +33,7 @@ script:
   - /opt/qt58/bin/qt58-env.sh
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DCMAKE_PREFIX_PATH:PATH=/opt/qt58/ .. 
   - make
 
 

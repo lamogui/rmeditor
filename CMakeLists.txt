@@ -17,6 +17,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED 11)
 set(CMAKE_CXX_STANDARD 11)
 
 #dependencies 
+set(BUILD_TESTING OFF) #force RtAudio not test
 add_subdirectory(dependencies)
 
 #qt
