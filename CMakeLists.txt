@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.2.2) #travis 
 project(rmeditor)
 
 #macros 
@@ -140,6 +140,12 @@ if(UNIX)
         )  
 endif(UNIX)
 
+if(MSVC)
+	set(RMEDITOR_LIBS ${RMEDITOR_LIBS} 
+        OpenGL32 #FIXME : error adding symbols: DSO missing from command line
+        )	
+endif(MSVC)
+
 #executable 
 add_executable(rmeditor ${RMEDITOR_SRC} ${RMEDITOR_H} ${RMEDITOR_FORMS} ${RMEDITOR_RESOURCES})
 target_link_libraries(rmeditor ${RMEDITOR_LIBS})
@@ -149,7 +155,23 @@ target_include_directories(rmeditor PRIVATE
     dependencies/tunefish4/include #FIXME : tunefish4
     ${CMAKE_CURRENT_BINARY_DIR})
 
-
+#dependencies
+#if(MSVC)
+#	add_custom_target(Qt5CopyBinaries
+		# todo: check if debug and release folder exist
+		# debug version
+		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Cored.dll         ${CMAKE_BINARY_DIR}/Debug
+		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Guid.dll          ${CMAKE_BINARY_DIR}/Debug
+		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Networkd.dll      ${CMAKE_BINARY_DIR}/Debug
+		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5OpenGLd.dll       ${CMAKE_BINARY_DIR}/Debug
+		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Widgetsd.dll      ${CMAKE_BINARY_DIR}/Debug
+		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Xmld.dll          ${CMAKE_BINARY_DIR}/Debug
+		
+		# Output Message
+		#COMMENT "Copying Qt binaries from '${Qt5Core_DIR}/../../bin/' to '${CMAKE_BINARY_DIR}'" VERBATIM
+	#)
+	#add_dependencies(rmeditor Qt5CopyBinaries)
+#endif(MSVC)
 
 #MSVC static link
 if (MSVC)
@@ -161,4 +183,6 @@ if (MSVC)
     endif()
   endforeach()
 endif()
+
+
 
