@@ -1,0 +1,17 @@
+version: '{branch}-1.0.{build}'
+image:
+ - Visual Studio 2015
+
+configuration:
+ - Release
+
+platform:
+ - x64
+
+shallow_clone: true
+
+build_script:
+ - cmd: mkdir build
+ - cmd: cd build
+ - cmd: cmake -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH:PATH=C:\Qt\5.8\msvc2015_64 .. -G "Visual Studio 14 2015 Win64" 
+ - cmd: cmake --build . --config Release
