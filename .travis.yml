@@ -1,0 +1,18 @@
+language: cpp
+compiler: gcc
+  
+addons:
+  apt:
+    packages:
+      - cmake
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y qt-sdk
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  

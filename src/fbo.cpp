@@ -25,12 +25,12 @@ FBO::FBO(size_t width, size_t height):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, m_format, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, m_format, (GLsizei)m_width, (GLsizei)m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
 
     glGenTextures(1, &m_DepthTextureID);
     glBindTexture(GL_TEXTURE_2D, m_DepthTextureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, (GLsizei)m_width, (GLsizei)m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE,   GL_LUMINANCE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,   GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,   GL_LINEAR);
@@ -38,7 +38,7 @@ FBO::FBO(size_t width, size_t height):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, m_format, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, m_format, (GLsizei)m_width, (GLsizei)m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glBindTexture(GL_TEXTURE_2D, 0);
 
 
@@ -51,7 +51,7 @@ FBO::FBO(size_t width, size_t height):
     glGenRenderbuffers(1, &m_DepthRenderBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER_EXT, m_DepthRenderBuffer);
 
-    glRenderbufferStorage(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, m_width, m_height);
+    glRenderbufferStorage(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, (GLsizei)m_width, (GLsizei)m_height);
     glBindRenderbuffer(GL_RENDERBUFFER_EXT, 0);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, m_ColorTextureID, 0);
@@ -81,7 +81,7 @@ FBO::~FBO()
 void FBO::enable(void)
 {
     glPushAttrib(GL_VIEWPORT_BIT);
-    glViewport(0,0,m_width,m_height);
+    glViewport(0,0,(GLsizei)m_width, (GLsizei)m_height);
 
     glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_FrameBuffer);
     glPushMatrix();
@@ -130,14 +130,14 @@ GLuint FBO::getColor(void) const
 void FBO::updateTexture()
 {
     glBindTexture(GL_TEXTURE_2D, m_ColorTextureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, m_format, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, m_format, (GLsizei)m_width, (GLsizei)m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glBindTexture(GL_TEXTURE_2D, m_DepthTextureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, (GLsizei)m_width, (GLsizei)m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_FrameBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER_EXT, m_DepthRenderBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, m_width, m_height);
+    glRenderbufferStorage(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, (GLsizei)m_width, (GLsizei)m_height);
     glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 }
 
@@ -151,8 +151,8 @@ void FBO::bind()
 
 QImage FBO::getImage()
 {
-  QImage img(m_width,m_height,QImage::Format_RGBA8888);
+  QImage img((int)m_width,(int)m_height,QImage::Format_RGBA8888);
   img.fill(QColor(0,0,0,0));
-  this->glReadPixels(0,0,m_width,m_height,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid*)img.bits());
+  this->glReadPixels(0,0, (GLsizei)m_width, (GLsizei)m_height,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid*)img.bits());
   return img.transformed(QTransform(1.0,0.0,0.0,-1.0,0.0,0.0));
 }

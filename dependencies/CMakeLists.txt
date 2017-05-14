@@ -39,6 +39,16 @@ if (CMAKE_BUILD_TYPE MATCHES DEBUG)
   message(STATUS "CMAKE_STATIC_LIBRARY_SUFFIX=${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif()
 
+# MSVC static link
+if (MSVC)
+  foreach(flag
+          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+    if(${flag} MATCHES "/MD")
+      string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")
+    endif()
+  endforeach()
+endif()
 
 add_subdirectory(rtaudio)
 add_subdirectory(tunefish4)

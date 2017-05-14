@@ -56,7 +56,7 @@ void _4KlangMusic::processAudio(void *outputBuffer, unsigned int nBufferFrames,
                                   double, RtAudioStreamStatus)
 {
   _mutex.lock();
-  size_t toCopy = nBufferFrames * 2 > (2*MAX_SAMPLES) - _bufferPos ? (2*MAX_SAMPLES) - _bufferPos : nBufferFrames * 2;
+  uint32_t toCopy = nBufferFrames * 2 > (2*MAX_SAMPLES) - _bufferPos ? (2*MAX_SAMPLES) - _bufferPos : nBufferFrames * 2;
   memcpy(outputBuffer,(const void*)&( _buffer[_bufferPos]),toCopy * sizeof(float));
 
   _bufferPos += toCopy;
