@@ -13,15 +13,15 @@
   </scenes>
   <timeline>
     <track>
-      <sequence start="0" length="763" scene="corridor">
+      <sequence start="0" length="779" scene="corridor">
         <camera>
           <keyframe pos_z="-2.96499" pos_y="-1.0" rot_y="0.0" rot_x="0.0" frame="0" rot_w="1.0" rot_z="0.0" pos_x="0.0"/>
-          <keyframe pos_z="-4.56772" pos_y="-1.0" rot_y="0.0" rot_x="0.0" frame="763" rot_w="1.0" rot_z="0.0" pos_x="0.0"/>
+          <keyframe pos_z="-4.56772" pos_y="-1.0" rot_y="0.0" rot_x="0.0" frame="780" rot_w="1.0" rot_z="0.0" pos_x="0.0"/>
         </camera>
       </sequence>
-      <sequence start="763" length="200" scene="corridor">
+      <sequence start="786" length="177" scene="corridor">
         <camera>
-          <keyframe pos_z="0.723768" pos_y="-1.9016" rot_y="-0.788395" rot_x="0.236346" frame="0" rot_w="0.45869" rot_z="-0.334924" pos_x="1.20307"/>
+          <keyframe pos_z="0.723768" pos_y="-1.9016" rot_y="-0.788395" rot_x="0.236346" frame="5" rot_w="0.45869" rot_z="-0.334924" pos_x="1.20307"/>
           <keyframe pos_z="0.750342" pos_y="-1.96122" rot_y="-0.873888" rot_x="0.0912517" frame="201" rot_w="0.181894" rot_z="-0.441477" pos_x="0.769921"/>
         </camera>
       </sequence>

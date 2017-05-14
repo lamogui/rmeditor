@@ -1,11 +1,10 @@
 ﻿
-#include <QtGlobal> // for Q_OS_WIN32
-
+#include "4klangmusic.hpp"
 #ifdef Q_OS_WIN32
 
 #include <QDebug>
 
-#include "4klangmusic.hpp"
+
 #include <cassert>
 #include "../src/4klang.h"
 

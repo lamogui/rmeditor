@@ -6,7 +6,7 @@
 #include "nodefile.hpp"
 #include "texture.hpp"
 
-#include "../rtaudio/RtAudio.h"
+#include <rtaudio/RtAudio.h>
 
 
 class RtAudio;

@@ -32,7 +32,7 @@ float piano = 0.0;
 //To use the framework implement the following functions
 
 vec2 map(vec3 p); //x = distance, y = material
-vec4 shade(vec3 p, vec3 n, vec3 ro, vec3 rd, float mat);
+vec3 shade(vec3 p, vec3 n, vec3 ro, float mat, vec3 inputColor);
 void globals(); //COmpute your globals variables
 
 /* BEGIN STOLEN */ 
@@ -152,8 +152,6 @@ void main()
 	vec2 uv = vec2(coords.x*xy_scale_factor,coords.y);
 	vec3 ro = cam_position;
 	vec3 rd = rotate_dir(cam_rotation, normalize(vec3(uv,2.0)));
-	vec3 n;
-	vec4 pmat;
 
 	/*snare = max(
 					 max(
@@ -167,27 +165,47 @@ void main()
 	
   
   globals();
-  
+
+  const int numReflexions = 6;
+  vec4 pmats[numReflexions]; // everywhere we hit (+ material ID)
+  vec3 ns[numReflexions];    // all our normals !
+
+  // First trace the light path
+	for (int i = 0; i < numReflexions; i++)
+	{
+		pmats[i] = rm(ro,rd);
+    ns[i] = normal(pmats[i].xyz);
+
+		// reflect ! (put here a condition to break before)
+		ro = pmats[i].xyz + ns[i]*4.*dLimit;
+		rd = reflect(rd, ns[i]);
+  }
+ 
+  for (int i = numReflexions-1; i >=0; i--)
+	{
+    ro = i > 0 ? pmats[i-1].xyz : cam_position;
+    color = shade(pmats[i].xyz, ns[i], ro, pmats[i].w, color).xyz;
+  }
+
+/*
   for (int i = 0; i < 6; i++)
 	{
 		pmat = rm(ro,rd);
 	  n = normal(pmat.xyz);
-		vec4 cr = shade(pmat.xyz, n, ro, rd, pmat.w);
-
-		color = cr.xyz * color;
+		vec4 cr = shade(pmat.xyz, n, ro, rd, pmat.w, color);
+		color = mix(cr.xyz * color);
 		
 		if (cr.w > 0.)
 		{
 			ro = pmat.xyz + n*4.*dLimit;
 			rd = reflect(rd, n);
-
 		}
 		else
 		{
 		  break;
 		}
 	}
-
+*/
 	color = pow(color, vec3(1.5/2.2));
 	
 	//Render_normals

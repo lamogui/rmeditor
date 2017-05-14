@@ -1,5 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.1.3)
 
+project(rmeditor-dependencies)
+
 # define a macro that helps defining an option
 macro(rmeditor_dependencies_set_option var default type docstring)
     if(NOT DEFINED ${var})
@@ -11,42 +13,31 @@ endmacro()
 
 # determine whether to create a debug or release build
 rmeditor_dependencies_set_option(CMAKE_BUILD_TYPE Release STRING "Choose the type of build (Debug or Release)")
-rmeditor_dependencies_set_option(LIB_PATH "${CMAKE_SOURCE_DIR}/../lib" PATH "Output path of *.a")
-message(STATUS "LIB_PATH set to ${LIB_PATH}")
+rmeditor_dependencies_set_option(RMEDITOR_DEPENCENCIES_LIB_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../lib" PATH "Output path of *.a")
+message(STATUS "RMEDITOR_DEPENCENCIES_LIB_OUTPUT_PATH set to ${RMEDITOR_DEPENCENCIES_LIB_OUTPUT_PATH}")
 
 set(CMAKE_CXX_STANDARD_REQUIRED 11)
 set(CMAKE_CXX_STANDARD 11)
 
-project(rmeditor-dependencies)
 
-
-#if (MSVC)
-#  foreach(flag
-#          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-#          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-#    if(${flag} MATCHES "/MD")
-#      string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")
-#    endif()
-#  endforeach()
-#endif()
 
 # enable project folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #set lib output path
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIB_PATH})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIB_PATH})
-LINK_DIRECTORIES(${LIB_PATH})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${RMEDITOR_DEPENCENCIES_LIB_OUTPUT_PATH})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${RMEDITOR_DEPENCENCIES_LIB_OUTPUT_PATH})
+link_directories(${RMEDITOR_DEPENCENCIES_LIB_OUTPUT_PATH})
 
 
-string(TOUPPER ${CMAKE_BUILD_TYPE} DEP_BUILD_TYPE)
-if (DEP_BUILD_TYPE MATCHES DEBUG)
-  set(CMAKE_STATIC_LIBRARY_SUFFIX "d${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  set(CMAKE_SHARED_LIBRARY_SUFFIX "d${CMAKE_SHARED_LIBRARY_SUFFIX}")
+# add "d" for debug libraries
+string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
+if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+  set(CMAKE_STATIC_LIBRARY_SUFFIX "-dbg${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(CMAKE_SHARED_LIBRARY_SUFFIX "-dbg${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
-  message(INFO "CMAKE_STATIC_LIBRARY_SUFFIX=${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  message(STATUS "CMAKE_STATIC_LIBRARY_SUFFIX=${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif()
-
 
 
 add_subdirectory(rtaudio)

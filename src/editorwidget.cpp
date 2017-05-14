@@ -1,4 +1,5 @@
 #include "editorwidget.hpp"
+
 #include "ui_editorwidget.h"
 
 #include <iostream>

@@ -14,7 +14,8 @@ class Keyframe : public QObject, public QGraphicsItem
 {
 
   Q_OBJECT
-
+  Q_INTERFACES(QGraphicsItem)
+  
   public:
     Keyframe(qint64 rel_frame,Project& project, Sequence *seq, QDomElement& node);
     Keyframe(Project& project, Sequence *seq, QDomElement& node);
