@@ -6,7 +6,7 @@ from os import listdir
 from os.path import isfile, isdir, join
 
 
-ROW_PER_BEAT = 96;
+ROW_PER_BEAT = 32;
 TF_PARAM_COUNT = 112;
 DEFAULT_TEMPO = 140;
 

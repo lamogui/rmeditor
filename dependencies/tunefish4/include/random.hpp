@@ -1,4 +1,4 @@
-﻿/*
+/*
  ---------------------------------------------------------------------
  Tunefish 4  -  http://tunefish-synth.com
  ---------------------------------------------------------------------
@@ -22,23 +22,22 @@
 #ifndef RANDOM_HPP
 #define RANDOM_HPP
 
-
 class eRandom
 {
 public:
     eRandom();
     eRandom(eU32 initSeed);
 
-    void    seed(eU32 newSeed);
-    void    seedRandomly();
+    void    Seed(eU32 newSeed);
+    void    SeedRandomly();
 
-    eU32    nextInt();
-    eInt    nextInt(eInt min, eInt max);
-    eF32    nextFloat();
-    eF32    nextFloat(eF32 min, eF32 max);
-    eF32    nextFloatNormalDistribution(eF32 Mean, eF32 StdDeviation);
+    eU32    NextInt();
+    eInt    NextInt(eInt min, eInt max);
+    eF32    NextFloat();
+    eF32    NextFloat(eF32 min, eF32 max);
+    eF32    NextFloatNormalDistribution(eF32 Mean, eF32 StdDeviation);
 
-    eU32    max() const;
+    eU32    Max() const;
 
 private:
     eU32    m_seed;

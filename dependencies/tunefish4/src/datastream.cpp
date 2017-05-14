@@ -8,11 +8,13 @@
  *   /_____//_/ /_//_/ \__, //_/ /_/ /_/ \__,_/     /_/.   
  *                    /____/                              
  *
- *   Copyright © 2003-2012 Brain Control, all rights reserved.
+ *   Copyright ï¿½ 2003-2012 Brain Control, all rights reserved.
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "system.hpp"
+#include "datastream.hpp"
+#include "runtime.hpp"
 
 eDataStream::eDataStream(eConstPtr mem, eU32 length) :
     m_reading(eFALSE),
@@ -55,7 +57,7 @@ void eDataStream::writeBit(eBool bit, eU32 count)
 
     for (eU32 i=0; i<count; i++)
     {
-        eSetBit(m_curByte, m_bitCount, bit);
+        eModifyBit(m_curByte, m_bitCount, bit);
         m_bitCount++;
 
         if (m_bitCount == 8)
@@ -184,9 +186,9 @@ eU32 eDataStream::readVbr()
 
     eU32 dword = 0;
     for (eInt i=bitCount-1; i>=0; i--)
-        eSetBit(dword, i, readBit());
+        eModifyBit(dword, i, readBit());
 
-    eSetBit(dword, bitCount, eTRUE);
+    eModifyBit(dword, bitCount, eTRUE);
     return dword-1; // because of +1 when encoding
 }
 
