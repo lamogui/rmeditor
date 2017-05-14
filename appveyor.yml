@@ -8,8 +8,6 @@ configuration:
 platform:
  - x64
 
-shallow_clone: true
-
 build_script:
  - cmd: mkdir build
  - cmd: cd build
