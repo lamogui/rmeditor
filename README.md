@@ -1,5 +1,7 @@
 # rmeditor
 
+[![Build Status](https://travis-ci.org/lamogui/rmeditor.svg?branch=master)](https://travis-ci.org/lamogui/rmeditor)
+
 ![screenshot](http://s31.postimg.org/jcs4o844r/screenshot.png)
 
 
@@ -41,14 +43,14 @@ cd build-dependencies
 cmake-gui ../dependencies
 ```
 
-####Windows
+#### Windows
 Check *AUDIO_WINDOWS_WASAPI* and/or *AUDIO_WINDOWS_DS*
 
-####Linux
+#### Linux
 Check *AUDIO_LINUX_PULSE*
 
 
-####Debug/Release
+#### Debug/Release
 In order to run the program in Debug and Release Mode you need to complie the 
 dependencies twice (use *CMAKE_BUILD_TYPE* with *Debug*, *Release*, or *MinSizeRel*)
 

@@ -34,7 +34,6 @@ find_package(Qt5Network REQUIRED)
 set(RMEDITOR_INCLUDE_DIR include)
 set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/4klangmusic.hpp
-  ${RMEDITOR_INCLUDE_DIR}/bassmod.h
   ${RMEDITOR_INCLUDE_DIR}/camera.hpp
   ${RMEDITOR_INCLUDE_DIR}/demotimeline.hpp
   ${RMEDITOR_INCLUDE_DIR}/editorwidget.hpp
