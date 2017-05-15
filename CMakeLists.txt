@@ -112,8 +112,8 @@ set(RMEDITOR_FORMS
 #ressources
 set(RMEDITOR_RESOURCES_DIR resources)
 qt5_add_resources(RMEDITOR_RESOURCES
-    ${RMEDITOR_RESOURCES_DIR}/res.qrc 
-    ${RMEDITOR_RESOURCES_DIR}/qdarkstyle/style.qrc
+    #${RMEDITOR_RESOURCES_DIR}/res.qrc 
+    #${RMEDITOR_RESOURCES_DIR}/qdarkstyle/style.qrc
 )
 
 if (WIN32)
@@ -140,15 +140,31 @@ if(UNIX)
         )  
 endif(UNIX)
 
-if(MSVC)
-	set(RMEDITOR_LIBS ${RMEDITOR_LIBS} 
-        OpenGL32 #FIXME : error adding symbols: DSO missing from command line
-        )	
+if (MSVC)
+    set(RMEDITOR_LIBS ${RMEDITOR_LIBS} 
+        #Qt static dependencies
+        User32 
+        OpenGL32 
+        Ws2_32 
+        Iphlpapi 
+        UxTheme 
+        Winmm
+
+        debug ${CMAKE_PREFIX_PATH}/lib/qtpcred.lib
+        debug ${CMAKE_PREFIX_PATH}/lib/qtharfbuzzd.lib
+        debug ${CMAKE_PREFIX_PATH}/lib/qtlibpngd.lib
+
+        optimized ${CMAKE_PREFIX_PATH}/lib/qtpcre.lib
+        optimized ${CMAKE_PREFIX_PATH}/lib/qtharfbuzz.lib
+        optimized ${CMAKE_PREFIX_PATH}/lib/qtlibpng.lib
+     )
+
 endif(MSVC)
+
 
 #executable 
 add_executable(rmeditor ${RMEDITOR_SRC} ${RMEDITOR_H} ${RMEDITOR_FORMS} ${RMEDITOR_RESOURCES})
-target_link_libraries(rmeditor ${RMEDITOR_LIBS})
+target_link_libraries(rmeditor general ${RMEDITOR_LIBS})
 target_include_directories(rmeditor PRIVATE
     ${RMEDITOR_INCLUDE_DIR} 
     dependencies #FIXME : RtAudio
