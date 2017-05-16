@@ -13,12 +13,9 @@ clone_script:
  
 build_script:
  - cmd: cd rmeditor
- - cmd: dir
- - cmd: pwd
  - cmd: mkdir build
  - cmd: cd build
- - cmd: dir
- - cmd: pwd
- - cmd: dir ..
+ - cmd: mkdir Release
+ - cmd: mkdir Debug
  - cmd: cmake -DBUILD_TESTING:BOOL=OFF -DCMAKE_PREFIX_PATH:PATH=C:\Qt\5.8\msvc2015_64 .. -G "Visual Studio 14 2015 Win64" 
  - cmd: cmake --build . --config Release
