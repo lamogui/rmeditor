@@ -9,7 +9,7 @@ uniform float track_time;
 uniform vec3 cam_position;
 uniform vec4 cam_rotation;
 
-const float instCount = 8.0;
+const float instCount = 7.0;
 const float nbNotes = 128.0;
 const float dLimit = 0.001;
 const float dFar = 60.;
@@ -158,11 +158,7 @@ void main()
 						max(getNoteVelocity(81.,4.),getNoteVelocity(74.,4.)),
 					 getNoteVelocity(62.,4.)),
 				getNoteVelocity(86.,4.));*/
-  piano = getNoteVelocity(72., 4.); /*max(
-							getNoteVelocity(72., 4.),
-							getNoteVelocity(96., 4.));*/
-						
-	
+  piano = getNoteVelocity(84.0, 3.); 
   
   globals();
 
@@ -187,33 +183,20 @@ void main()
     color = shade(pmats[i].xyz, ns[i], ro, pmats[i].w, color).xyz;
   }
 
-/*
-  for (int i = 0; i < 6; i++)
-	{
-		pmat = rm(ro,rd);
-	  n = normal(pmat.xyz);
-		vec4 cr = shade(pmat.xyz, n, ro, rd, pmat.w, color);
-		color = mix(cr.xyz * color);
-		
-		if (cr.w > 0.)
-		{
-			ro = pmat.xyz + n*4.*dLimit;
-			rd = reflect(rd, n);
-		}
-		else
-		{
-		  break;
-		}
-	}
-*/
-	color = pow(color, vec3(1.5/2.2));
+
+	color = pow(color, vec3(1.1/2.2));
 	
-	//Render_normals
-	//color = abs(n);
-	
+  //Render_normals
+  /*vec3 n = vec3(0.0);
+  for (int i = 0; i < numReflexions; ++i)
+	  n += ns[i] * 0.5 + vec3(0.5);
+  n /= vec3(numReflexions);*/
+	//color = color + n * 0.2;
+
 	//Render ambient Occlusion
-	//float ao = ambientOcclusion(pmat.xyz,n);
-	//color= vec3(ao);
+	float ao = ambientOcclusion(pmats[0].xyz, ns[0]);
+	color *= vec3(ao);
+  //color += vec3(piano);
 	
 	//Render distance
 	//color = vec3(1.-distance(pmat.xyz,cam_position)*2./dFar);
