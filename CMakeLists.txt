@@ -197,7 +197,10 @@ target_include_directories(rmeditor PRIVATE
     dependencies #FIXME : RtAudio
     dependencies/tunefish4/include #FIXME : tunefish4
     ${CMAKE_CURRENT_BINARY_DIR})
-target_compile_definitions(rmeditor ${RMEDITOR_DEFINITIONS})
+
+if (MSVC_STATIC) # temp until there is at least one definition 
+  target_compile_definitions(rmeditor ${RMEDITOR_DEFINITIONS})
+endif (MSVC_STATIC)
 
 #dependencies
 if(MSVC)
