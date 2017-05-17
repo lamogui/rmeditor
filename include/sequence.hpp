@@ -23,9 +23,7 @@ public:
   Sequence(Project& project, DemoTimeline& timeline, QDomElement node, Scene& scene, int start, int length=600, qreal height = 60.0);
   virtual ~Sequence();
 
-
-
-  virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
   inline bool isInside(qint64 frame) const { return (frame >= startFrame() && frame < endFrame()); }
   inline bool overlap(const Sequence& seq) const { return (isInside(seq.startFrame())||
@@ -72,14 +70,14 @@ protected:
   void load();
   void renderImages();
 
-  virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
-  virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
-  virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+  void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+  void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+  void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override; 
 
 
-  virtual void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event);
-  virtual void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
-  virtual void 	hoverMoveEvent(QGraphicsSceneHoverEvent *event);
+  void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
+  void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
+  void 	hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
 
   bool isInsideRightExtend(QPointF rel_pos, qreal scale) const;
   qreal getScaleFromWidget(const QWidget *widget) const;

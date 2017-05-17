@@ -23,7 +23,7 @@ public:
   DemoRenderer(DemoTimeline&  timeline, size_t w, size_t h);
 
 protected:
-  virtual void glRender();
+  void glRender() override;
 
   DemoTimeline* m_timeline;
 
@@ -49,9 +49,9 @@ public:
   qint64 addSequence(Sequence* seq); //Return the correct start frame of the seq
   Sequence* isInsideSequence(qint64 frame) const;
 
-  inline  virtual Renderer* getRenderer() { return m_renderer; }
+  inline Renderer* getRenderer() override { return m_renderer; }
 
-  virtual void updateTime();
+  void updateTime() override;
 
 public slots:
   void updateCamera(qint64 frame, Camera& cam);
@@ -76,8 +76,8 @@ protected slots:
   void addSequenceAction(QAction* action);
 
 protected:
-  virtual void keyReleaseEvent(QKeyEvent *keyEvent);
-  virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
+  void keyReleaseEvent(QKeyEvent *keyEvent) override;
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
   void load();
   bool correctStartFrame(Sequence* seq); //seq must not be in m_sequences !

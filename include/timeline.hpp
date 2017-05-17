@@ -26,7 +26,7 @@ public:
 
   qint64 currentFrame() const;
 
-  virtual Renderer* getRenderer() { return NULL; }
+  virtual Renderer* getRenderer() { return nullptr; }
   virtual void updateTime() = 0;
 
 signals:

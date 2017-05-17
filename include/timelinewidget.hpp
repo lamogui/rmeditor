@@ -32,12 +32,12 @@ signals:
 
 
 protected:
-  virtual void drawForeground(QPainter* painter, const QRectF& rect);
-  virtual void mousePressEvent(QMouseEvent* mouseEvent);
-  virtual void mouseMoveEvent(QMouseEvent* mouseEvent);
-  virtual void mouseReleaseEvent(QMouseEvent* mouseEvent);
-  virtual void wheelEvent(QWheelEvent* event);
-  virtual void focusInEvent(QFocusEvent* event);
+  void drawForeground(QPainter* painter, const QRectF& rect) override;
+  void mousePressEvent(QMouseEvent* mouseEvent) override;
+  void mouseMoveEvent(QMouseEvent* mouseEvent) override;
+  void mouseReleaseEvent(QMouseEvent* mouseEvent) override;
+  void wheelEvent(QWheelEvent* event) override;
+  void focusInEvent(QFocusEvent* event) override;
 
 
 protected slots:
