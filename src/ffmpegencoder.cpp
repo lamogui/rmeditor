@@ -129,7 +129,7 @@ void FFmpegEncoder::run()
 
   emit logInfo(tr("[ffmpeg] video resolution ") + QString::number(_resolution.width()) + "x" + QString::number(_resolution.height()));
   emit logInfo(tr("[ffmpeg] video buffer size ") + video_recv_buffer_size);
-  emit logInfo(tr("[ffmpeg] audio buffer size ") + audioBufferSize);
+  emit logInfo(tr("[ffmpeg] audio buffer size ") + QString::number(audioBufferSize));
 
   //globals options
   arguments << "-y"; // << "-loglevel" <<  "56";
@@ -278,7 +278,7 @@ void FFmpegEncoder::run()
       //QMessageBox::critical(NULL,tr("VIDEO TCP SOCKET ERROR"), videoSocket.errorString());
       break;
     }
-    emit newFrameEncoded(i);
+    emit newFrameEncoded((int)i);
     QCoreApplication::processEvents();
   }
 

@@ -75,7 +75,7 @@ bool Tunefish4Music::load()
 
   m_noteVelocityBuffer.clear();
   m_noteVelocityBuffer.resize(TF_NUMFREQS * instrumentCount());
-  m_noteVelocityTex.create(TF_NUMFREQS,instrumentCount(),(const GLvoid*) m_noteVelocityBuffer.data(),GL_R32F,GL_RED, GL_FLOAT);
+  m_noteVelocityTex.create(TF_NUMFREQS,(GLsizei)instrumentCount(),(const GLvoid*) m_noteVelocityBuffer.data(),GL_R32F,GL_RED, GL_FLOAT);
 
   return true;
 }
