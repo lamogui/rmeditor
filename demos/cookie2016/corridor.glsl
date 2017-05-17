@@ -2,14 +2,7 @@
 vec3 lpos1 = vec3(.0,-1.5,.0);
 vec3 lpos2 = vec3(2.,-0.5,2.);
 vec3 lpos3 = vec3(-2.,-.5,-2.);
-/*
-float hel_l = 0.;
-float rot_d;
-float ball_r;
-float pale_l = 0.;
-float rot_h = PI/2.;
-float rotate_sand_time=0.;
-*/
+
 
 bool lightOn = false;
 

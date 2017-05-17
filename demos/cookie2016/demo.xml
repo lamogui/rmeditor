@@ -1,109 +1,109 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <rmdemo>
-  <music name="the silence" file="silence.tf4m" length="115.0"/>
+  <music file="silence.tf4m" length="115.0" name="the silence"/>
   <frameworks>
-    <framework name="raymarcher" file="raymarcher.glsl"/>
-    <framework name="font" file="font.glsl"/>
+    <framework file="raymarcher.glsl" name="raymarcher"/>
+    <framework file="font.glsl" name="font"/>
   </frameworks>
   <scenes>
-    <scene name="notes_velocity" file="notes_velocity.glsl"/>
-    <scene name="title" framework="font" file="title.glsl"/>
-    <scene name="64kb" framework="font" file="64kb.glsl"/>
-    <scene name="corridor" framework="raymarcher" file="corridor.glsl"/>
+    <scene file="notes_velocity.glsl" name="notes_velocity"/>
+    <scene framework="font" file="title.glsl" name="title"/>
+    <scene framework="font" file="64kb.glsl" name="64kb"/>
+    <scene framework="raymarcher" file="corridor.glsl" name="corridor"/>
   </scenes>
   <timeline>
     <track>
-      <sequence start="0" length="779" scene="corridor">
+      <sequence scene="corridor" start="0" length="786">
         <camera>
-          <keyframe pos_z="-2.96499" pos_y="-1.0" rot_y="0.0" rot_x="0.0" frame="0" rot_w="1.0" rot_z="0.0" pos_x="0.0"/>
-          <keyframe pos_z="-4.56772" pos_y="-1.0" rot_y="0.0" rot_x="0.0" frame="780" rot_w="1.0" rot_z="0.0" pos_x="0.0"/>
+          <keyframe pos_y="-1.0" rot_x="0.0" rot_w="1.0" pos_z="-2.96499" rot_y="0.0" frame="0" pos_x="0.0" rot_z="0.0"/>
+          <keyframe pos_y="-1.0" rot_x="0.0" rot_w="1.0" pos_z="-4.56772" rot_y="0.0" frame="786" pos_x="0.0" rot_z="0.0"/>
         </camera>
       </sequence>
-      <sequence start="786" length="177" scene="corridor">
+      <sequence scene="corridor" start="786" length="177">
         <camera>
-          <keyframe pos_z="0.723768" pos_y="-1.9016" rot_y="-0.788395" rot_x="0.236346" frame="5" rot_w="0.45869" rot_z="-0.334924" pos_x="1.20307"/>
-          <keyframe pos_z="0.750342" pos_y="-1.96122" rot_y="-0.873888" rot_x="0.0912517" frame="201" rot_w="0.181894" rot_z="-0.441477" pos_x="0.769921"/>
+          <keyframe pos_y="-1.9016" rot_x="0.236346" rot_w="0.45869" pos_z="0.723768" rot_y="-0.788395" frame="0" pos_x="1.20307" rot_z="-0.334924"/>
+          <keyframe pos_y="-1.96122" rot_x="0.0912517" rot_w="0.181894" pos_z="0.750342" rot_y="-0.873888" frame="201" pos_x="0.769921" rot_z="-0.441477"/>
         </camera>
       </sequence>
-      <sequence start="963" length="182" scene="corridor">
+      <sequence scene="corridor" start="963" length="182">
         <camera>
-          <keyframe pos_z="-0.790755" pos_y="2.21172" rot_y="-0.0639221" rot_x="0.60793" frame="0" rot_w="0.781405" rot_z="-0.125451" pos_x="2.20282"/>
-          <keyframe pos_z="-0.682728" pos_y="1.48203" rot_y="-0.119587" rot_x="0.628423" frame="182" rot_w="0.750506" rot_z="-0.165894" pos_x="2.27912"/>
+          <keyframe pos_y="2.21172" rot_x="0.60793" rot_w="0.781405" pos_z="-0.790755" rot_y="-0.0639221" frame="0" pos_x="2.20282" rot_z="-0.125451"/>
+          <keyframe pos_y="1.48203" rot_x="0.628423" rot_w="0.750506" pos_z="-0.682728" rot_y="-0.119587" frame="182" pos_x="2.27912" rot_z="-0.165894"/>
         </camera>
       </sequence>
-      <sequence start="1145" length="203" scene="corridor">
+      <sequence scene="corridor" start="1145" length="203">
         <camera>
-          <keyframe pos_z="1.74919" pos_y="-1.00431" rot_y="-0.183318" rot_x="0.25898" frame="0" rot_w="0.948099" rot_z="0.0206876" pos_x="3.33683"/>
-          <keyframe pos_z="2.31256" pos_y="-1.28187" rot_y="-0.154971" rot_x="0.208624" frame="203" rot_w="0.965588" rot_z="0.00962856" pos_x="3.28157"/>
+          <keyframe pos_y="-1.00431" rot_x="0.25898" rot_w="0.948099" pos_z="1.74919" rot_y="-0.183318" frame="0" pos_x="3.33683" rot_z="0.0206876"/>
+          <keyframe pos_y="-1.28187" rot_x="0.208624" rot_w="0.965588" pos_z="2.31256" rot_y="-0.154971" frame="203" pos_x="3.28157" rot_z="0.00962856"/>
         </camera>
       </sequence>
-      <sequence start="1348" length="194" scene="corridor">
+      <sequence scene="corridor" start="1348" length="194">
         <camera>
-          <keyframe pos_z="-0.888372" pos_y="-1.8175" rot_y="0.00595913" rot_x="-0.0410664" frame="0" rot_w="0.942395" rot_z="0.331913" pos_x="-0.085919"/>
-          <keyframe pos_z="-0.549836" pos_y="-1.78661" rot_y="0.00656223" rot_x="-0.045902" frame="194" rot_w="0.942224" rot_z="0.331755" pos_x="-0.0920697"/>
+          <keyframe pos_y="-1.8175" rot_x="-0.0410664" rot_w="0.942395" pos_z="-0.888372" rot_y="0.00595913" frame="0" pos_x="-0.085919" rot_z="0.331913"/>
+          <keyframe pos_y="-1.78661" rot_x="-0.045902" rot_w="0.942224" pos_z="-0.549836" rot_y="0.00656223" frame="194" pos_x="-0.0920697" rot_z="0.331755"/>
         </camera>
       </sequence>
-      <sequence start="1542" length="177" scene="corridor">
+      <sequence scene="corridor" start="1542" length="177">
         <camera>
-          <keyframe pos_z="1.30531" pos_y="-1.72333" rot_y="0.137792" rot_x="0.483198" frame="0" rot_w="0.860479" rot_z="-0.0843019" pos_x="0.0617504"/>
-          <keyframe pos_z="1.45466" pos_y="-1.97973" rot_y="0.134032" rot_x="0.482827" frame="177" rot_w="0.861073" rot_z="-0.0864011" pos_x="0.105967"/>
+          <keyframe pos_y="-1.72333" rot_x="0.483198" rot_w="0.860479" pos_z="1.30531" rot_y="0.137792" frame="0" pos_x="0.0617504" rot_z="-0.0843019"/>
+          <keyframe pos_y="-1.97973" rot_x="0.482827" rot_w="0.861073" pos_z="1.45466" rot_y="0.134032" frame="177" pos_x="0.105967" rot_z="-0.0864011"/>
         </camera>
       </sequence>
-      <sequence start="1719" length="181" scene="corridor">
+      <sequence scene="corridor" start="1719" length="181">
         <camera>
-          <keyframe pos_z="-0.887034" pos_y="-1.87174" rot_y="-0.633007" rot_x="-0.110107" frame="0" rot_w="0.695452" rot_z="0.321752" pos_x="1.05672"/>
-          <keyframe pos_z="-0.81787" pos_y="-1.97184" rot_y="-0.637756" rot_x="-0.126724" frame="181" rot_w="0.696052" rot_z="0.304498" pos_x="0.592484"/>
+          <keyframe pos_y="-1.87174" rot_x="-0.110107" rot_w="0.695452" pos_z="-0.887034" rot_y="-0.633007" frame="0" pos_x="1.05672" rot_z="0.321752"/>
+          <keyframe pos_y="-1.97184" rot_x="-0.126724" rot_w="0.696052" pos_z="-0.81787" rot_y="-0.637756" frame="181" pos_x="0.592484" rot_z="0.304498"/>
         </camera>
       </sequence>
-      <sequence start="2081" length="225" scene="corridor">
+      <sequence scene="corridor" start="2081" length="225">
         <camera>
-          <keyframe pos_z="1.94483" pos_y="-0.903222" rot_y="-0.155883" rot_x="0.251283" frame="0" rot_w="0.952749" rot_z="-0.0694464" pos_x="1.14883"/>
-          <keyframe pos_z="0.78376" pos_y="-0.206193" rot_y="-0.172993" rot_x="0.294953" frame="225" rot_w="0.937913" rot_z="-0.0582374" pos_x="1.68704"/>
+          <keyframe pos_y="-0.903222" rot_x="0.251283" rot_w="0.952749" pos_z="1.94483" rot_y="-0.155883" frame="0" pos_x="1.14883" rot_z="-0.0694464"/>
+          <keyframe pos_y="-0.206193" rot_x="0.294953" rot_w="0.937913" pos_z="0.78376" rot_y="-0.172993" frame="225" pos_x="1.68704" rot_z="-0.0582374"/>
         </camera>
       </sequence>
-      <sequence start="1900" length="181" scene="corridor">
+      <sequence scene="corridor" start="1900" length="181">
         <camera>
-          <keyframe pos_z="0.285582" pos_y="-1.34946" rot_y="-0.635894" rot_x="-0.092222" frame="0" rot_w="0.136152" rot_z="-0.754054" pos_x="1.31269"/>
-          <keyframe pos_z="-0.000868498" pos_y="-1.92753" rot_y="-0.651586" rot_x="-0.0859864" frame="181" rot_w="0.140963" rot_z="-0.740386" pos_x="1.86803"/>
+          <keyframe pos_y="-1.34946" rot_x="-0.092222" rot_w="0.136152" pos_z="0.285582" rot_y="-0.635894" frame="0" pos_x="1.31269" rot_z="-0.754054"/>
+          <keyframe pos_y="-1.92753" rot_x="-0.0859864" rot_w="0.140963" pos_z="-0.000868498" rot_y="-0.651586" frame="181" pos_x="1.86803" rot_z="-0.740386"/>
         </camera>
       </sequence>
-      <sequence start="2306" length="752" scene="corridor">
+      <sequence scene="corridor" start="2306" length="752">
         <camera>
-          <keyframe pos_z="-2.70218" pos_y="-1.20138" rot_y="-0.162738" rot_x="0.061717" frame="5" rot_w="0.98409" rot_z="-0.0356586" pos_x="0.786608"/>
-          <keyframe pos_z="-1.55156" pos_y="-1.28316" rot_y="0.0415559" rot_x="0.0276824" frame="753" rot_w="0.998588" rot_z="-0.0179164" pos_x="-0.447926"/>
+          <keyframe pos_y="-1.20138" rot_x="0.061717" rot_w="0.98409" pos_z="-2.70218" rot_y="-0.162738" frame="5" pos_x="0.786608" rot_z="-0.0356586"/>
+          <keyframe pos_y="-1.28316" rot_x="0.0276824" rot_w="0.998588" pos_z="-1.55156" rot_y="0.0415559" frame="753" pos_x="-0.447926" rot_z="-0.0179164"/>
         </camera>
       </sequence>
-      <sequence start="3058" length="603" scene="corridor">
+      <sequence scene="corridor" start="3058" length="603">
         <camera>
-          <keyframe pos_z="2.32426" pos_y="-0.0608191" rot_y="0.0235339" rot_x="-0.0131986" frame="0" rot_w="0.99961" rot_z="0.00641493" pos_x="-0.0715752"/>
-          <keyframe pos_z="0.304559" pos_y="-0.66052" rot_y="0.0183786" rot_x="-0.00640309" frame="604" rot_w="0.999777" rot_z="0.0072432" pos_x="-0.0220918"/>
+          <keyframe pos_y="-0.0608191" rot_x="-0.0131986" rot_w="0.99961" pos_z="2.32426" rot_y="0.0235339" frame="0" pos_x="-0.0715752" rot_z="0.00641493"/>
+          <keyframe pos_y="-0.66052" rot_x="-0.00640309" rot_w="0.999777" pos_z="0.304559" rot_y="0.0183786" frame="604" pos_x="-0.0220918" rot_z="0.0072432"/>
         </camera>
       </sequence>
-      <sequence start="3848" length="89" scene="corridor">
+      <sequence scene="corridor" start="3848" length="89">
         <camera>
-          <keyframe pos_z="1.07215" pos_y="-1.91976" rot_y="-0.937382" rot_x="0.0996561" frame="4" rot_w="-0.00280395" rot_z="-0.333727" pos_x="0.706836"/>
-          <keyframe pos_z="0.871158" pos_y="-1.93948" rot_y="-0.90859" rot_x="0.0501051" frame="90" rot_w="-0.122325" rot_z="-0.396218" pos_x="-0.132156"/>
+          <keyframe pos_y="-1.91976" rot_x="0.0996561" rot_w="-0.00280395" pos_z="1.07215" rot_y="-0.937382" frame="4" pos_x="0.706836" rot_z="-0.333727"/>
+          <keyframe pos_y="-1.93948" rot_x="0.0501051" rot_w="-0.122325" pos_z="0.871158" rot_y="-0.90859" frame="90" pos_x="-0.132156" rot_z="-0.396218"/>
         </camera>
       </sequence>
-      <sequence start="6516" length="384" scene="title">
+      <sequence scene="title" start="6516" length="384">
         <camera/>
       </sequence>
-      <sequence start="3937" length="84" scene="corridor">
+      <sequence scene="corridor" start="3937" length="84">
         <camera>
-          <keyframe pos_z="0.859311" pos_y="-1.76594" rot_y="-0.915392" rot_x="0.150399" frame="5" rot_w="0.20107" rot_z="-0.314653" pos_x="0.972907"/>
-          <keyframe pos_z="0.738016" pos_y="-1.79507" rot_y="-0.889161" rot_x="0.128914" frame="80" rot_w="0.218312" rot_z="-0.380935" pos_x="-0.213864"/>
+          <keyframe pos_y="-1.76594" rot_x="0.150399" rot_w="0.20107" pos_z="0.859311" rot_y="-0.915392" frame="5" pos_x="0.972907" rot_z="-0.314653"/>
+          <keyframe pos_y="-1.79507" rot_x="0.128914" rot_w="0.218312" pos_z="0.738016" rot_y="-0.889161" frame="80" pos_x="-0.213864" rot_z="-0.380935"/>
         </camera>
       </sequence>
-      <sequence start="4021" length="108" scene="corridor">
+      <sequence scene="corridor" start="4021" length="108">
         <camera>
-          <keyframe pos_z="1.16438" pos_y="-0.402133" rot_y="-0.491062" rot_x="0.0923319" frame="4" rot_w="0.853912" rot_z="-0.145486" pos_x="0.321269"/>
-          <keyframe pos_z="0.967782" pos_y="-0.217438" rot_y="-0.505897" rot_x="0.0897415" frame="113" rot_w="0.845222" rot_z="-0.14701" pos_x="-0.393161"/>
+          <keyframe pos_y="-0.402133" rot_x="0.0923319" rot_w="0.853912" pos_z="1.16438" rot_y="-0.491062" frame="4" pos_x="0.321269" rot_z="-0.145486"/>
+          <keyframe pos_y="-0.217438" rot_x="0.0897415" rot_w="0.845222" pos_z="0.967782" rot_y="-0.505897" frame="113" pos_x="-0.393161" rot_z="-0.14701"/>
         </camera>
       </sequence>
-      <sequence start="4129" length="95" scene="corridor">
+      <sequence scene="corridor" start="4129" length="95">
         <camera>
-          <keyframe pos_z="0.710715" pos_y="-0.195202" rot_y="0.578697" rot_x="0.0917894" frame="1" rot_w="0.810245" rot_z="0.0136712" pos_x="0.681289"/>
-          <keyframe pos_z="-0.856757" pos_y="0.00223632" rot_y="0.424448" rot_x="0.118832" frame="95" rot_w="0.897128" rot_z="0.0297044" pos_x="1.76431"/>
+          <keyframe pos_y="-0.195202" rot_x="0.0917894" rot_w="0.810245" pos_z="0.710715" rot_y="0.578697" frame="1" pos_x="0.681289" rot_z="0.0136712"/>
+          <keyframe pos_y="0.00223632" rot_x="0.118832" rot_w="0.897128" pos_z="-0.856757" rot_y="0.424448" frame="95" pos_x="1.76431" rot_z="0.0297044"/>
         </camera>
       </sequence>
     </track>

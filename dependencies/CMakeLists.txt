@@ -12,8 +12,11 @@ endmacro()
 
 
 # determine whether to create a debug or release build
-rmeditor_dependencies_set_option(CMAKE_BUILD_TYPE Release STRING "Choose the type of build (Debug or Release)")
+rmeditor_dependencies_set_option(CMAKE_BUILD_TYPE "Release" STRING "Choose the type of build (Debug or Release)")
 rmeditor_dependencies_set_option(RMEDITOR_DEPENCENCIES_LIB_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../lib" PATH "Output path of *.a")
+if (MSVC)
+	rmeditor_dependencies_set_option(MSVC_STATIC OFF BOOL "use /MT* instead of /MD*")
+endif(MSVC)
 message(STATUS "RMEDITOR_DEPENCENCIES_LIB_OUTPUT_PATH set to ${RMEDITOR_DEPENCENCIES_LIB_OUTPUT_PATH}")
 
 set(CMAKE_CXX_STANDARD_REQUIRED 11)
@@ -39,15 +42,25 @@ if (CMAKE_BUILD_TYPE MATCHES DEBUG)
   message(STATUS "CMAKE_STATIC_LIBRARY_SUFFIX=${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif()
 
-# MSVC static link
+#MSVC static link
 if (MSVC)
-  foreach(flag
+  if (MSVC_STATIC)
+	foreach(flag
           CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
           CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    if(${flag} MATCHES "/MD")
-      string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")
-    endif()
-  endforeach()
+		if(${flag} MATCHES "/MD")
+		string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")
+		endif()
+	endforeach()
+  else (RMEDITOR_MSVC_STATIC)
+	foreach(flag
+          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+		if(${flag} MATCHES "/MT")
+		string(REGEX REPLACE "/MT" "/MD" ${flag} "${${flag}}")
+		endif()
+	endforeach()
+  endif(MSVC_STATIC)
 endif()
 
 add_subdirectory(rtaudio)

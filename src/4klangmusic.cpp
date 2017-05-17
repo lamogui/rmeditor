@@ -6,8 +6,7 @@
 
 
 #include <cassert>
-#include "../src/4klang.h"
-
+#define MAX_SAMPLES 1
 _4KlangMusic::_4KlangMusic(const QString& filename, double length, QDomNode node ,LogWidget& log,QObject* parent):
   Music(filename,length,node,log,parent),
 _buffer(new float[MAX_SAMPLES*2]),

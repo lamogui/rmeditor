@@ -9,7 +9,7 @@ uniform sampler2D notes_velocity;
 void main()
 {
 
-	float instCount = 8.0;
+	float instCount = 7.0;
 	float nbNotes = 128.0;
 
 	vec2 uv = coords*0.5 + vec2(0.5,0.5);

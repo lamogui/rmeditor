@@ -9,10 +9,16 @@ platform:
  - x64
  
 clone_script:
-- cmd: git clone --recursive https://github.com/lamogui/rmeditor
+ - cmd: git clone --recursive https://github.com/lamogui/rmeditor
  
 build_script:
+ - cmd: cd rmeditor
+ - cmd: mkdir bin
+ - cmd: cd bin
+ - cmd: mkdir Release
+ - cmd: mkdir Debug
+ - cmd: cd ..
  - cmd: mkdir build
  - cmd: cd build
- - cmd: cmake -DBUILD_TESTING=OFF -DCMAKE_PREFIX_PATH:PATH=C:\Qt\5.8\msvc2015_64 .. -G "Visual Studio 14 2015 Win64" 
+ - cmd: cmake -DBUILD_TESTING:BOOL=OFF -DCMAKE_PREFIX_PATH:PATH=C:\Qt\5.8\msvc2015_64 .. -G "Visual Studio 14 2015 Win64" 
  - cmd: cmake --build . --config Release

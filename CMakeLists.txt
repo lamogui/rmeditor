@@ -10,11 +10,19 @@ macro(rmeditor_set_option var default type docstring)
 endmacro()
 
 #options
-rmeditor_set_option(CMAKE_BUILD_TYPE Release STRING "Choose the type of build (Debug or Release)")
+rmeditor_set_option(CMAKE_BUILD_TYPE "Release" STRING "Choose the type of build (Debug or Release)")
+rmeditor_set_option(RMEDITOR_USE_QT_STATIC OFF BOOL "Have you successfully generated a static build of qt ?")
+rmeditor_set_option(RMEDITOR_BIN_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin" PATH "Output path of *.exe")
+if (MSVC)
+	rmeditor_set_option(MSVC_STATIC OFF BOOL "use /MT* instead of /MD*")
+endif(MSVC)
 
 #c++ 11
 set(CMAKE_CXX_STANDARD_REQUIRED 11)
 set(CMAKE_CXX_STANDARD 11)
+
+#set bin output path
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${RMEDITOR_BIN_OUTPUT_PATH})
 
 #dependencies 
 set(BUILD_TESTING OFF) #force RtAudio not test
@@ -112,8 +120,8 @@ set(RMEDITOR_FORMS
 #ressources
 set(RMEDITOR_RESOURCES_DIR resources)
 qt5_add_resources(RMEDITOR_RESOURCES
-    ${RMEDITOR_RESOURCES_DIR}/res.qrc 
-    ${RMEDITOR_RESOURCES_DIR}/qdarkstyle/style.qrc
+   ${RMEDITOR_RESOURCES_DIR}/res.qrc 
+   ${RMEDITOR_RESOURCES_DIR}/qdarkstyle/style.qrc
 )
 
 if (WIN32)
@@ -140,15 +148,32 @@ if(UNIX)
         )  
 endif(UNIX)
 
-if(MSVC)
-	set(RMEDITOR_LIBS ${RMEDITOR_LIBS} 
-        OpenGL32 #FIXME : error adding symbols: DSO missing from command line
-        )	
+if (MSVC)
+	set (RMEDITOR_LIBS ${RMEDITOR_LIBS} OpenGL32 )
+    if (RMEDITOR_USE_QT_STATIC)
+	    set(RMEDITOR_LIBS ${RMEDITOR_LIBS} 
+          #Qt static dependencies
+          User32 
+          Ws2_32 
+          Iphlpapi 
+          UxTheme 
+          Winmm
+          debug ${CMAKE_PREFIX_PATH}/lib/qtpcred.lib
+          debug ${CMAKE_PREFIX_PATH}/lib/qtharfbuzzd.lib
+          debug ${CMAKE_PREFIX_PATH}/lib/qtlibpngd.lib
+
+          optimized ${CMAKE_PREFIX_PATH}/lib/qtpcre.lib
+          optimized ${CMAKE_PREFIX_PATH}/lib/qtharfbuzz.lib
+          optimized ${CMAKE_PREFIX_PATH}/lib/qtlibpng.lib
+        )
+	 endif(RMEDITOR_USE_QT_STATIC)
+	 
 endif(MSVC)
+
 
 #executable 
 add_executable(rmeditor ${RMEDITOR_SRC} ${RMEDITOR_H} ${RMEDITOR_FORMS} ${RMEDITOR_RESOURCES})
-target_link_libraries(rmeditor ${RMEDITOR_LIBS})
+target_link_libraries(rmeditor general ${RMEDITOR_LIBS})
 target_include_directories(rmeditor PRIVATE
     ${RMEDITOR_INCLUDE_DIR} 
     dependencies #FIXME : RtAudio
@@ -156,32 +181,52 @@ target_include_directories(rmeditor PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR})
 
 #dependencies
-#if(MSVC)
-#	add_custom_target(Qt5CopyBinaries
-		# todo: check if debug and release folder exist
-		# debug version
-		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Cored.dll         ${CMAKE_BINARY_DIR}/Debug
-		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Guid.dll          ${CMAKE_BINARY_DIR}/Debug
-		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Networkd.dll      ${CMAKE_BINARY_DIR}/Debug
-		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5OpenGLd.dll       ${CMAKE_BINARY_DIR}/Debug
-		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Widgetsd.dll      ${CMAKE_BINARY_DIR}/Debug
-		#COMMAND ${CMAKE_COMMAND} -E copy ${Qt5Core_DIR}/../../../bin/Qt5Xmld.dll          ${CMAKE_BINARY_DIR}/Debug
+if(MSVC)
+	if (NOT RMEDITOR_USE_QT_STATIC)
+		add_custom_target(
+			QtCopyDll
+			# debug version
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Cored.dll       ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Guid.dll        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Networkd.dll    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5OpenGLd.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Widgetsd.dll    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Xmld.dll        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			
+			# release version
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Core.dll       ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Gui.dll        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/ 
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Network.dll    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5OpenGL.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Widgets.dll    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Xml.dll        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/
+			# Output Message
+			COMMENT "Copying Qt binaries from '${Qt5Core_DIR}/../../bin/' to '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}'" VERBATIM
+		)
 		
-		# Output Message
-		#COMMENT "Copying Qt binaries from '${Qt5Core_DIR}/../../bin/' to '${CMAKE_BINARY_DIR}'" VERBATIM
-	#)
-	#add_dependencies(rmeditor Qt5CopyBinaries)
-#endif(MSVC)
+		add_dependencies(rmeditor QtCopyDll)
+	endif (NOT RMEDITOR_USE_QT_STATIC)
+endif(MSVC)
 
 #MSVC static link
 if (MSVC)
-  foreach(flag
+  if (MSVC_STATIC)
+	foreach(flag
           CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
           CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    if(${flag} MATCHES "/MD")
-      string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")
-    endif()
-  endforeach()
+		if(${flag} MATCHES "/MD")
+		string(REGEX REPLACE "/MD" "/MT" ${flag} "${${flag}}")
+		endif()
+	endforeach()
+  else (RMEDITOR_MSVC_STATIC)
+	foreach(flag
+          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+		if(${flag} MATCHES "/MT")
+		string(REGEX REPLACE "/MT" "/MD" ${flag} "${${flag}}")
+		endif()
+	endforeach()
+  endif(MSVC_STATIC)
 endif()
 
 
