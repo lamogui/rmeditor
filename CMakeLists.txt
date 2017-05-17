@@ -153,23 +153,41 @@ if (MSVC)
     if (RMEDITOR_USE_QT_STATIC)
 	    set(RMEDITOR_LIBS ${RMEDITOR_LIBS} 
           #Qt static dependencies
-          User32 
-          Ws2_32 
-          Iphlpapi 
-          UxTheme 
-          Winmm
+          general User32 
+          general Ws2_32 
+          general Iphlpapi 
+          general UxTheme 
+          general Winmm
+          general Dwmapi #Qt5PlatformSupport
+          general Imm32 #Qt5PlatformSupport
+
           debug ${CMAKE_PREFIX_PATH}/lib/qtpcred.lib
           debug ${CMAKE_PREFIX_PATH}/lib/qtharfbuzzd.lib
           debug ${CMAKE_PREFIX_PATH}/lib/qtlibpngd.lib
+          debug ${CMAKE_PREFIX_PATH}/lib/Qt5FontDatabaseSupportd.lib #Qt5PlatformSupport
+          debug ${CMAKE_PREFIX_PATH}/lib/Qt5EventDispatcherSupportd.lib #Qt5PlatformSupport
+          debug ${CMAKE_PREFIX_PATH}/lib/Qt5ThemeSupportd.lib #Qt5PlatformSupport
+          debug ${CMAKE_PREFIX_PATH}/lib/Qt5AccessibilitySupportd.lib #Qt5PlatformSupport
+          debug ${CMAKE_PREFIX_PATH}/lib/qtfreetyped.lib #Qt5PlatformSupport
+          debug ${CMAKE_PREFIX_PATH}/plugins/platforms/qwindowsd.lib
 
           optimized ${CMAKE_PREFIX_PATH}/lib/qtpcre.lib
           optimized ${CMAKE_PREFIX_PATH}/lib/qtharfbuzz.lib
           optimized ${CMAKE_PREFIX_PATH}/lib/qtlibpng.lib
+          optimized ${CMAKE_PREFIX_PATH}/lib/Qt5FontDatabaseSupport.lib #Qt5PlatformSupport
+          optimized ${CMAKE_PREFIX_PATH}/lib/Qt5EventDispatcherSupport.lib #Qt5PlatformSupport
+          optimized ${CMAKE_PREFIX_PATH}/lib/Qt5ThemeSupport.lib #Qt5PlatformSupport
+          optimized ${CMAKE_PREFIX_PATH}/lib/Qt5AccessibilitySupport.lib #Qt5PlatformSupport
+          optimized ${CMAKE_PREFIX_PATH}/lib/qtfreetype.lib #Qt5PlatformSupport
+          optimized ${CMAKE_PREFIX_PATH}/plugins/platforms/qwindows.lib
         )
 	 endif(RMEDITOR_USE_QT_STATIC)
-	 
 endif(MSVC)
 
+#definitions 
+if (MSVC_STATIC)
+  set(RMEDITOR_DEFINITIONS ${RMEDITOR_DEFINITIONS} PUBLIC "MSVC_STATIC")
+endif(MSVC_STATIC)
 
 #executable 
 add_executable(rmeditor ${RMEDITOR_SRC} ${RMEDITOR_H} ${RMEDITOR_FORMS} ${RMEDITOR_RESOURCES})
@@ -179,10 +197,13 @@ target_include_directories(rmeditor PRIVATE
     dependencies #FIXME : RtAudio
     dependencies/tunefish4/include #FIXME : tunefish4
     ${CMAKE_CURRENT_BINARY_DIR})
+target_compile_definitions(rmeditor ${RMEDITOR_DEFINITIONS})
 
 #dependencies
 if(MSVC)
-	if (NOT RMEDITOR_USE_QT_STATIC)
+	if (RMEDITOR_USE_QT_STATIC)
+    
+  else (RMEDITOR_USE_QT_STATIC)
 		add_custom_target(
 			QtCopyDll
 			# debug version
@@ -205,7 +226,8 @@ if(MSVC)
 		)
 		
 		add_dependencies(rmeditor QtCopyDll)
-	endif (NOT RMEDITOR_USE_QT_STATIC)
+  
+	endif (RMEDITOR_USE_QT_STATIC)
 endif(MSVC)
 
 #MSVC static link
