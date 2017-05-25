@@ -27,4 +27,4 @@ private:
 
 };
 
-#endif // DATA_H
+#endif // !LOGWIDGET_HPP

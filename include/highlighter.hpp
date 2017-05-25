@@ -19,7 +19,7 @@ public:
     void defineGLSLFragmentShaderRules();
     void defineXMLRule();
 protected:
-    void highlightBlock(const QString &text);
+    void highlightBlock(const QString &text) override;
 
 private:
     struct HighlightingRule
@@ -44,4 +44,4 @@ private:
     QTextCharFormat XMLParamFormat;
 };
 
-#endif
+#endif // !HIGHLIGHTER_H

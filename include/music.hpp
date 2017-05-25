@@ -18,7 +18,7 @@ class Music : public NodeFile
 
 public:
   Music(const QString& filename, double length, QDomNode node ,LogWidget& log,QObject* parent);
-  virtual ~Music();
+  ~Music() override;
 
   virtual double getTime() const = 0;
 

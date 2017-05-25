@@ -39,7 +39,7 @@ bool _4KlangMusic::createRtAudioStream()
     unsigned int sampleRate = 44100;
     unsigned int bufferFrames = 512;
     bytesPerFrame = sizeof(float) * parameters.nChannels;
-    audio.openStream(&parameters,NULL,RTAUDIO_FLOAT32,sampleRate,&bufferFrames, rtAudioCallback, (void*) this, 0, Music::rtAudioError);
+    audio.openStream(&parameters,nullptr,RTAUDIO_FLOAT32,sampleRate,&bufferFrames, rtAudioCallback, (void*) this, 0, Music::rtAudioError);
     audio.startStream();
   }
   catch (RtAudioError &err)

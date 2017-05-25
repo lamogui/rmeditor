@@ -13,8 +13,8 @@
 
 Project::Project(const QDir &dir, const QString &filename, LogWidget &log, QObject *parent):
   TextEditable(filename, QDomNode() ,log,parent),
-  music(NULL),
-  demoTimeline(NULL),
+  music(nullptr),
+  demoTimeline(nullptr),
   dir(dir),
   log(&log),
   textUpdateTimer(new QTimer(this))
@@ -54,10 +54,10 @@ void Project::resetProject()
   textUpdateTimer->stop();
   if (demoTimeline)
   {
-    emit demoTimelineChanged(NULL);
+    emit demoTimelineChanged(nullptr);
     delete demoTimeline;
   }
-  demoTimeline = NULL;
+  demoTimeline = nullptr;
   //text.clear();
   node = QDomNode();
   document.clear();
@@ -81,7 +81,7 @@ void Project::resetProject()
   {
     delete music;
   }
-  music = NULL;
+  music = nullptr;
 
 }
 
@@ -255,7 +255,7 @@ bool Project::parseTagScenes(QDomNode node)
       }
       else
       {
-        Framework* fw=NULL;
+        Framework* fw=nullptr;
         if (!framework.isEmpty())
         {
           auto it = frameworks.find(framework);
@@ -376,7 +376,7 @@ Scene* Project::getRayMarchScene(const QString& name) const
   {
     return it.value();
   }
-  return NULL;
+  return nullptr;
 }
 
 
@@ -388,7 +388,7 @@ Framework* Project::getFramework(const QString& name) const
   {
     return it.value();
   }
-  return NULL;
+  return nullptr;
 }
 
 QString Project::getDefaultProjectText()

@@ -31,7 +31,7 @@ bool Tunefish4Music::createRtAudioStream()
     unsigned int sampleRate = 44100;
     unsigned int bufferFrames = TF_FRAMESIZE;
     bytesPerFrame = sizeof(eS16) * parameters.nChannels;
-    audio.openStream(&parameters,NULL,RTAUDIO_SINT16,sampleRate,&bufferFrames, rtAudioCallback, (void*) this, 0, Music::rtAudioError);
+    audio.openStream(&parameters,nullptr,RTAUDIO_SINT16,sampleRate,&bufferFrames, rtAudioCallback, (void*) this, 0, Music::rtAudioError);
     if (bufferFrames != TF_FRAMESIZE)
     {
       emit error("[" + fileName() + "] Canno't set bufferFrames to " + QString::number(TF_FRAMESIZE));

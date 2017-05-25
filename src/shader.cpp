@@ -66,12 +66,12 @@ int Shader::compil( const char *vertex, const char *fragment )
   program = this->glCreateProgram();
 	if( !makeShader(vertex, GL_VERTEX_SHADER_ARB) )
     {
-        //QMessageBox::critical(NULL, "Error", "Can't compil the vertex shader !");
+        //QMessageBox::critical(nullptr, "Error", "Can't compil the vertex shader !");
 		return SHADER_VERTEX_ERROR;
     }
     if( !makeShader(fragment, GL_FRAGMENT_SHADER_ARB) )
     {
-        //QMessageBox::critical(NULL, "Error", "Can't compil this pixel shader !");
+        //QMessageBox::critical(nullptr, "Error", "Can't compil this pixel shader !");
         return SHADER_FRAGMENT_ERROR;
     }
 
@@ -84,7 +84,7 @@ int Shader::compil( const char *vertex, const char *fragment )
 bool Shader::makeShader(const char *txt, GLuint type)
 {
     GLuint object = glCreateShader(type);
-	glShaderSource(object, 1, (const GLchar**)(&txt), NULL);
+	glShaderSource(object, 1, (const GLchar**)(&txt), nullptr);
 	glCompileShader(object);
 	
     if( checkShader(object) )
@@ -107,7 +107,7 @@ bool Shader::checkShader(int id)
     if( ok != GL_TRUE )
     {
         GLint logLength = 0;
-        GLchar* log = NULL;
+        GLchar* log = nullptr;
 
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &logLength);
         log = new GLchar[logLength];
@@ -120,7 +120,7 @@ bool Shader::checkShader(int id)
     else
     {
         GLint logLength = 0;
-        GLchar* log = NULL;
+        GLchar* log = nullptr;
 
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &logLength);
         log = new GLchar[logLength];

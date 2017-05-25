@@ -27,4 +27,4 @@ private:
     Ui::LogDockWidget *ui;
 };
 
-#endif
+#endif // !LOGDOCKWIDGET_HPP

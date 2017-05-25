@@ -42,7 +42,7 @@ void EditorWidget::loadProject(Project &project)
 void EditorWidget::on_saveButton_clicked(bool)
 {
   TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->currentWidget());
-  if (te != NULL)
+  if (te != nullptr)
   {
     if (te->save())
     {
@@ -58,7 +58,7 @@ void EditorWidget::on_saveButton_clicked(bool)
 void EditorWidget::on_buildButton_clicked(bool)
 {
   TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->currentWidget());
-  if (te != NULL)
+  if (te != nullptr)
   {
     if (te->build())
     {
@@ -79,7 +79,7 @@ void EditorWidget::on_tab_currentChanged(int index)
   }
 
   TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->widget(index));
-  Q_ASSERT(te != NULL);
+  Q_ASSERT(te != nullptr);
   //te->refresh();
   ui->buildButton->setEnabled(te->textObject()->buildable());
   emit rendererChanged(te->textObject()->getRenderer());
@@ -129,11 +129,11 @@ void EditorWidget::saveAllShaders()
 
       if (shaderCode)
       {
-        if (dynamic_cast<Framework*>(shaderCode) != NULL)
+        if (dynamic_cast<Framework*>(shaderCode) != nullptr)
         {
           frameworks.append(editor);
         }
-        else if (dynamic_cast<Scene*>(shaderCode) != NULL)
+        else if (dynamic_cast<Scene*>(shaderCode) != nullptr)
         {
           scenes.append(editor);
         }

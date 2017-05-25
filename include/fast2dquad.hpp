@@ -9,4 +9,4 @@ void Fast2DQuadFree(void);
 
 
 
-#endif
+#endif // !DEF_FAST2DQUAD

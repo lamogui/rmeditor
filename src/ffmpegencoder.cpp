@@ -163,7 +163,7 @@ void FFmpegEncoder::run()
   if (!_ffmpeg->waitForStarted(3000))
   {
     emit logError(tr("Error unable to start ffmpeg: ") + _ffmpeg->errorString());
-    //QMessageBox::critical(NULL,"ffmpeg error",tr("Error unable to start ffmpeg: ") + _ffmpeg.errorString());
+    //QMessageBox::critical(nullptr,"ffmpeg error",tr("Error unable to start ffmpeg: ") + _ffmpeg.errorString());
     QCoreApplication::processEvents();
     delete _ffmpeg;
     return;
@@ -176,7 +176,7 @@ void FFmpegEncoder::run()
   if (!videoSocket.waitForConnected(3000))
   {
     emit logError(tr("Error can't connect video to ffmpeg server: ") + videoSocket.errorString());
-    //QMessageBox::critical(NULL,"ffmpeg error",tr("Error can't connect video to ffmpeg server: ") + videoSocket.errorString());
+    //QMessageBox::critical(nullptr,"ffmpeg error",tr("Error can't connect video to ffmpeg server: ") + videoSocket.errorString());
     QCoreApplication::processEvents();
     delete _ffmpeg;
     return;
@@ -205,7 +205,7 @@ void FFmpegEncoder::run()
     if (writted == - 1)
     {
       emit logError(tr("VIDEO TCP SOCKET ERROR: ") + videoSocket.errorString());
-      //QMessageBox::critical(NULL,tr("VIDEO TCP SOCKET ERROR"), videoSocket.errorString());
+      //QMessageBox::critical(nullptr,tr("VIDEO TCP SOCKET ERROR"), videoSocket.errorString());
       QCoreApplication::processEvents();
       delete _ffmpeg;
       return;
@@ -221,7 +221,7 @@ void FFmpegEncoder::run()
   if (!audioSocket.waitForConnected(3000))
   {
     emit logError(tr("Error can't connect audio to ffmpeg server: ") + audioSocket.errorString());
-    //QMessageBox::critical(NULL,"ffmpeg error",tr("Error can't connect audio to ffmpeg server: ") + audioSocket.errorString());
+    //QMessageBox::critical(nullptr,"ffmpeg error",tr("Error can't connect audio to ffmpeg server: ") + audioSocket.errorString());
     QCoreApplication::processEvents();
     delete _ffmpeg;
     return;
@@ -247,7 +247,7 @@ void FFmpegEncoder::run()
       if (writted == - 1)
       {
         emit logError(tr("AUDIO TCP SOCKET ERROR: ") + audioSocket.errorString());
-        //QMessageBox::critical(NULL,tr("AUDIO TCP SOCKET ERROR"), audioSocket.errorString());
+        //QMessageBox::critical(nullptr,tr("AUDIO TCP SOCKET ERROR"), audioSocket.errorString());
         break;
       }
 #endif
@@ -275,7 +275,7 @@ void FFmpegEncoder::run()
     if (writted == - 1)
     {
       emit logError(tr("VIDEO TCP SOCKET ERROR: ") + videoSocket.errorString());
-      //QMessageBox::critical(NULL,tr("VIDEO TCP SOCKET ERROR"), videoSocket.errorString());
+      //QMessageBox::critical(nullptr,tr("VIDEO TCP SOCKET ERROR"), videoSocket.errorString());
       break;
     }
     emit newFrameEncoded((int)i);
@@ -296,7 +296,7 @@ void FFmpegEncoder::run()
   if (!_ffmpeg->waitForFinished())
   {
     emit logError(tr("error ffmpeg process not finnished: ") + _ffmpeg->errorString());
-    //QMessageBox::critical(NULL,tr("ffmpeg error"), _ffmpeg.errorString());
+    //QMessageBox::critical(nullptr,tr("ffmpeg error"), _ffmpeg.errorString());
   }
   else
   {

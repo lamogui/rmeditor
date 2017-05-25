@@ -27,4 +27,4 @@ public slots:
 };
 
 
-#endif
+#endif // !FRAMEWORK_HPP

@@ -64,4 +64,4 @@ protected:
 
 };
 
-#endif
+#endif // !CAMERA_HPP

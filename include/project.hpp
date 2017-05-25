@@ -21,8 +21,8 @@ class Project : public TextEditable
   Q_OBJECT
 
   public:
-    Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=NULL);
-    virtual ~Project();
+    Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=nullptr);
+    ~Project() override;
 
     const QString& getText() const override;
     void connectLog(LogWidget& log) override;

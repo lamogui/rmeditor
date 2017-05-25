@@ -27,7 +27,7 @@ class Texture2D : public AbstractTexture
 public:
     Texture2D();
 
-    bool create(GLsizei width, GLsizei height, const GLvoid *data = NULL, GLint internalFormat = GL_RGBA, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
+    bool create(GLsizei width, GLsizei height, const GLvoid *data = nullptr, GLint internalFormat = GL_RGBA, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
     void update(GLvoid* pixels) override;
     bool load(const std::string &path); //Load color 2D texture
     void bind() override;

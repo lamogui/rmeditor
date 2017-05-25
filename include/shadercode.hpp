@@ -15,7 +15,7 @@ class FragmentShaderCode : public TextEditable
   Q_OBJECT
 
 public:
-  FragmentShaderCode(const QString& filename, QDomNode node,LogWidget& log,QObject* parent=NULL);
+  FragmentShaderCode(const QString& filename, QDomNode node,LogWidget& log,QObject* parent=nullptr);
 
   const QString& getText() const override;
   inline Shader& getShader() { return shader;}

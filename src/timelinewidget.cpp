@@ -18,7 +18,7 @@
 TimelineWidget::TimelineWidget(QWidget *parent, qreal borderheight):
   QGraphicsView(parent),
   borderHeight(borderheight),
-  timeline(NULL),
+  timeline(nullptr),
   updateTimer(new QTimer(this)),
   grabTime(false),
   scale(1,1)
@@ -29,16 +29,16 @@ TimelineWidget::TimelineWidget(QWidget *parent, qreal borderheight):
 void TimelineWidget::setTimeline(Timeline *timeline)
 {
   stopUpdateLoop();
-  timeline = timeline;
+  this->timeline = timeline;
   startUpdateLoop();
 
-  setScene(timeline);
-  if(timeline)
+  setScene(this->timeline);
+  if(this->timeline)
   {
-    setScale(QPointF((qreal)this->rect().width()/timeline->sceneRect().width(),1.0));
-    QRectF scene_rect = timeline->sceneRect();
+    setScale(QPointF((qreal)this->rect().width()/ this->timeline->sceneRect().width(),1.0));
+    QRectF scene_rect = this->timeline->sceneRect();
     scene_rect.setTop(-borderHeight - 2.0);
-    timeline->setSceneRect(scene_rect);
+    this->timeline->setSceneRect(scene_rect);
   }
   else
   {
@@ -85,7 +85,7 @@ void TimelineWidget::onTimelineDestroy()
   disconnect(updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
   disconnect(this,SIGNAL(timePositionChanged(double)),0,0);
   updateTimer->stop();
-  timeline=NULL;
+  timeline=nullptr;
   setScene(timeline);
 }
 

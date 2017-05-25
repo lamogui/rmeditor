@@ -110,7 +110,7 @@ Sequence* DemoTimeline::isInsideSequence(qint64 frame) const
       return it.value();
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 
@@ -494,12 +494,12 @@ void DemoRenderer::glRender()
 
     if (camera)
     {
-      scene->getShader().sendf("caposition",camera->getPosition().x(),camera->getPosition().y(), camera->getPosition().z());
-      scene->getShader().sendf("carotation",camera->getRotation().x(),camera->getRotation().y(), camera->getRotation().z(), camera->getRotation().scalar());
+      scene->getShader().sendf("cam_position",camera->getPosition().x(),camera->getPosition().y(), camera->getPosition().z());
+      scene->getShader().sendf("cam_rotation",camera->getRotation().x(),camera->getRotation().y(), camera->getRotation().z(), camera->getRotation().scalar());
     }
     else
     {
-      scene->getShader().sendf("carotation",0.f,0.f,0.f,1.f);
+      scene->getShader().sendf("cam_rotation",0.f,0.f,0.f,1.f);
     }
 
     scene->getShader().sendf("xy_scale_factor",(float)fbo.getSizeX()/(float)fbo.getSizeY());

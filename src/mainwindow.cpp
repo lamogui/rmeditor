@@ -19,7 +19,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    project(NULL),
+    project(nullptr),
     ui(new Ui::MainWindow)
 
 {
@@ -31,13 +31,13 @@ MainWindow::MainWindow(QWidget *parent) :
     info->getLogWidget()->setPrintTime(false);
 
     editor = new EditorWidget(*(info->getLogWidget()),this);
-    timeline = new TimelineDockWidget(this);
+    timelineWidget = new TimelineDockWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea, info);
-    addDockWidget(Qt::BottomDockWidgetArea, timeline);
+    addDockWidget(Qt::BottomDockWidgetArea, timelineWidget);
     addDockWidget(Qt::LeftDockWidgetArea, editor);
 
     connect(editor,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
-    connect(timeline,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
+    connect(timelineWidget,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
 
     //Main window actions
     ui->toolBar->addAction(ui->actionNew);
@@ -127,13 +127,14 @@ void MainWindow::connectProject()
   editor->loadProject(*project);
   connect(project,SIGNAL(appendTextEditable(TextEditable*)),editor,SLOT(appendTextEditable(TextEditable*)));
   connect(project,SIGNAL(demoTimelineChanged(Timeline*)),this,SLOT(setTimeline(Timeline*)));
-  timeline->setProject(project);
+  timelineWidget->setProject(project);
 }
 
 void MainWindow::setTimeline(Timeline *t)
 {
-  (void)t;
-  timeline->setProject(project);
+  (void)t; // oh !
+  Q_ASSERT(t == project->getDemoTimeline() || !t); // Don't support another case yet 
+  timelineWidget->setProject(project);
 }
 
 void MainWindow::insertCameraKeyframe()
@@ -141,7 +142,7 @@ void MainWindow::insertCameraKeyframe()
   Camera* cam = ui->widget->camera();
   if (cam)
   {
-    timeline->insertCameraKeyframe(cam);
+    timelineWidget->insertCameraKeyframe(cam);
   }
 }
 
@@ -190,7 +191,7 @@ void MainWindow::freezeAll()
   ui->menuFile->setEnabled(false);
   ui->menuExport->setEnabled(false);
 
-  timeline->setEnabled(false);
+  timelineWidget->setEnabled(false);
   editor->setEnabled(false);
 
  // timeline->getTimelineWidget()->stopUpdateLoop();
@@ -204,7 +205,7 @@ void MainWindow::unfreezeAll()
   ui->menuFile->setEnabled(true);
   ui->menuExport->setEnabled(true);
 
-  timeline->setEnabled(true);
+  timelineWidget->setEnabled(true);
   editor->setEnabled(true);
 
   ui->widget->setOnlyShowTexture(false);

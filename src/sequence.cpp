@@ -18,18 +18,18 @@
 #include "timelinewidget.hpp"
 
 Sequence::Sequence(Project &project, DemoTimeline &timeline, QDomElement &node, qreal height):
-  QGraphicsRectItem(NULL),
+  QGraphicsRectItem(nullptr),
   node(node),
   project(&project),
   timeline(&timeline),
-  scene(NULL)
+  scene(nullptr)
 {
   setRect(QRectF(10,10,10,height)); //ugly
   load();
 }
 
 Sequence::Sequence(Project& project, DemoTimeline &timeline, QDomElement node, Scene &scene, int start, int length, qreal height):
-  QGraphicsRectItem(NULL),
+  QGraphicsRectItem(nullptr),
   node(node),
   project(&project),
   timeline(&timeline),
@@ -167,8 +167,8 @@ void Sequence::renderImages()
     Camera cam;
     this->setCamera(0,cam);
 
-    scene->getShader().sendf("carotation",cam.getRotation().x(),cam.getRotation().y(),cam.getRotation().z(),cam.getRotation().scalar());
-    scene->getShader().sendf("caposition",cam.getPosition().x(),cam.getPosition().y(),cam.getPosition().z());
+    scene->getShader().sendf("cam_rotation",cam.getRotation().x(),cam.getRotation().y(),cam.getRotation().z(),cam.getRotation().scalar());
+    scene->getShader().sendf("cam_position",cam.getPosition().x(),cam.getPosition().y(),cam.getPosition().z());
 
     scene->getShader().sendf("xy_scale_factor",(float)fbo.getSizeX()/(float)fbo.getSizeY());
     scene->getShader().sendf("sequence_time",0.f);
@@ -312,8 +312,8 @@ void Sequence::keyframePositionChanged(qint64 previous_frame, Keyframe* keyframe
 
 void Sequence::setCamera(qint64 relative_frame, Camera &cam) const
 {
-  CameraKeyframe* begin = NULL;
-  CameraKeyframe* end = NULL;
+  CameraKeyframe* begin = nullptr;
+  CameraKeyframe* end = nullptr;
 
   QMap<qint64,CameraKeyframe*>::ConstIterator it;
   for (it = cameraKeyframes.constBegin(); it != cameraKeyframes.constEnd(); ++it)
@@ -358,7 +358,7 @@ void Sequence::setCamera(qint64 relative_frame, Camera &cam) const
 void Sequence::insertCameraKeyframe(qint64 rel_frame, const QVector3D &pos, const QQuaternion &rot)
 {
   QMap<qint64,CameraKeyframe*>::iterator it = cameraKeyframes.find(rel_frame);
-  CameraKeyframe* keyframe = (it != cameraKeyframes.end()) ? it.value() : NULL;
+  CameraKeyframe* keyframe = (it != cameraKeyframes.end()) ? it.value() : nullptr;
   if (keyframe)
   {
     keyframe->setPosition(pos);

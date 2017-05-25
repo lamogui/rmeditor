@@ -38,7 +38,7 @@ class DemoTimeline : public Timeline
 
 public:
   DemoTimeline(QDomElement& node, Project& project, double fps, LogWidget& log);
-  virtual ~DemoTimeline();
+  ~DemoTimeline() override;
 
   inline QDomElement getNode() const { return node; }
 

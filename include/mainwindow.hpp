@@ -34,22 +34,18 @@ public slots:
     void exportAsVideo();
     void exportAsLinuxDemo();
 
-
     void freezeAll();
     void unfreezeAll();
 
-
-
 private:
     void connectProject();
-
 
     Project* project;
 
     Ui::MainWindow *ui;
     LogDockWidget *info;
     EditorWidget *editor;
-    TimelineDockWidget *timeline;
+    TimelineDockWidget *timelineWidget;
 };
 
 #endif // MAINWINDOW_H

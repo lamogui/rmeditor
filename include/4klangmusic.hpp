@@ -20,22 +20,22 @@ public:
   _4KlangMusic(const QString& filename, double length, QDomNode node ,LogWidget& log,QObject* parent);
   virtual ~_4KlangMusic();
 
-  virtual double getTime() const;
+  double getTime() const override;
 
-  virtual void exportMusicCData(const QFile& source, const QFile& header) const;
+  void exportMusicCData(const QFile& source, const QFile& header) const override;
 
   /*
     RtAudio stuff
   */
-  virtual bool createRtAudioStream();
-  virtual void processAudio(void *outputBuffer, unsigned int nBufferFrames,
-                            double streamTime, RtAudioStreamStatus status);
+  bool createRtAudioStream() override;
+  void processAudio(void *outputBuffer, unsigned int nBufferFrames,
+                    double streamTime, RtAudioStreamStatus status) override;
 
 
 public slots:
-  virtual bool load();
-  virtual void setPosition(double time);
-  virtual void updateTextures();
+  bool load() override;
+  void setPosition(double time) override;
+  void updateTextures() override;
 
 protected:
   float* _buffer; //Song buffer
