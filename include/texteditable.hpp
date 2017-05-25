@@ -6,7 +6,7 @@
 #include "nodefile.hpp"
 
 class LogWidget;
-class Renderer;
+class Render;
 
 class TextEditable : public NodeFile
 {
@@ -22,7 +22,7 @@ public:
 
   //Is the object buildable
   virtual bool buildable() const {return false;}
-  inline virtual Renderer* getRenderer() const {return nullptr;}
+  inline virtual Render* getRender() const {return nullptr;}
 
 public slots:
   //Return true is the file is loaded or created (not if it build correctly)
@@ -38,7 +38,7 @@ signals:
 
 protected:
   bool save(const QString& text);
-
+  LogWidget& log;
 };
 
 #endif

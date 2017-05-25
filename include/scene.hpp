@@ -5,28 +5,35 @@
 #include "shadercode.hpp"
 
 class Framework;
-class SceneRenderer;
+class SceneRender;
 
 
 class Scene : public FragmentShaderCode
 {
 public:
   Scene(const QString& filename, QDomNode node, Framework* framework, LogWidget& log,QObject* parent);
-  ~Scene() override;
 
-  Renderer* getRenderer() const override;
+  Render* getRender() const override;
+  
+  QSharedPointer<QOpenGLShaderProgram>& getShaderProgram() {return shaderProgram;}
+  const QSharedPointer<QOpenGLShaderProgram>& getShaderProgram() const {return shaderProgram; }
 
   inline Framework* getFramework() const { return framework; }
+
+  static const char* getVertexShaderCode();
+
 
 public slots:
   bool build(const QString& text) override;
 
 private:
-
   Framework* framework;
-  SceneRenderer* sceneRenderer;
-  Camera camera;
+  SceneRender* sceneRender;
+  QSharedPointer<Camera> camera;
+  QSharedPointer<QOpenGLShaderProgram> shaderProgram;
 
+private:
+  typedef FragmentShaderCode BaseClass;
 };
 
 #endif

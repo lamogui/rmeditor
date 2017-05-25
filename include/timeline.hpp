@@ -8,7 +8,7 @@
 
 class LogWidget;
 class Music;
-class Renderer;
+class Render;
 
 class Timeline : public QGraphicsScene
 {
@@ -26,7 +26,7 @@ public:
 
   qint64 currentFrame() const;
 
-  virtual Renderer* getRenderer() { return nullptr; }
+  virtual Render* getRender() { return nullptr; }
   virtual void updateTime() = 0;
 
 signals:

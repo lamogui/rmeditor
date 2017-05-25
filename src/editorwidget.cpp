@@ -82,7 +82,7 @@ void EditorWidget::on_tab_currentChanged(int index)
   Q_ASSERT(te != nullptr);
   //te->refresh();
   ui->buildButton->setEnabled(te->textObject()->buildable());
-  emit rendererChanged(te->textObject()->getRenderer());
+  emit rendererChanged(te->textObject()->getRender());
 
 }
 

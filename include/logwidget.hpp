@@ -2,6 +2,7 @@
 #define LOGWIDGET_HPP
 
 #include <QTextEdit>
+#include <QOpenGLDebugMessage>
 
 class LogWidget : public QTextEdit
 {
@@ -20,9 +21,13 @@ public slots:
 
   inline void setPrintTime(bool e) { printTime = e; }
 
+  void handleOpengGLLoggedMessage(const QOpenGLDebugMessage& debugMessage);
+
 signals:
 
 private:
+  
+
   bool printTime;
 
 };

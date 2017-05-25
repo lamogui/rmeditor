@@ -22,7 +22,7 @@ public slots:
     return true;
   }
 
-  private:
+private:
 
 };
 

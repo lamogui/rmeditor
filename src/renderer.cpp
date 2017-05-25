@@ -4,79 +4,82 @@
 
 #include <QDebug>
 
-Renderer::Renderer(size_t w, size_t h, QObject *parent):
+Render::Render(const QSize& initialSize, QObject *parent):
   QObject(parent),
-  QOpenGLFunctions(QOpenGLContext::currentContext()),
-  fbo(),
+  fbo(new QOpenGLFramebufferObject(initialSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8)),
   camera(nullptr)
 {
-  fbo.setSize(w,h);
+  createAttachements(initialSize);
 }
 
-Renderer::~Renderer()
+Render::~Render()
 {
-
+  delete fbo;
 }
 
-
-void Renderer::resize(size_t width, size_t height)
+void Render::render()
 {
-  fbo.setSize(width,height);
-  customResize(width,height);
-}
-
-void Renderer::glRender(size_t width, size_t height)
-{
-  if (width != fbo.getSizeX() || height != fbo.getSizeY())
-  {
-    resize(width,height);
-  }
+  renderChildrens();
+  fbo->bind();
+  this->glViewport(0, 0, (GLsizei)fbo->width(), (GLsizei)fbo->height());
   glRender();
+  fbo->release();
 }
 
-QImage Renderer::getImage()
+void Render::resize(const QSize& newSize)
 {
-  fbo.enable();
-  QImage img = fbo.getImage();
-  fbo.disable();
-  return img;
+  if (newSize != fbo->size())
+    resizeFBO(newSize);
+}
+
+void Render::createAttachements(const QSize& fboSize)
+{
+  // fbo->addColorAttachment(fboSize, GL_RGBA8);          // color (always created by default)
+  fbo->addColorAttachment(fboSize, GL_RGB8);              // normal
+  fbo->addColorAttachment(fboSize, GL_DEPTH_COMPONENT32F); // depth
+}
+
+void Render::resizeFBO(const QSize& newSize)
+{
+  delete fbo;
+  fbo = new QOpenGLFramebufferObject(newSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8);
+  createAttachements(newSize);
 }
 
 #include "scene.hpp"
 
-SceneRenderer::SceneRenderer(Scene &scene, size_t w, size_t h, QObject* parent):
-  Renderer(w,h,parent),
+SceneRender::SceneRender(Scene &scene, const QSize& initialSize, QObject* parent):
+  Render(initialSize, parent),
   scene(&scene)
 {
 
 }
 
-void SceneRenderer::glRender()
+void SceneRender::glRender()
 {
-  fbo.enable();
-
   scene->getShader().enable();
 
   if (camera)
   {
-    scene->getShader().sendf("cam_position",camera->getPosition().x(),camera->getPosition().y(), camera->getPosition().z());
-    scene->getShader().sendf("cam_rotation",camera->getRotation().x(),camera->getRotation().y(), camera->getRotation().z(), camera->getRotation().scalar());
+    QSharedPointer<Camera> cam = camera.lock();
+    scene->getShader().sendf("cam_position", cam->getPosition().x(), cam->getPosition().y(), cam->getPosition().z());
+    scene->getShader().sendf("cam_rotation", cam->getRotation().x(), cam->getRotation().y(), cam->getRotation().z(), cam->getRotation().scalar());
   }
   else
   {
     scene->getShader().sendf("cam_rotation",0.f,0.f,0.f,1.f);
   }
 
-  scene->getShader().sendf("xy_scale_factor",(float)fbo.getSizeX()/(float)fbo.getSizeY());
+  scene->getShader().sendf("xy_scale_factor",(float)fbo->width()/(float)fbo->height());
   scene->getShader().sendf("sequence_time",(float)(sequenceTime.elapsed())/1000.f);
   scene->getShader().sendf("track_time",(float)(sequenceTime.elapsed())/1000.f);
-  Fast2DQuadDraw();
-  scene->getShader().disable();
+  
+  quad.draw();
 
-  fbo.disable();
+  scene->getShader().disable();
 }
 
-void SceneRenderer::attachedWidget(RenderWidget *widget)
+void SceneRender::attachedWidget(RenderWidget *widget)
 {
   if (widget)
   {

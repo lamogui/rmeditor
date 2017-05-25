@@ -1,56 +1,52 @@
 ﻿
-#include <QOpenGLFunctions>
+#include "fast2dquad.hpp"
 
 
-
-#define BUFFER_OFFSET(a) ((char*)nullptr + (a))
+// FIXME : remove this ugly structure and define 
 struct vec2
 {
-    float x,y;
+  float x, y;
 };
+#define BUFFER_OFFSET(a) ((char*)nullptr + (a))
 
-static GLuint vbo;
-
-void Fast2DQuadInit(void)
+Fast2DQuad::Fast2DQuad() :
+  vbo(QOpenGLBuffer::VertexBuffer)
 {
-  QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+  initializeOpenGLFunctions(); // FIXME : don't do that for every object that need opengl support...
 
   vec2 point[4];
-    point[0].x =-1.0f; point[1].x = 1.0f; point[2].x =-1.0f; point[3].x = 1.0f;
-    point[0].y =-1.0f; point[1].y =-1.0f; point[2].y = 1.0f; point[3].y = 1.0f;
-	vec2 uv[4];
-    uv[0].x = 0.0f; uv[1].x = 1.0f; uv[2].x = 0.0f; uv[3].x = 1.0f;
-    uv[0].y = 0.0f; uv[1].y = 0.0f; uv[2].y = 1.0f; uv[3].y = 1.0f;
+  point[0].x = -1.0f; point[1].x = 1.0f; point[2].x = -1.0f; point[3].x = 1.0f;
+  point[0].y = -1.0f; point[1].y = -1.0f; point[2].y = 1.0f; point[3].y = 1.0f;
+  vec2 uv[4];
+  uv[0].x = 0.0f; uv[1].x = 1.0f; uv[2].x = 0.0f; uv[3].x = 1.0f;
+  uv[0].y = 0.0f; uv[1].y = 0.0f; uv[2].y = 1.0f; uv[3].y = 1.0f;
 
-	
-	//make the vertex buffer object
-  glFuncs.glGenBuffers(1, &vbo);
-  glFuncs.glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glFuncs.glBufferData(GL_ARRAY_BUFFER, 4*2*sizeof(float)*2, nullptr, GL_STATIC_DRAW);
-      glFuncs.glBufferSubData(GL_ARRAY_BUFFER, 0, 4*2*sizeof(float), point);
-      glFuncs.glBufferSubData(GL_ARRAY_BUFFER, 4*2*sizeof(float), 4*2*sizeof(float), uv);
-  glFuncs.glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+  vao.create();
+  vao.bind();
+    vbo.create();
+    vbo.bind();
+      vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+      vbo.allocate(4 * 2 * sizeof(float) * 2);
+      vbo.write(0, point, 4 * 2 * sizeof(float)); // write positions
+      vbo.write(4 * 2 * sizeof(float), uv, 4 * 2 * sizeof(float)); // write uv
+    
+      this->glVertexAttribPointer(VERTEX_ATTRIBUTES_POSITION_INDEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+      this->glEnableVertexAttribArray(VERTEX_ATTRIBUTES_POSITION_INDEX);
+      this->glVertexAttribPointer(VERTEX_ATTRIBUTES_TEXCOORD_INDEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(4 * 2 * sizeof(float)));
+      this->glEnableVertexAttribArray(VERTEX_ATTRIBUTES_TEXCOORD_INDEX);
+    vao.release();
+  vbo.release(); 
 }
 
-
-void Fast2DQuadDraw(void)
+Fast2DQuad::~Fast2DQuad()
 {
-  QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
-  glFuncs.glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexPointer(2, GL_FLOAT, 0, BUFFER_OFFSET(0));
-    glTexCoordPointer(2, GL_FLOAT, 0, BUFFER_OFFSET(4*2*sizeof(float)));
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glFuncs.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
-  glFuncs.glBindBuffer(GL_ARRAY_BUFFER, 0);
+  vbo.destroy();
+  vao.destroy();
 }
 
-
-void Fast2DQuadFree(void)
+void Fast2DQuad::draw()
 {
-  QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
-  glFuncs.glDeleteBuffers(1,&vbo);
+  vao.bind();
+    this->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  vao.release();
 }

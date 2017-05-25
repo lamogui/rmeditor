@@ -3,7 +3,8 @@
 
 
 TextEditable::TextEditable(const QString &filename, QDomNode node, LogWidget &log, QObject *parent):
-  NodeFile(filename,node,log,parent)
+  NodeFile(filename,node,log,parent),
+  log(log)
 {
 }
 

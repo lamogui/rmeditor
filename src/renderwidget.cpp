@@ -1,5 +1,6 @@
 ﻿
 #include "renderwidget.hpp"
+#include "logwidget.hpp"
 #include <iostream>
 
 #include <QMessageBox>
@@ -20,28 +21,24 @@
 
 
 RenderWidget::RenderWidget(QWidget *parent) :
-  QGLWidget(parent),
+  QOpenGLWidget(parent),
   renderer(nullptr),
   captureMouse(false),
   onlyShowTexture(false)
 {
-    QGLFormat myFormat = format();
-    //myFormat.setVersion(4,0);
-    myFormat.setOverlay(true);
-    setFormat(myFormat);
-    /*bool hasOverlay =  format().hasOpenGLOverlays();
-    int minv = format().minorVersion();
-    int majv = format().majorVersion();*/
+  setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
+  connect(&updateTimer, SIGNAL(timeout()), this, SLOT(update()));
+  startUpdateLoop();
+  resetCamera();
+  setFocusPolicy(Qt::ClickFocus);
 
-
-    connect(&updateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
-    startUpdateLoop();
-
-
-
-    resetCamera();
-
-    setFocusPolicy(Qt::ClickFocus);
+  QSurfaceFormat f;
+  f.setRenderableType(QSurfaceFormat::OpenGL);
+  f.setMajorVersion(4);
+  f.setMinorVersion(5);
+  f.setProfile(QSurfaceFormat::CoreProfile);
+  f.setOptions(QSurfaceFormat::DebugContext | f.options());
+  setFormat(f);
 }
 
 RenderWidget::~RenderWidget()
@@ -51,15 +48,25 @@ RenderWidget::~RenderWidget()
     renderer->attachedWidget(nullptr);
   }
 
-    Fast2DQuadFree();
+  Fast2DQuadFree();
 }
 
+
+void RenderWidget::setLogWidget(LogWidget* log)
+  {logWidget = log;}
 
 //-----------------------------------------------------------------------------
 // initializeGL
 //-----------------------------------------------------------------------------
 void RenderWidget::initializeGL()
 {
+  Q_ASSERT(logWidget);
+  qDebug() << "Created context version: " << format().majorVersion() << "." << format().minorVersion();
+  openglDebugLogger.initialize();
+  connect(&openglDebugLogger, &QOpenGLDebugLogger::messageLogged, logWidget, &LogWidget::handleOpengGLLoggedMessage);
+  openglDebugLogger.startLogging();
+
+
     Fast2DQuadInit();
     //glMatrixMode(GL_PROJECTION);
     //gluPerspective(90., 16./9., 0.01, 10000.);
@@ -133,8 +140,8 @@ void RenderWidget::paintGL()
         glPopMatrix();
     }
 
-    glFlush();
-    glFinish();
+    //glFlush();
+    //glFinish();
 }
 
 //-----------------------------------------------------------------------------
@@ -197,16 +204,16 @@ void RenderWidget::resetCamera()
 
 void RenderWidget::takeScreenshot()
 {
-    emit updateGL();
-    QImage imageToSave = grabFrameBuffer(false);
-    QString filename = QFileDialog::getSaveFileName(this, "Save a screenshot", QString(), "Images (*.png *.jpg)");
-    if (!filename.isEmpty())
-    {
-      imageToSave.save(filename);
-    }
+  update();
+  QImage imageToSave = this->grabFramebuffer();
+  QString filename = QFileDialog::getSaveFileName(this, "Save a screenshot", QString(), "Images (*.png *.jpg)");
+  if (!filename.isEmpty())
+  {
+    imageToSave.save(filename);
+  }
 }
 
-void RenderWidget::setRenderer(Renderer *renderer)
+void RenderWidget::setRender(Render *renderer)
 {
  /* if (!renderer)
   {
@@ -215,18 +222,18 @@ void RenderWidget::setRenderer(Renderer *renderer)
 */
   if (this->renderer)
   {
-    disconnect(this->renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRendererDestroy()));
+    disconnect(this->renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRenderDestroy()));
     this->renderer->attachedWidget(nullptr);
   }
   this->renderer = renderer;
   if (renderer)
   {
-    connect(renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRendererDestroy()),Qt::DirectConnection);
+    connect(renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRenderDestroy()),Qt::DirectConnection);
     renderer->attachedWidget(this);
   }
 }
 
-void RenderWidget::onRendererDestroy()
+void RenderWidget::onRenderDestroy()
 {
   renderer = nullptr;
 }

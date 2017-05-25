@@ -17,17 +17,16 @@ class Project;
 class Sequence;
 
 
-class DemoRenderer : public Renderer
+class DemoRender : public Render
 {
 public:
-  DemoRenderer(DemoTimeline&  timeline, size_t w, size_t h);
+  DemoRender(DemoTimeline&  timeline, const QSize& initialSize);
 
 protected:
   void glRender() override;
+  void renderChildrens() override;
 
   DemoTimeline* timeline;
-
-
 };
 
 
@@ -49,7 +48,7 @@ public:
   qint64 addSequence(Sequence* seq); //Return the correct start frame of the seq
   Sequence* isInsideSequence(qint64 frame) const;
 
-  inline Renderer* getRenderer() override { return renderer; }
+  inline Render* getRender() override { return renderer; }
 
   void updateTime() override;
 
@@ -86,10 +85,10 @@ protected:
   bool parseTrackNode(QDomElement& node);
 
   QDomElement node;
-  Camera camera;
+  QSharedPointer<Camera> camera;
   double trackHeight;
   Project* project;
-  DemoRenderer* renderer;
+  DemoRender* render;
   QMap<qint64, Sequence*> sequences;
   QPointF mousePressPos;
 

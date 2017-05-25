@@ -19,6 +19,7 @@ public:
     
     LogWidget* getLogWidget();
 
+
 private slots:
     void on_clearButton_clicked(bool);
 

@@ -3,13 +3,11 @@
 
 
 #include <QString>
-#include "shader.hpp"
-#include "texteditable.hpp"
-#include "fbo.hpp"
+#include <QOpenGLShader>
 
+#include "texteditable.hpp"
 
 class ShaderMinifier;
-
 class FragmentShaderCode : public TextEditable
 {
   Q_OBJECT
@@ -18,11 +16,9 @@ public:
   FragmentShaderCode(const QString& filename, QDomNode node,LogWidget& log,QObject* parent=nullptr);
 
   const QString& getText() const override;
-  inline Shader& getShader() { return shader;}
-  void connectLog(LogWidget& log) override;
+  inline QOpenGLShader& getShader() { return shader;}
 
   bool buildable() const override { return true; }
-
 
   virtual QString minifiedShaderCode(const ShaderMinifier& minifier) const;
   virtual QString cFormatedShaderCode(const ShaderMinifier& minifier) const;
@@ -30,10 +26,12 @@ public:
 public slots:
    bool build(const QString& text) override;
 
-
 protected:
-    Shader shader;
-    QString fragmentcode;
+  // Utils
+  bool handleShaderCompileResult(const QString& shaderCode, QOpenGLShader::ShaderType type);
+
+  QOpenGLShader shader;
+  QString fragmentcode;
 
 };
 

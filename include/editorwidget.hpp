@@ -10,7 +10,7 @@ class EditorWidget;
 
 class LogWidget;
 class Project;
-class Renderer;
+class Render;
 class TextEditable;
 class TextEditor;
 
@@ -30,7 +30,7 @@ public slots:
 
 
 signals:
-    void rendererChanged(Renderer* renderer);
+    void rendererChanged(Render* renderer);
 
 private slots:
     void on_buildButton_clicked(bool);

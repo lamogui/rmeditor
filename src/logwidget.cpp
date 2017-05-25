@@ -7,8 +7,8 @@ LogWidget::LogWidget(QWidget *parent):
   QTextEdit(parent),
   printTime(true)
 {
+  
 }
-
 
 
 QString LogWidget::getDate()
@@ -52,4 +52,16 @@ void LogWidget::writeError(QString txt)
     txt = getDate() + txt;
   }
   this->insertPlainText(txt+"\n");
+}
+
+void LogWidget::handleOpengGLLoggedMessage(const QOpenGLDebugMessage &debugMessage)
+{
+  if (debugMessage.type() & (QOpenGLDebugMessage::ErrorType))
+    writeError(debugMessage.message());
+  else if (debugMessage.type() &
+    (QOpenGLDebugMessage::DeprecatedBehaviorType | QOpenGLDebugMessage::UndefinedBehaviorType |
+      QOpenGLDebugMessage::PortabilityType | QOpenGLDebugMessage::PerformanceType | QOpenGLDebugMessage::InvalidType))
+    writeWarning(debugMessage.message());
+  else 
+    writeInfo(debugMessage.message());
 }

@@ -18,12 +18,13 @@
 
 DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogWidget &log):
   Timeline(*(project.getMusic()),2*60.0,fps,log),
+  camera(new Camera),
   node(node),
   trackHeight(60.0),
   project(&project),
-  renderer(new DemoRenderer(*this,1280,720))
+  render(new DemoRender(*this,QSize(1280,720)))
 {
-  renderer->setCamera(&camera);
+  render->getCamera() = camera;
   load();
 }
 
@@ -304,8 +305,9 @@ void DemoTimeline::renderImage(const QSize& resolution, QImage* target)
 
   updateTime();
   //Cast because of compiler bug in debug...
-  ((Renderer*)renderer)->glRender((size_t)resolution.width(),(size_t)resolution.height());
-  *target = renderer->getImage();
+  
+  render->render();
+  *target = render->getFBO().toImage(true, 0);
 }
 
 
@@ -466,14 +468,19 @@ void DemoTimeline::exportSources(const QDir &dir) const
 */
 
 
-DemoRenderer::DemoRenderer(DemoTimeline &timeline, size_t w, size_t h):
-  Renderer(w,h,&timeline),
+DemoRender::DemoRender(DemoTimeline &timeline, const QSize& initialSize):
+  Render(initialSize,&timeline),
   timeline(&timeline)
 {
 
 }
 
-void DemoRenderer::glRender()
+void DemoRender::renderChildrens() override
+{
+
+}
+
+void DemoRender::glRender()
 {
   fbo.enable();
 

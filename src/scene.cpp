@@ -4,37 +4,89 @@
 #include "framework.hpp"
 #include "renderer.hpp"
 #include "shaderminifier.hpp"
+#include "logwidget.hpp"
 
-Scene::Scene(const QString &filename, QDomNode node, Framework *framework, LogWidget &log, QObject *parent):
-  FragmentShaderCode(filename,node,log,parent),
+Scene::Scene(const QString &filename, QDomNode node, Framework *framework, LogWidget &log, QObject *parent) :
+  FragmentShaderCode(filename, node, log, parent),
   framework(framework),
-  sceneRenderer(new SceneRenderer(*this,1280,720,this))
+  camera(new Camera),
+  sceneRender(new SceneRender(*this,QSize(1280,720),this))
 {
-  sceneRenderer->setCamera(&camera);
+  sceneRender->getCamera() = camera;
   load();
 }
 
-Renderer* Scene::getRenderer() const
+const char* Scene::getVertexShaderCode()
 {
-  return sceneRenderer;
+
+  static const char* vertexShader =
+    "#version 450\n"
+    "in vec2 position;"
+    "in vec2 texCoords;"
+    "smooth out vec2 coords;"
+    "smooth out vec2 uv;"
+    "void main()"
+    "{"
+    "coords         = texCoords;"
+    "uv             = position;"
+    "gl_Position    = vec3(position, 0.0);"
+    "}";
+  return vertexShader;
 }
 
-Scene::~Scene()
+Render* Scene::getRender() const
 {
-  sceneRenderer->setCamera(nullptr);
+  return sceneRender;
 }
-
 
 bool Scene::build(const QString &text)
 {
+  shaderProgram.reset(new QOpenGLShaderProgram());
+  shaderProgram->create();
+
   fragmentcode = text;
   QString code;
+
   if (framework)
   {
     code += framework->getText();
     emit startLineNumberChanged(code.count(QChar::LineFeed));
   }
   code += fragmentcode;
-  return (shader.compil(Shader::getVertexShader(), code.toStdString().c_str()) == SHADER_SUCCESS);
+  if (!handleShaderCompileResult(code, QOpenGLShader::Fragment))
+    return false;
+ 
+  if (!shaderProgram->addShader(&shader))
+  {
+    log.writeError(fileName() + " (at compile): " + shaderProgram->log());
+    return false;
+  }
+  else if (!shaderProgram->log().isEmpty())
+    log.writeWarning(fileName() + " (at compile): " + shader.log());
+  
+  if (!shaderProgram->addShaderFromSourceCode(QOpenGLShader::Vertex, getVertexShaderCode()))
+  {
+    log.writeError(fileName() + " (at compile): " + shaderProgram->log());
+    return false;
+  }
+  else if (!shaderProgram->log().isEmpty())
+    log.writeWarning(fileName() + " (at compile): " + shader.log());
+
+
+  // link
+  shaderProgram->bindAttributeLocation("position", VERTEX_ATTRIBUTES_POSITION_INDEX);
+  shaderProgram->bindAttributeLocation("texCoords", VERTEX_ATTRIBUTES_TEXCOORD_INDEX);
+
+  if (!shaderProgram->link())
+  {
+    log.writeError(fileName() + " (at link): " + shaderProgram->log());
+    return false;
+  }
+  else if (!shaderProgram->log().isEmpty())
+    log.writeWarning(fileName() + " (at link): " + shader.log());
+
+  return shaderProgram->isLinked();
 }
+
+
 

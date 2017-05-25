@@ -2,66 +2,64 @@
 #define RENDERER_HPP
 
 #include <QObject>
-#include <QOpenGLFunctions>
 #include <QTime>
-
-#include "fbo.hpp"
+#include <QOpenGLFunctions_4_5_Core>
+#include <QOpenGLFramebufferObject>
 
 class RenderWidget;
 class Camera;
 
-
-class Renderer : public QObject, public QOpenGLFunctions
+class Render : public QObject, public QOpenGLFunctions_4_5_Core // FIXME : do no inherit from this 
 {
   Q_OBJECT
 
 public:
-  Renderer(size_t w, size_t h, QObject* parent=nullptr);
-  virtual ~Renderer();
+  Render(const QSize& initialSize, QObject* parent = nullptr);
+  ~Render() override;
 
+  // The function ! 
+  void render();
 
-  virtual void resize(size_t width, size_t height);
-  void glRender(size_t width, size_t height);
+  // Accessors
+  const QOpenGLFramebufferObject& getFBO() const { return *fbo; }
+  QWeakPointer<Camera>& getCamera() { return camera; }
+  const QWeakPointer<Camera>& getCamera() const { return camera; }
 
-  inline GLuint getColorTexture() const { return fbo.getColor(); }
-  inline void setCamera(Camera* c) { camera = c; }
-  inline Camera* getCamera() const  { return camera; }
-
-  //Called by RenderWidget, widget is nullptr when detached
-  virtual void attachedWidget(RenderWidget* widget) { (void) widget; }
-
-
-  inline size_t width() const { return fbo.getWidth(); }
-  inline size_t height() const { return fbo.getHeight(); }
-
-
-  QImage getImage();
+  // To override
+  virtual void resize(const QSize& newSize);
+  virtual void attachedWidget(RenderWidget* widget) { (void)widget; } //Called by RenderWidget, widget is nullptr when detached
 
 protected:
-  virtual void customResize(size_t width, size_t height) { (void) width; (void) height; }
+  // To override
   virtual void glRender() = 0;
+  virtual void createAttachements(const QSize& fboSize);  // note that the default RGBA color attachement is always created !
+  inline virtual void renderChildrens() {} // call here the render function of your childrens 
 
+  // utils
+  void resizeFBO(const QSize& newSize);
 
-  FBO fbo;
-  Camera* camera;
+  QOpenGLFramebufferObject* fbo;
+  QWeakPointer<Camera> camera;
 };
 
-class Scene;
+#include "fast2dquad.hpp"
 
-class SceneRenderer : public Renderer
+class Scene;
+class SceneRender : public Render
 {
 public:
-  SceneRenderer(Scene& scene, size_t w, size_t h, QObject *parent=nullptr);
+  SceneRender(Scene& scene, const QSize& initialSize, QObject *parent=nullptr);
   
-  // Renderer 
+  // Render 
   void attachedWidget(RenderWidget* widget) override;
 
 protected:
-  // Renderer
+  // Render
   void glRender() override;
 
   Scene* scene;
   QTime sequenceTime;
+  Fast2DQuad quad;
 };
 
 #endif // !RENDERER_HPP

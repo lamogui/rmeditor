@@ -2,17 +2,17 @@
 #define RENDERWIDGET_H
 
 #include <QTime>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QListWidget>
 #include <QTimer>
 #include <QSet>
+#include <QOpenGLDebugLogger>
 
 class Camera;
-class Renderer;
+class Render;
+class LogWidget;
 
-
-
-class RenderWidget : public QGLWidget
+class RenderWidget : public QOpenGLWidget
 {
     Q_OBJECT
 
@@ -20,12 +20,14 @@ public:
        RenderWidget(QWidget *parent = 0);
        ~RenderWidget();
 
+       void setLogWidget(LogWidget* log);
+
 public slots:
        void resetCamera();
        Camera* camera() const;
        void takeScreenshot();
 
-       void setRenderer(Renderer* renderer);
+       void setRender(Render* renderer);
 
        inline void setOnlyShowTexture(bool e) { onlyShowTexture = e;}
        void startUpdateLoop();
@@ -42,7 +44,7 @@ protected slots:
        void keyPressEvent(QKeyEvent* event) override;
        void keyReleaseEvent(QKeyEvent* event) override;
 
-       void onRendererDestroy();
+       void onRenderDestroy();
 
 
 
@@ -53,9 +55,11 @@ protected:
 
 
        QTimer updateTimer;
-       Renderer* renderer;
+       Render* renderer;
        QPointF previousMousePos;
        QSet<Qt::Key> keysPressed;
+       QOpenGLDebugLogger openglDebugLogger;
+       LogWidget* logWidget;
        bool captureMouse;
 
        bool onlyShowTexture;

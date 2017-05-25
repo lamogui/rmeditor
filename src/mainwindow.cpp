@@ -23,12 +23,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 
 {
+
     ui->setupUi(this);
     ui->progressBar->setVisible(false);
     ui->cancelButton->setVisible(false);
 
     info = new LogDockWidget(this);
     info->getLogWidget()->setPrintTime(false);
+    ui->renderWidget->setLogWidget((info->getLogWidget()));
 
     editor = new EditorWidget(*(info->getLogWidget()),this);
     timelineWidget = new TimelineDockWidget(this);
@@ -36,8 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
     addDockWidget(Qt::BottomDockWidgetArea, timelineWidget);
     addDockWidget(Qt::LeftDockWidgetArea, editor);
 
-    connect(editor,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
-    connect(timelineWidget,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
+    connect(editor,SIGNAL(rendererChanged(Render*)),this->ui->renderWidget,SLOT(setRender(Render*)));
+    connect(timelineWidget,SIGNAL(rendererChanged(Render*)),this->ui->renderWidget,SLOT(setRender(Render*)));
 
     //Main window actions
     ui->toolBar->addAction(ui->actionNew);
@@ -54,11 +56,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionOpen,SIGNAL(triggered()), this, SLOT(open()));
     connect(ui->actionSaveAllShaders, SIGNAL(triggered()), this, SLOT(saveAllShaders()));
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(ui->actionReset_camera, SIGNAL(triggered()), ui->widget, SLOT(resetCamera()));
-    connect(ui->actionTake_screenshot, SIGNAL(triggered()), ui->widget, SLOT(takeScreenshot()));
+    connect(ui->actionReset_camera, SIGNAL(triggered()), ui->renderWidget, SLOT(resetCamera()));
+    connect(ui->actionTake_screenshot, SIGNAL(triggered()), ui->renderWidget, SLOT(takeScreenshot()));
     connect(ui->actionExport_as_video,SIGNAL(triggered()),this,SLOT(exportAsVideo()));
-    connect(ui->actionExport_as_Linux_Demo,SIGNAL(triggered()),this,SLOT(exportAsLinuxDemo()));
+    connect(ui->actionExport_as_Linux_Demo, SIGNAL(triggered()), this, SLOT(exportAsLinuxDemo()));
     connect(ui->actionInsert_camera_keyframe,SIGNAL(triggered()),this,SLOT(insertCameraKeyframe()));
+
+    
 }
 
 MainWindow::~MainWindow()
@@ -139,7 +143,7 @@ void MainWindow::setTimeline(Timeline *t)
 
 void MainWindow::insertCameraKeyframe()
 {
-  Camera* cam = ui->widget->camera();
+  Camera* cam = ui->renderWidget->camera();
   if (cam)
   {
     timelineWidget->insertCameraKeyframe(cam);
@@ -153,7 +157,7 @@ void MainWindow::exportAsVideo()
   {
     freezeAll();
 
-    ui->widget->setRenderer(project->getDemoTimeline()->getRenderer());
+    ui->renderWidget->setRender(project->getDemoTimeline()->getRender());
 
     ui->progressBar->setMinimum(0);
     ui->progressBar->setMaximum(project->getDemoTimeline()->length());
@@ -184,7 +188,7 @@ void MainWindow::exportAsVideo()
 
 void MainWindow::freezeAll()
 {
-  ui->widget->setOnlyShowTexture(true);
+  ui->renderWidget->setOnlyShowTexture(true);
 
   ui->menuBar->setEnabled(false);
   ui->menuCamera->setEnabled(false);
@@ -208,7 +212,7 @@ void MainWindow::unfreezeAll()
   timelineWidget->setEnabled(true);
   editor->setEnabled(true);
 
-  ui->widget->setOnlyShowTexture(false);
+  ui->renderWidget->setOnlyShowTexture(false);
 
   ui->progressBar->setVisible(false);
   ui->cancelButton->setVisible(false);

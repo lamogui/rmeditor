@@ -5,18 +5,11 @@
 #include "shaderminifier.hpp"
 
 FragmentShaderCode::FragmentShaderCode(const QString &filename,QDomNode node,LogWidget& log, QObject *parent):
-  TextEditable(filename,node,log,parent)
+  TextEditable(filename,node,log,parent),
+  shader(QOpenGLShader::Fragment)
 {
   connectLog(log);
 }
-
-void FragmentShaderCode::connectLog(LogWidget &log)
-{
-  TextEditable::connectLog(log);
-  connect(&shader,SIGNAL(error(QString)),&log,SLOT(writeError(QString)));
-  connect(&shader,SIGNAL(warning(QString)),&log,SLOT(writeWarning(QString)));
-}
-
 
 const QString &FragmentShaderCode::getText() const
 {
@@ -26,9 +19,20 @@ const QString &FragmentShaderCode::getText() const
 bool FragmentShaderCode::build(const QString &text)
 {
   fragmentcode = text;
-  return (shader.compil(Shader::getVertexShader(), fragmentcode.toStdString().c_str()) == SHADER_SUCCESS);
+  return handleShaderCompileResult(fragmentcode, QOpenGLShader::Fragment);
 }
 
+bool FragmentShaderCode::handleShaderCompileResult(const QString& shaderCode, QOpenGLShader::ShaderType type)
+{
+  if (shader.compileSourceCode(fragmentcode))
+  {
+    if (!shader.log().isEmpty())
+      log.writeWarning(fileName() + ": " + shader.log());
+    return true;
+  }
+  log.writeError(fileName() + ": " + shader.log());
+  return false;
+}
 
 QString FragmentShaderCode::minifiedShaderCode(const ShaderMinifier& minifier) const
 {

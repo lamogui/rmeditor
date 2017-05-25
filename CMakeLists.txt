@@ -46,7 +46,6 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/demotimeline.hpp
   ${RMEDITOR_INCLUDE_DIR}/editorwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/fast2dquad.hpp
-  ${RMEDITOR_INCLUDE_DIR}/fbo.hpp
   ${RMEDITOR_INCLUDE_DIR}/ffmpegencoder.hpp
   ${RMEDITOR_INCLUDE_DIR}/framework.hpp
   ${RMEDITOR_INCLUDE_DIR}/highlighter.hpp
@@ -61,7 +60,6 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/renderwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/scene.hpp
   ${RMEDITOR_INCLUDE_DIR}/sequence.hpp
-  ${RMEDITOR_INCLUDE_DIR}/shader.hpp
   ${RMEDITOR_INCLUDE_DIR}/shadercode.hpp
   ${RMEDITOR_INCLUDE_DIR}/shaderminifier.hpp
   ${RMEDITOR_INCLUDE_DIR}/texteditable.hpp
@@ -81,7 +79,6 @@ set(RMEDITOR_SRC
   ${RMEDITOR_SRC_DIR}/demotimeline.cpp
   ${RMEDITOR_SRC_DIR}/editorwidget.cpp
   ${RMEDITOR_SRC_DIR}/fast2dquad.cpp
-  ${RMEDITOR_SRC_DIR}/fbo.cpp
   ${RMEDITOR_SRC_DIR}/ffmpegencoder.cpp
   ${RMEDITOR_SRC_DIR}/highlighter.cpp
   ${RMEDITOR_SRC_DIR}/keyframe.cpp
@@ -96,7 +93,6 @@ set(RMEDITOR_SRC
   ${RMEDITOR_SRC_DIR}/renderwidget.cpp
   ${RMEDITOR_SRC_DIR}/scene.cpp
   ${RMEDITOR_SRC_DIR}/sequence.cpp
-  ${RMEDITOR_SRC_DIR}/shader.cpp
   ${RMEDITOR_SRC_DIR}/shadercode.cpp
   ${RMEDITOR_SRC_DIR}/shaderminifier.cpp
   ${RMEDITOR_SRC_DIR}/texteditable.cpp
