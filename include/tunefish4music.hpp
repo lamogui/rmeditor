@@ -25,7 +25,7 @@ public:
   void processAudio(void *outputBuffer, unsigned int nBufferFrames,
                     double streamTime, RtAudioStreamStatus status) override;
 
-  size_t instrumentCount() const { return m_player.song.instrCount; }
+  size_t instrumentCount() const { return player.song.instrCount; }
 
 
 
@@ -35,9 +35,9 @@ public slots:
   void updateTextures() override;
 
 protected:
-  eTfPlayer m_player;
-  std::vector<eF32> m_noteVelocityBuffer;
-  QMutex m_mutex;
+  eTfPlayer player;
+  std::vector<eF32> noteVelocityBuffer;
+  QMutex mutex;
 
 };
 

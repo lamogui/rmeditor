@@ -21,9 +21,9 @@
 
 RenderWidget::RenderWidget(QWidget *parent) :
   QGLWidget(parent),
-  m_renderer(NULL),
-  m_captureMouse(false),
-  m_onlyShowTexture(false)
+  renderer(NULL),
+  captureMouse(false),
+  onlyShowTexture(false)
 {
     QGLFormat myFormat = format();
     //myFormat.setVersion(4,0);
@@ -34,7 +34,7 @@ RenderWidget::RenderWidget(QWidget *parent) :
     int majv = format().majorVersion();*/
 
 
-    connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
+    connect(&updateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
     startUpdateLoop();
 
 
@@ -46,9 +46,9 @@ RenderWidget::RenderWidget(QWidget *parent) :
 
 RenderWidget::~RenderWidget()
 {
-  if (m_renderer)
+  if (renderer)
   {
-    m_renderer->attachedWidget(NULL);
+    renderer->attachedWidget(NULL);
   }
 
     Fast2DQuadFree();
@@ -75,40 +75,40 @@ void RenderWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if (m_renderer)
+    if (renderer)
     {
-      if (!m_onlyShowTexture)
+      if (!onlyShowTexture)
       {
-        if (m_renderer->camera() && !m_keysPressed.empty())
+        if (renderer->getCamera() && !keysPressed.empty())
         {
           QVector3D delta;
-          if (m_keysPressed.contains(Qt::Key_Up))
+          if (keysPressed.contains(Qt::Key_Up))
           {
             delta += QVector3D(0,0,1);
           }
-          if (m_keysPressed.contains(Qt::Key_Down))
+          if (keysPressed.contains(Qt::Key_Down))
           {
             delta += QVector3D(0,0,-1);
           }
-          if (m_keysPressed.contains(Qt::Key_Left))
+          if (keysPressed.contains(Qt::Key_Left))
           {
             delta += QVector3D(-1,0,0);
           }
-          if (m_keysPressed.contains(Qt::Key_Right))
+          if (keysPressed.contains(Qt::Key_Right))
           {
             delta += QVector3D(1,0,0);
           }
-          if (m_keysPressed.contains(Qt::Key_PageUp))
+          if (keysPressed.contains(Qt::Key_PageUp))
           {
             delta += QVector3D(0,1,0);
           }
-          if (m_keysPressed.contains(Qt::Key_PageDown))
+          if (keysPressed.contains(Qt::Key_PageDown))
           {
             delta += QVector3D(0,-1,0);
           }
-          m_renderer->camera()->translateRelative(delta*0.02f);
+          renderer->getCamera()->translateRelative(delta*0.02f);
         }
-        m_renderer->glRender(this->width(),this->height());
+        renderer->glRender(this->width(),this->height());
       }
 
       QOpenGLFunctions gl(QOpenGLContext::currentContext());
@@ -122,7 +122,7 @@ void RenderWidget::paintGL()
 
 
       gl.glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, m_renderer->getColorTexture());
+      glBindTexture(GL_TEXTURE_2D, renderer->getColorTexture());
       Fast2DQuadDraw();
 
 
@@ -150,35 +150,35 @@ void RenderWidget::mousePressEvent(QMouseEvent* event)
 {
   if (event->button() == Qt::RightButton)
   {
-    m_captureMouse = true;
+    captureMouse = true;
   }
   QWidget::mousePressEvent(event);
-  m_previousMousePos = event->screenPos();
+  previousMousePos = event->screenPos();
 }
 
 void RenderWidget::mouseReleaseEvent(QMouseEvent* event)
 {
   if (event->button() == Qt::RightButton)
   {
-    m_captureMouse = false;
+    captureMouse = false;
   }
   QWidget::mouseReleaseEvent(event);
-  m_previousMousePos = event->screenPos();
+  previousMousePos = event->screenPos();
 }
 
 void RenderWidget::mouseMoveEvent(QMouseEvent* event)
 {
-  if (m_captureMouse)
+  if (captureMouse)
   {
-    float yaw = event->screenPos().x() - m_previousMousePos.x();
-    float pitch = event->screenPos().y() - m_previousMousePos.y();
-    if (m_renderer && m_renderer->camera())
+    float yaw = event->screenPos().x() - previousMousePos.x();
+    float pitch = event->screenPos().y() - previousMousePos.y();
+    if (renderer && renderer->getCamera())
     {
-      m_renderer->camera()->rotate(yaw*0.25,pitch*0.25,0);
+      renderer->getCamera()->rotate(yaw*0.25,pitch*0.25,0);
     }
   }
   QWidget::mouseMoveEvent(event);
-  m_previousMousePos = event->screenPos();
+  previousMousePos = event->screenPos();
 }
 
 void RenderWidget::wheelEvent(QWheelEvent* event)
@@ -188,9 +188,9 @@ void RenderWidget::wheelEvent(QWheelEvent* event)
 
 void RenderWidget::resetCamera()
 {
-  if (m_renderer && m_renderer->camera())
+  if (renderer && renderer->getCamera())
   {
-    m_renderer->camera()->reset();
+    renderer->getCamera()->reset();
   }
 }
 
@@ -213,22 +213,22 @@ void RenderWidget::setRenderer(Renderer *renderer)
     return;
   }
 */
-  if (m_renderer)
+  if (renderer)
   {
-    disconnect(m_renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRendererDestroy()));
-    m_renderer->attachedWidget(NULL);
+    disconnect(renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRendererDestroy()));
+    renderer->attachedWidget(NULL);
   }
-  m_renderer = renderer;
-  if (m_renderer)
+  renderer = renderer;
+  if (renderer)
   {
-    connect(m_renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRendererDestroy()),Qt::DirectConnection);
-    m_renderer->attachedWidget(this);
+    connect(renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRendererDestroy()),Qt::DirectConnection);
+    renderer->attachedWidget(this);
   }
 }
 
 void RenderWidget::onRendererDestroy()
 {
-  m_renderer = NULL;
+  renderer = NULL;
 }
 
 void RenderWidget::keyPressEvent(QKeyEvent *event)
@@ -240,7 +240,7 @@ void RenderWidget::keyPressEvent(QKeyEvent *event)
       event->key() == Qt::Key_PageUp ||
       event->key() == Qt::Key_PageDown)
   {
-    m_keysPressed.insert((Qt::Key)event->key());
+    keysPressed.insert((Qt::Key)event->key());
   }
   else
   {
@@ -250,24 +250,24 @@ void RenderWidget::keyPressEvent(QKeyEvent *event)
 
 void RenderWidget::keyReleaseEvent(QKeyEvent *event)
 {
-  m_keysPressed.remove((Qt::Key)event->key());
+  keysPressed.remove((Qt::Key)event->key());
 }
 
 Camera* RenderWidget::camera() const
 {
-  if (m_renderer)
+  if (renderer)
   {
-    return m_renderer->camera();
+    return renderer->getCamera();
   }
   return NULL;
 }
 
 void RenderWidget::startUpdateLoop()
 {
-   m_updateTimer.start(10);
+   updateTimer.start(10);
 }
 
 void RenderWidget::stopUpdateLoop()
 {
-  m_updateTimer.stop();
+  updateTimer.stop();
 }

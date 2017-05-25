@@ -44,12 +44,12 @@ private:
     void connectProject();
 
 
-    Project* m_project;
+    Project* project;
 
     Ui::MainWindow *ui;
-    LogDockWidget *m_info;
-    EditorWidget *m_editor;
-    TimelineDockWidget *m_timeline;
+    LogDockWidget *info;
+    EditorWidget *editor;
+    TimelineDockWidget *timeline;
 };
 
 #endif // MAINWINDOW_H

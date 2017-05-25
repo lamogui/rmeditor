@@ -18,7 +18,7 @@ class Framework : public FragmentShaderCode
 public slots:
   virtual bool build(const QString& text)
   {
-    m_fragmentcode = text;
+    fragmentcode = text;
     return true;
   }
 

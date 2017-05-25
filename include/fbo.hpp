@@ -23,28 +23,28 @@ public:
        void setSize(size_t width, size_t height );
        void setFormat(GLint format);
 
-       size_t  getSizeX() const {return m_width;}
-       size_t  getSizeY() const {return m_height;}
+       size_t  getSizeX() const {return width;}
+       size_t  getSizeY() const {return height;}
        GLuint getColor(void) const;
-       GLenum getFormat() const {return m_format;}
+       GLenum getFormat() const {return format;}
 
        void bind();
 
        QImage getImage();
 
-       inline size_t width() const { return m_width; }
-       inline size_t height() const { return m_height; }
+       inline size_t getWidth() const { return width; }
+       inline size_t getHeight() const { return height; }
 
 private:
        void updateTexture();
 
-       GLuint m_FrameBuffer;
-       GLuint m_DepthRenderBuffer;
-       GLuint m_ColorTextureID;
-       GLuint m_DepthTextureID;
-       size_t    m_width,m_height;
-       GLint  m_format;
+       GLuint FrameBuffer;
+       GLuint DepthRenderBuffer;
+       GLuint ColorTextureID;
+       GLuint DepthTextureID;
+       size_t  width,height;
+       GLint  format;
 };
 
 
-#endif
+#endif // !DEF_CORE_FBO_H

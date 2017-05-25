@@ -37,7 +37,7 @@ signals:
 private:
   bool makeShader(const char *txt, GLuint type);
   bool checkShader( int id );
-  GLuint m_program;
+  GLuint program;
 };
 
 

@@ -17,7 +17,7 @@ public:
   TextEditable(const QString& filename, QDomNode node ,LogWidget& log,QObject* parent);
 
   //The text to print in the editor and that will be saved in the file
-  virtual const QString& text() const = 0;
+  virtual const QString& getText() const = 0;
 
 
   //Is the object buildable

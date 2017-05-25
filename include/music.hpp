@@ -22,10 +22,10 @@ public:
 
   virtual double getTime() const = 0;
 
-  inline double length() const { return m_length; }
-  inline Texture2D& noteVelocityTex() { return m_noteVelocityTex; }
+  inline double getLength() const { return length; }
+  inline Texture2D& getNoteVelocityTex() { return noteVelocityTex; }
 
-  bool playing() const { return m_playing; }
+  bool isPlaying() const { return playing; }
 
 
 
@@ -44,8 +44,8 @@ public slots:
   virtual void setPosition(double time) = 0;
   virtual void updateTextures() = 0;
 
-  inline void play() { m_playing = true; }
-  inline void pause() { m_playing = false;}
+  inline void play() { playing = true; }
+  inline void pause() { playing = false;}
 
 
 
@@ -57,11 +57,11 @@ protected:
 
   static void rtAudioError(RtAudioError::Type type, const std::string &errorText);
 
-  size_t m_bytesPerFrame; //Rt audio bytes per frame
-  RtAudio m_audio;
-  Texture2D m_noteVelocityTex;
-  double m_length;
-  volatile bool m_playing;
+  size_t bytesPerFrame; //Rt audio bytes per frame
+  RtAudio audio;
+  Texture2D noteVelocityTex;
+  double length;
+  volatile bool playing;
 };
 
 #endif

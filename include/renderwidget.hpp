@@ -27,7 +27,7 @@ public slots:
 
        void setRenderer(Renderer* renderer);
 
-       inline void setOnlyShowTexture(bool e) { m_onlyShowTexture = e;}
+       inline void setOnlyShowTexture(bool e) { onlyShowTexture = e;}
        void startUpdateLoop();
        void stopUpdateLoop();
 
@@ -51,13 +51,13 @@ protected:
        void resizeGL(int width, int height);
 
 
-       QTimer m_updateTimer;
-       Renderer* m_renderer;
-       QPointF m_previousMousePos;
-       QSet<Qt::Key> m_keysPressed;
-       bool m_captureMouse;
+       QTimer updateTimer;
+       Renderer* renderer;
+       QPointF previousMousePos;
+       QSet<Qt::Key> keysPressed;
+       bool captureMouse;
 
-       bool m_onlyShowTexture;
+       bool onlyShowTexture;
 
 };
 

@@ -13,26 +13,26 @@ FragmentShaderCode::FragmentShaderCode(const QString &filename,QDomNode node,Log
 void FragmentShaderCode::connectLog(LogWidget &log)
 {
   TextEditable::connectLog(log);
-  connect(&m_shader,SIGNAL(error(QString)),&log,SLOT(writeError(QString)));
-  connect(&m_shader,SIGNAL(warning(QString)),&log,SLOT(writeWarning(QString)));
+  connect(&shader,SIGNAL(error(QString)),&log,SLOT(writeError(QString)));
+  connect(&shader,SIGNAL(warning(QString)),&log,SLOT(writeWarning(QString)));
 }
 
 
-const QString &FragmentShaderCode::text() const
+const QString &FragmentShaderCode::getText() const
 {
-  return m_fragmentcode;
+  return fragmentcode;
 }
 
 bool FragmentShaderCode::build(const QString &text)
 {
-  m_fragmentcode = text;
-  return (m_shader.compil(Shader::getVertexShader(), m_fragmentcode.toStdString().c_str()) == SHADER_SUCCESS);
+  fragmentcode = text;
+  return (shader.compil(Shader::getVertexShader(), fragmentcode.toStdString().c_str()) == SHADER_SUCCESS);
 }
 
 
 QString FragmentShaderCode::minifiedShaderCode(const ShaderMinifier& minifier) const
 {
-  return minifier.minifiedShaderCode(this->fileName(),m_fragmentcode);
+  return minifier.minifiedShaderCode(this->fileName(),fragmentcode);
 }
 
 QString FragmentShaderCode::cFormatedShaderCode(const ShaderMinifier& minifier) const

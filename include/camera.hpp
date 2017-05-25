@@ -16,14 +16,14 @@ public:
 
   //const Camera& operator= (const Camera& cpy);
 
-  inline const QVector3D& position() const { return m_position;}
-  inline const QQuaternion& rotation() const { return m_rotation; }
+  inline const QVector3D& getPosition() const { return position;}
+  inline const QQuaternion& getRotation() const { return rotation; }
 
-  inline void setPosition(const QVector3D& pos) { m_position = pos;}
-  inline void setRotation(const QQuaternion& rot) { m_rotation = rot; }
+  inline void setPosition(const QVector3D& pos) { position = pos;}
+  inline void setRotation(const QQuaternion& rot) { rotation = rot; }
 
-  inline QVector3D rd() const { return rotation().rotatedVector(QVector3D(0,0,-1)); } //Ogre (0,0,-1) Unity (0,0,1)
-  inline QVector3D ro() const { return position(); }
+  inline QVector3D rd() const { return getRotation().rotatedVector(QVector3D(0,0,-1)); } //Ogre (0,0,-1) Unity (0,0,1)
+  inline QVector3D ro() const { return getPosition(); }
 
   void rotate(qreal yaw, qreal pitch, qreal roll ); //Degrees
   void translateRelative(const QVector3D& dir);
@@ -34,8 +34,8 @@ public:
   void reset();
 
 protected:
-  QQuaternion m_rotation;
-  QVector3D m_position;
+  QQuaternion rotation;
+  QVector3D position;
 
 };
 
@@ -51,16 +51,16 @@ public:
   void setPosition(const QVector3D& p);
   void setRotation(const QQuaternion& q);
 
-  inline const QVector3D& position() const { return m_position;}
-  inline const QQuaternion& rotation() const { return m_rotation; }
+  inline const QVector3D& getPosition() const { return position;}
+  inline const QQuaternion& getRotation() const { return rotation; }
 
   void fromCamera(Camera& cam);
 
   virtual void load();
 
 protected:
-  QQuaternion m_rotation;
-  QVector3D m_position;
+  QQuaternion rotation;
+  QVector3D position;
 
 };
 

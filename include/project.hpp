@@ -24,24 +24,24 @@ class Project : public TextEditable
     Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=NULL);
     virtual ~Project();
 
-    virtual const QString& text() const;
-    virtual void connectLog(LogWidget& log);
+    const QString& getText() const override;
+    void connectLog(LogWidget& log) override;
 
     Scene *getRayMarchScene(const QString& name) const;
     Framework *getFramework(const QString& name) const;
-    inline const QMap<QString,Scene*>& rayMarchScenes() const {return m_rmScenes;}
-    inline const QMap<QString,Framework*>& frameworks() const {return m_frameworks;}
+    inline const QMap<QString,Scene*>& rayMarchScenes() const {return rmScenes;}
+    inline const QMap<QString,Framework*>& getFrameworks() const {return frameworks;}
     static QString nodeTypeToString(QDomNode::NodeType type);
 
 
     static QString getDefaultProjectText();
 
-    virtual bool buildable() const { return true; }
+    bool buildable() const override { return true; }
 
-    inline Music* music() const { return m_music; }
-    inline DemoTimeline* demoTimeline() const { return m_demoTimeline; }
+    inline Music* getMusic() const { return music; }
+    inline DemoTimeline* getDemoTimeline() const { return demoTimeline; }
 
-    inline QDomDocument& document() { return m_document; }
+    inline QDomDocument& getDocument() { return document; }
 
     void exportFrameworkSources(const QDir& dir) const;
     void exportScenesSources(const QDir& dir) const;
@@ -49,7 +49,7 @@ class Project : public TextEditable
 
   public slots:
     void resetProject();
-    virtual bool build(const QString& text);
+    bool build(const QString& text) override;
     void notifyDocumentChanged();
     void destroyNode(QDomNode& node);
 
@@ -68,16 +68,16 @@ class Project : public TextEditable
     bool parseTagMusic(QDomNode node);
     bool parseTagTimeline(QDomNode node);
 
-    QMap<QString,Scene*> m_rmScenes;
-    QMap<QString,Framework*> m_frameworks;
+    QMap<QString,Scene*> rmScenes;
+    QMap<QString,Framework*> frameworks;
 
-    Music* m_music;
-    DemoTimeline* m_demoTimeline;
-    QString m_text;
-    QDir m_dir;
-    LogWidget* m_log;
-    QDomDocument m_document;
-    QTimer* m_textUpdateTimer;
+    Music* music;
+    DemoTimeline* demoTimeline;
+    QString text;
+    QDir dir;
+    LogWidget* log;
+    QDomDocument document;
+    QTimer* textUpdateTimer;
 };
 
-#endif
+#endif // !PROJECT_HPP

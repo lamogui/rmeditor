@@ -33,14 +33,14 @@ bool _4KlangMusic::createRtAudioStream()
   try
   {
     RtAudio::StreamParameters parameters;
-    parameters.deviceId = m_audio.getDefaultOutputDevice();
+    parameters.deviceId = audio.getDefaultOutputDevice();
     parameters.nChannels = 2;
     parameters.firstChannel = 0;
     unsigned int sampleRate = 44100;
     unsigned int bufferFrames = 512;
-    m_bytesPerFrame = sizeof(float) * parameters.nChannels;
-    m_audio.openStream(&parameters,NULL,RTAUDIO_FLOAT32,sampleRate,&bufferFrames, rtAudioCallback, (void*) this, 0, Music::rtAudioError);
-    m_audio.startStream();
+    bytesPerFrame = sizeof(float) * parameters.nChannels;
+    audio.openStream(&parameters,NULL,RTAUDIO_FLOAT32,sampleRate,&bufferFrames, rtAudioCallback, (void*) this, 0, Music::rtAudioError);
+    audio.startStream();
   }
   catch (RtAudioError &err)
   {
@@ -82,21 +82,21 @@ void _4KlangMusic::updateTextures()
 {
      // TODO
 /*
-  memset((void*)m_noteVelocityBuffer.data(),0,m_noteVelocityBuffer.size()*sizeof(float));
+  memset((void*)noteVelocityBuffer.data(),0,noteVelocityBuffer.size()*sizeof(float));
   for (size_t i =0 ; i < instrumentCount(); i++)
   {
     for (size_t k = 0; k < TF_MAXVOICES; k++)
     {
-      if (m_player.synth.instr[i]->voice[k].noteIsOn)
+      if (player.synth.instr[i]->voice[k].noteIsOn)
       {
-        eU32 note = m_player.synth.instr[i]->voice[k].currentNote%TF_NUMFREQS;
-        eF32 velocity = m_player.synth.instr[i]->voice[k].currentVelocity/128.0f;
-        m_noteVelocityBuffer[note + TF_NUMFREQS * i] = std::max(velocity,m_noteVelocityBuffer[note + TF_NUMFREQS * i]);
+        eU32 note = player.synth.instr[i]->voice[k].currentNote%TF_NUMFREQS;
+        eF32 velocity = player.synth.instr[i]->voice[k].currentVelocity/128.0f;
+        noteVelocityBuffer[note + TF_NUMFREQS * i] = std::max(velocity,noteVelocityBuffer[note + TF_NUMFREQS * i]);
       }
     }
   }
 
-  m_noteVelocityTex.update((GLvoid*) m_noteVelocityBuffer.data());*/
+  noteVelocityTex.update((GLvoid*) noteVelocityBuffer.data());*/
 }
 
 

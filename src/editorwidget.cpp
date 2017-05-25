@@ -13,7 +13,7 @@
 
 EditorWidget::EditorWidget(LogWidget &log, QWidget *parent) :
     QDockWidget(parent),
-    m_log(&log),
+    log(&log),
     ui(new Ui::EditorWidget)
 {
     ui->setupUi(this);
@@ -32,7 +32,7 @@ void EditorWidget::loadProject(Project &project)
     TextEditable* te = project.getRayMarchScene(key);
     appendTextEditable(te);
   }
-  foreach (QString key, project.frameworks().keys())
+  foreach (QString key, project.getFrameworks().keys())
   {
     TextEditable* te = project.getFramework(key);
     appendTextEditable(te);
@@ -46,11 +46,11 @@ void EditorWidget::on_saveButton_clicked(bool)
   {
     if (te->save())
     {
-      m_log->writeInfo(tr("saved ") + te->textObject()->fileName());
+      log->writeInfo(tr("saved ") + te->textObject()->fileName());
     }
     else
     {
-     m_log->writeError(tr("unable to save the file ") + te->textObject()->fileName());
+     log->writeError(tr("unable to save the file ") + te->textObject()->fileName());
     }
   }
 }
@@ -62,11 +62,11 @@ void EditorWidget::on_buildButton_clicked(bool)
   {
     if (te->build())
     {
-      m_log->writeInfo(QString("[") + te->textObject()->fileName() + tr("] build success !"));
+      log->writeInfo(QString("[") + te->textObject()->fileName() + tr("] build success !"));
     }
     else
     {
-      m_log->writeError(QString("[") + te->textObject()->fileName() + tr("] build failure !"));
+      log->writeError(QString("[") + te->textObject()->fileName() + tr("] build failure !"));
     }
   }
 }

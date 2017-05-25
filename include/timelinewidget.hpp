@@ -15,13 +15,13 @@ public:
   TimelineWidget(QWidget* parent, qreal borderheight = 25.0);
 
   void setTimeline(Timeline* timeline);
-  inline Timeline* timeline() { return m_timeline; }
+  inline Timeline* getTimeline() { return timeline; }
 
-  inline double borderHeight() const { return m_borderHeight; }
-  inline double sceneBorderHeight() const { return borderHeight()/m_scale.y(); }
+  inline double getBorderHeight() const { return borderHeight; }
+  inline double sceneBorderHeight() const { return getBorderHeight()/scale.y(); }
 
   void setScale(const QPointF &scale);
-  inline const QPointF& scale() const { return m_scale; }
+  inline const QPointF& getScale() const { return scale; }
 
   void startUpdateLoop();
   void stopUpdateLoop();
@@ -49,14 +49,14 @@ private slots:
 private:
   void mouseTimePositionChanged(const QPointF &scenePos);
 
- double m_lastTimeForegroundDraw; //This should be useless as a member now
- double m_lastTimeDraw;
- qreal m_borderHeight;
- QRectF m_lastBorderRect;
- Timeline* m_timeline;
- QTimer* m_updateTimer;
- bool m_grabTime;
- QPointF m_scale;
+ double lastTimeForegroundDraw; //This should be useless as a member now
+ double lastTimeDraw;
+ qreal borderHeight;
+ QRectF lastBorderRect;
+ Timeline* timeline;
+ QTimer* updateTimer;
+ bool grabTime;
+ QPointF scale;
 
 };
 

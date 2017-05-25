@@ -17,28 +17,28 @@
 
 TimelineWidget::TimelineWidget(QWidget *parent, qreal borderheight):
   QGraphicsView(parent),
-  m_borderHeight(borderheight),
-  m_timeline(NULL),
-  m_updateTimer(new QTimer(this)),
-  m_grabTime(false),
-  m_scale(1,1)
+  borderHeight(borderheight),
+  timeline(NULL),
+  updateTimer(new QTimer(this)),
+  grabTime(false),
+  scale(1,1)
 {
-  m_updateTimer->setSingleShot(false);
+  updateTimer->setSingleShot(false);
 }
 
 void TimelineWidget::setTimeline(Timeline *timeline)
 {
   stopUpdateLoop();
-  m_timeline = timeline;
+  timeline = timeline;
   startUpdateLoop();
 
-  setScene(m_timeline);
-  if(m_timeline)
+  setScene(timeline);
+  if(timeline)
   {
-    setScale(QPointF((qreal)this->rect().width()/m_timeline->sceneRect().width(),1.0));
-    QRectF scene_rect = m_timeline->sceneRect();
-    scene_rect.setTop(-m_borderHeight - 2.0);
-    m_timeline->setSceneRect(scene_rect);
+    setScale(QPointF((qreal)this->rect().width()/timeline->sceneRect().width(),1.0));
+    QRectF scene_rect = timeline->sceneRect();
+    scene_rect.setTop(-borderHeight - 2.0);
+    timeline->setSceneRect(scene_rect);
   }
   else
   {
@@ -49,19 +49,19 @@ void TimelineWidget::setTimeline(Timeline *timeline)
 
 void TimelineWidget::updateWithTime()
 {
-  double t = m_timeline->music()->getTime();
-  if (t != m_lastTimeDraw)
+  double t = timeline->getMusic()->getTime();
+  if (t != lastTimeDraw)
   {
-    m_timeline->updateTime();
+    timeline->updateTime();
 
-    if (t > m_timeline->music()->length())
+    if (t > timeline->getMusic()->getLength())
     {
       emit timePositionChanged(0);
     }
 
     QScrollBar* horizontal = this->horizontalScrollBar();
     qreal scroll_length = horizontal->maximum() - horizontal->minimum() + horizontal->pageStep();
-    qreal scroll_pos = t*scroll_length/m_timeline->music()->length();
+    qreal scroll_pos = t*scroll_length/timeline->getMusic()->getLength();
 
     if (scroll_pos > horizontal->value() + horizontal->pageStep())
     {
@@ -75,18 +75,18 @@ void TimelineWidget::updateWithTime()
     invalidateScene(sceneRect(),QGraphicsScene::ForegroundLayer);
     update();
 
-    m_lastTimeDraw = t;
+    lastTimeDraw = t;
   }
 }
 
 void TimelineWidget::onTimelineDestroy()
 {
 
-  disconnect(m_updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
+  disconnect(updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
   disconnect(this,SIGNAL(timePositionChanged(double)),0,0);
-  m_updateTimer->stop();
-  m_timeline=NULL;
-  setScene(m_timeline);
+  updateTimer->stop();
+  timeline=NULL;
+  setScene(timeline);
 }
 
 
@@ -99,7 +99,7 @@ void TimelineWidget::drawForeground(QPainter* painter, const QRectF& rect)
   qreal y = sceneRect().height() * (vertical->value() - vertical->minimum())/
             (qreal)(vertical->maximum() - vertical->minimum() + vertical->pageStep());
 
-  QPointF delta(x,y-borderHeight()-2.0);
+  QPointF delta(x,y-getBorderHeight()-2.0);
   qreal visibleWidth = sceneRect().width()  * (qreal)horizontal->pageStep()/(qreal)(horizontal->maximum() - horizontal->minimum() + horizontal->pageStep());
 
 
@@ -119,10 +119,10 @@ void TimelineWidget::drawForeground(QPainter* painter, const QRectF& rect)
     painter->setPen(linePen);
 
     double framerate = 60.0;
-    if (m_timeline)
+    if (timeline)
     {
-      framerate = m_timeline->framerate();
-      m_lastTimeForegroundDraw = m_timeline->music()->getTime();
+      framerate = timeline->getFramerate();
+      lastTimeForegroundDraw = timeline->getMusic()->getTime();
     }
 
     //TODO condition for framerate
@@ -134,7 +134,7 @@ void TimelineWidget::drawForeground(QPainter* painter, const QRectF& rect)
       }
       QFont textFont;
       textFont.setPointSizeF(sceneBorderHeight()*0.5);
-      textFont.setStretch((int)(100 * 1.0 / m_scale.x()));
+      textFont.setStretch((int)(100 * 1.0 / scale.x()));
       painter->setFont(textFont);
 
 
@@ -160,17 +160,17 @@ void TimelineWidget::drawForeground(QPainter* painter, const QRectF& rect)
       }
     }
 
-    qreal lineWidth = 2.0 / m_scale.x();
+    qreal lineWidth = 2.0 / scale.x();
     linePen.setWidthF(lineWidth);
     painter->setPen(linePen);
-    double m_t = m_lastTimeForegroundDraw * framerate;
-    if (m_t >= rect.left() && m_t <= rect.right())
+    double t = lastTimeForegroundDraw * framerate;
+    if (t >= rect.left() && t <= rect.right())
     {
-      QLineF line(QPointF(m_t,rect.top()),QPointF(m_t,rect.bottom()));
+      QLineF line(QPointF(t,rect.top()),QPointF(t,rect.bottom()));
       painter->drawLine(line);
     }
 
-    m_lastBorderRect = border;
+    lastBorderRect = border;
   }
 
   QGraphicsView::drawForeground(painter,rect);
@@ -178,13 +178,13 @@ void TimelineWidget::drawForeground(QPainter* painter, const QRectF& rect)
 
 void TimelineWidget::mousePressEvent(QMouseEvent* mouseEvent)
 {
-  if (m_timeline)
+  if (timeline)
   {
-    emit rendererChanged(m_timeline->getRenderer());
+    emit rendererChanged(timeline->getRenderer());
   }
 
   QPointF scenePos = mapToScene(mouseEvent->pos());
-  if (m_lastBorderRect.contains(scenePos))
+  if (lastBorderRect.contains(scenePos))
   {
     mouseTimePositionChanged(scenePos);
   }
@@ -198,7 +198,7 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mouseEvent)
  void TimelineWidget::mouseMoveEvent(QMouseEvent* mouseEvent)
  {
    QPointF scenePos = mapToScene(mouseEvent->pos());
-   if (m_grabTime)
+   if (grabTime)
    {
       mouseTimePositionChanged(scenePos);
    }
@@ -211,27 +211,27 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mouseEvent)
  void TimelineWidget::mouseReleaseEvent(QMouseEvent* mouseEvent)
  {
    //QPointF scenePos = mapToScene(mouseEvent->pos());
-   if (m_grabTime)
+   if (grabTime)
    {
-     m_grabTime = false;
+     grabTime = false;
    }
    else
    {
      QGraphicsView::mouseReleaseEvent(mouseEvent);
    }
-   m_grabTime = false;
+   grabTime = false;
  }
 
 
 
  void TimelineWidget::mouseTimePositionChanged(const QPointF& scenePos)
  {
-   if (m_timeline)
+   if (timeline)
    {
-     emit timePositionChanged(scenePos.x()/m_timeline->framerate());
+     emit timePositionChanged(scenePos.x()/timeline->getFramerate());
      invalidateScene(sceneRect(),QGraphicsScene::ForegroundLayer);
      update();
-     m_grabTime = true;
+     grabTime = true;
    }
  }
 
@@ -249,30 +249,30 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mouseEvent)
 
    if (event->modifiers() & Qt::ShiftModifier)
    {
-     //m_scale.setY(m_scale.y()*delta);
+     //scale.setY(scale.y()*delta);
    }
    else
    {
-     m_scale.setX(m_scale.x()*delta);
+     scale.setX(scale.x()*delta);
    }
-   setScale(m_scale);
+   setScale(scale);
  }
 
 
 void TimelineWidget::setScale(const QPointF& scale)
 {
-  m_scale = scale;
-  if (m_scale.x() > 1.0)
+  this->scale = scale;
+  if (scale.x() > 1.0)
   {
-    m_scale.setX(1.0);
+    this->scale.setX(1.0);
   }
-  else if (m_timeline && this->rect().width() >  m_timeline->sceneRect().width() * m_scale.x())
+  else if (timeline && this->rect().width() >  timeline->sceneRect().width() * scale.x())
   {
-    m_scale.setX((qreal)this->rect().width()/m_timeline->sceneRect().width());
+    this->scale.setX((qreal)this->rect().width()/timeline->sceneRect().width());
   }
   QTransform t;
   t.translate(transform().dx(),transform().dy());
-  t.scale(m_scale.x(),m_scale.y());
+  t.scale(scale.x(),scale.y());
   setTransform(t,false);
   invalidateScene(sceneRect(),QGraphicsScene::ForegroundLayer);
   //update();
@@ -280,31 +280,31 @@ void TimelineWidget::setScale(const QPointF& scale)
 
 void TimelineWidget::focusInEvent(QFocusEvent* event)
 {
-  if (m_timeline)
+  if (timeline)
   {
-    emit rendererChanged(m_timeline->getRenderer());
+    emit rendererChanged(timeline->getRenderer());
   }
 }
 
 void TimelineWidget::startUpdateLoop()
 {
-  if (m_timeline)
+  if (timeline)
   {
-    connect(m_timeline,SIGNAL(destroyed()),this,SLOT(onTimelineDestroy()),Qt::DirectConnection);
-    connect(m_updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
-    connect(this,SIGNAL(timePositionChanged(double)),m_timeline->music(),SLOT(setPosition(double)));
-    m_updateTimer->start();
-    m_updateTimer->setInterval(10.0);
+    connect(timeline,SIGNAL(destroyed()),this,SLOT(onTimelineDestroy()),Qt::DirectConnection);
+    connect(updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
+    connect(this,SIGNAL(timePositionChanged(double)),timeline->getMusic(),SLOT(setPosition(double)));
+    updateTimer->start();
+    updateTimer->setInterval(10.0);
   }
 }
 
 void TimelineWidget::stopUpdateLoop()
 {
-  if (m_timeline)
+  if (timeline)
   {
-    disconnect(m_updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
-    disconnect(this,SIGNAL(timePositionChanged(double)),m_timeline->music(),SLOT(setPosition(double)));
-    disconnect(m_timeline,SIGNAL(destroyed()),this,SLOT(onTimelineDestroy()));
-    m_updateTimer->stop();
+    disconnect(updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
+    disconnect(this,SIGNAL(timePositionChanged(double)),timeline->getMusic(),SLOT(setPosition(double)));
+    disconnect(timeline,SIGNAL(destroyed()),this,SLOT(onTimelineDestroy()));
+    updateTimer->stop();
   }
 }

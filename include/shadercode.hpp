@@ -17,26 +17,24 @@ class FragmentShaderCode : public TextEditable
 public:
   FragmentShaderCode(const QString& filename, QDomNode node,LogWidget& log,QObject* parent=NULL);
 
-  virtual const QString& text() const;
-  inline Shader& getShader() { return m_shader;}
-  virtual void connectLog(LogWidget& log);
+  const QString& getText() const override;
+  inline Shader& getShader() { return shader;}
+  void connectLog(LogWidget& log) override;
 
-  virtual bool buildable() const { return true; }
+  bool buildable() const override { return true; }
 
 
   virtual QString minifiedShaderCode(const ShaderMinifier& minifier) const;
   virtual QString cFormatedShaderCode(const ShaderMinifier& minifier) const;
 
-
-
 public slots:
-  virtual bool build(const QString& text);
+   bool build(const QString& text) override;
 
 
 protected:
-    Shader m_shader;
-    QString m_fragmentcode;
+    Shader shader;
+    QString fragmentcode;
 
 };
 
-#endif // SCENE_H
+#endif // !SHADERCODE_HPP

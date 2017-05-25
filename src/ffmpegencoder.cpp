@@ -93,7 +93,7 @@ void FFmpegEncoder::run()
   connect(_ffmpeg,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(ffmpegFinished(int,QProcess::ExitStatus)));
 
 
-  Music* music = _timeline->music();
+  Music* music = _timeline->getMusic();
   Q_ASSERT(music);
 
   qint64 startFrame = 0;
@@ -105,7 +105,7 @@ void FFmpegEncoder::run()
 
   //Ugly wait the music thread to pause shoud do a better pause func with mutex
   QThread::sleep(1);
-  music->setPosition((double)startFrame/_timeline->framerate());
+  music->setPosition((double)startFrame/_timeline->getFramerate());
 
   size_t audioBufferSize = sizeof(qint16) * 2 * 512;
   size_t videoBufferSize = sizeof(uchar)*_resolution.width()*_resolution.height()*3;
@@ -139,7 +139,7 @@ void FFmpegEncoder::run()
             << "-f" << "rawvideo"
             << "-pixel_format" << "rgb24"
             << "-s" << res_str
-            << "-r" << QString::number(_timeline->framerate())
+            << "-r" << QString::number(_timeline->getFramerate())
             << "-i" << (QString("tcp://127.0.0.1:1911?listen&listen_timeout=3000&recv_buffer_size=") + video_recv_buffer_size);
 
   //audio input arguments
@@ -232,7 +232,7 @@ void FFmpegEncoder::run()
   void* outputBuffer = malloc(audioBufferSize);
   for (size_t i = startFrame + 1; !_cancel && (qint64)i < endFrame; ++i)
   {
-    double track_time = (double)i/_timeline->framerate();
+    double track_time = (double)i/_timeline->getFramerate();
     while (track_time >= music->getTime())
     {
       music->processAudio(outputBuffer,512,track_time,0);

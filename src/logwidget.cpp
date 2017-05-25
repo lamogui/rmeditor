@@ -5,7 +5,7 @@
 
 LogWidget::LogWidget(QWidget *parent):
   QTextEdit(parent),
-  m_printTime(true)
+  printTime(true)
 {
 }
 
@@ -23,7 +23,7 @@ void LogWidget::writeInfo(QString txt)
   cur.movePosition(QTextCursor::End);
   this->setTextCursor(cur);
   this->setTextColor(QColor(0,150,0) );
-  if(m_printTime)
+  if(printTime)
   {
     txt = getDate() + txt;
   }
@@ -35,7 +35,7 @@ void LogWidget::writeWarning(QString txt)
   cur.movePosition(QTextCursor::End);
   this->setTextCursor(cur);
   this->setTextColor( QColor(255,255,100) );
-  if(m_printTime)
+  if(printTime)
   {
     txt = getDate() + txt;
   }
@@ -47,7 +47,7 @@ void LogWidget::writeError(QString txt)
   cur.movePosition(QTextCursor::End);
   this->setTextCursor(cur);
   this->setTextColor( QColor(255,0,0) );
-  if(m_printTime)
+  if(printTime)
   {
     txt = getDate() + txt;
   }

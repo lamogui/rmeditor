@@ -41,7 +41,7 @@ private slots:
 
 
 private:
-    LogWidget* m_log;
+    LogWidget* log;
     Ui::EditorWidget *ui;
 };
 

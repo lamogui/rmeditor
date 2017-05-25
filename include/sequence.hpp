@@ -21,7 +21,7 @@ class Sequence : public QGraphicsRectItem
 public:
   Sequence(Project& project, DemoTimeline& timeline, QDomElement& node, qreal height = 60.0);
   Sequence(Project& project, DemoTimeline& timeline, QDomElement node, Scene& scene, int start, int length=600, qreal height = 60.0);
-  virtual ~Sequence();
+  ~Sequence() override;
 
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
@@ -34,12 +34,12 @@ public:
   inline qint64 endFrame() const { return pos().x() + length(); }
   inline qint64 length() const { return rect().width(); }
 
-  inline QMap<qint64, CameraKeyframe*> cameraKeyframes() const { return m_cameraKeyframes; }
+  inline QMap<qint64, CameraKeyframe*> getCameraKeyframes() const { return cameraKeyframes; }
 
   QBrush selectedBrush() { return QBrush(QColor(200,200,255)); }
   QBrush idleBrush() { return QBrush(QColor(200,200,200)); }
 
-  inline Scene* glScene() { return m_scene; }
+  inline Scene* glScene() { return scene; }
 
   void setCamera(qint64 relative_frame, Camera& cam) const;
   void insertCameraKeyframe(qint64 rel_frame, const QVector3D& pos, const QQuaternion& rot);
@@ -57,9 +57,9 @@ public:
 
   //Do not use this is only used by DemoTimeline (I know it's ugly)
   inline void forceSetStartFrame(qint64 frame) { this->setPos(QPointF((qreal)frame,this->pos().y())); }
-  inline qint64 orginalLength() const { return m_orginalLength; }
+  inline qint64 getOrginalLength() const { return orginalLength; }
   void deleteCameraKeyframe(CameraKeyframe* key); // key must be correctly in sequence
-  inline QDomElement& node() { return m_node; }
+  inline QDomElement& getNode() { return node; }
 
   //Used by keyframes
   qint64 nearestFrameAvailableForKeyframe(qint64 rel_frame) const;
@@ -84,17 +84,17 @@ protected:
 
 
 protected:
-  QDomElement m_node;
-  QDomElement m_cameraNode;
-  Project* m_project;
-  DemoTimeline* m_timeline;
-  Scene* m_scene;
-  QImage m_preview;
-  QPointF m_mousePressPos;
-  qint64 m_mousePressStartFrame;
-  qint64 m_orginalLength;
-  MouseAction m_currentAction;
-  QMap<qint64, CameraKeyframe*> m_cameraKeyframes;
+  QDomElement node;
+  QDomElement cameraNode;
+  Project* project;
+  DemoTimeline* timeline;
+  Scene* scene;
+  QImage preview;
+  QPointF mousePressPos;
+  qint64 mousePressStartFrame;
+  qint64 orginalLength;
+  MouseAction currentAction;
+  QMap<qint64, CameraKeyframe*> cameraKeyframes;
 
 };
 

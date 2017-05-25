@@ -25,7 +25,7 @@ public:
 protected:
   void glRender() override;
 
-  DemoTimeline* m_timeline;
+  DemoTimeline* timeline;
 
 
 };
@@ -40,7 +40,7 @@ public:
   DemoTimeline(QDomElement& node, Project& project, double fps, LogWidget& log);
   virtual ~DemoTimeline();
 
-  inline QDomElement getNode() const { return m_node; }
+  inline QDomElement getNode() const { return node; }
 
   qint64 sequenceStartFrameChanged(qint64 previous_frame,  Sequence* seq); //return the correct start frame of the seq
   qint64 maxSequenceLengthBeforeOverlap(Sequence* seq) const;
@@ -49,15 +49,15 @@ public:
   qint64 addSequence(Sequence* seq); //Return the correct start frame of the seq
   Sequence* isInsideSequence(qint64 frame) const;
 
-  inline Renderer* getRenderer() override { return m_renderer; }
+  inline Renderer* getRenderer() override { return renderer; }
 
   void updateTime() override;
 
 public slots:
   void updateCamera(qint64 frame, Camera& cam);
   inline void updateCamera(Camera& cam) { updateCamera(currentFrame(),cam);}
-  inline void updateCamera(qint64 frame) { updateCamera(frame,m_camera); }
-  inline void updateCamera() { updateCamera(currentFrame(),m_camera); }
+  inline void updateCamera(qint64 frame) { updateCamera(frame,camera); }
+  inline void updateCamera() { updateCamera(currentFrame(),camera); }
 
   void insertCameraKeyframe(qint64 frame, const QVector3D& pos, const QQuaternion& rot);
   void insertCameraKeyframe(const QVector3D& pos, const QQuaternion& rot);
@@ -80,18 +80,18 @@ protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
   void load();
-  bool correctStartFrame(Sequence* seq); //seq must not be in m_sequences !
+  bool correctStartFrame(Sequence* seq); //seq must not be in sequences !
 
 
   bool parseTrackNode(QDomElement& node);
 
-  QDomElement m_node;
-  Camera m_camera;
-  double m_trackHeight;
-  Project* m_project;
-  DemoRenderer* m_renderer;
-  QMap<qint64, Sequence*> m_sequences;
-  QPointF m_mousePressPos;
+  QDomElement node;
+  Camera camera;
+  double trackHeight;
+  Project* project;
+  DemoRenderer* renderer;
+  QMap<qint64, Sequence*> sequences;
+  QPointF mousePressPos;
 
 };
 

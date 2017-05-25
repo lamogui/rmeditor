@@ -23,16 +23,16 @@ public:
   virtual void resize(size_t width, size_t height);
   void glRender(size_t width, size_t height);
 
-  inline GLuint getColorTexture() const { return m_fbo.getColor(); }
-  inline void setCamera(Camera* c) { m_camera = c; }
-  inline Camera* camera() const  { return m_camera; }
+  inline GLuint getColorTexture() const { return fbo.getColor(); }
+  inline void setCamera(Camera* c) { camera = c; }
+  inline Camera* getCamera() const  { return camera; }
 
   //Called by RenderWidget, widget is NULL when detached
   virtual void attachedWidget(RenderWidget* widget) { (void) widget; }
 
 
-  inline size_t width() const { return m_fbo.width(); }
-  inline size_t height() const { return m_fbo.height(); }
+  inline size_t width() const { return fbo.getWidth(); }
+  inline size_t height() const { return fbo.getHeight(); }
 
 
   QImage getImage();
@@ -42,8 +42,8 @@ protected:
   virtual void glRender() = 0;
 
 
-  FBO m_fbo;
-  Camera* m_camera;
+  FBO fbo;
+  Camera* camera;
 };
 
 class Scene;
@@ -52,13 +52,16 @@ class SceneRenderer : public Renderer
 {
 public:
   SceneRenderer(Scene& scene, size_t w, size_t h, QObject *parent=NULL);
-  virtual void attachedWidget(RenderWidget* widget);
+  
+  // Renderer 
+  void attachedWidget(RenderWidget* widget) override;
 
 protected:
-  virtual void glRender();
+  // Renderer
+  void glRender() override;
 
-  Scene* m_scene;
-  QTime m_sequenceTime;
+  Scene* scene;
+  QTime sequenceTime;
 };
 
-#endif
+#endif // !RENDERER_HPP

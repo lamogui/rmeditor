@@ -18,12 +18,12 @@ public slots:
   void writeWarning(QString txt);
   void writeError(QString txt);
 
-  inline void setPrintTime(bool e) { m_printTime = e; }
+  inline void setPrintTime(bool e) { printTime = e; }
 
 signals:
 
 private:
-  bool m_printTime;
+  bool printTime;
 
 };
 

@@ -5,7 +5,7 @@
 
 NodeFile::NodeFile(const QString &filename, QDomNode node, LogWidget &log, QObject *parent):
   QFile(filename,parent),
-  m_node(node)
+  node(node)
 {
   connectLog(log);
 }

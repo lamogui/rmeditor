@@ -12,15 +12,15 @@
 
 Music::Music(const QString &filename, double length, QDomNode node, LogWidget &log, QObject *parent):
   NodeFile(filename,node,log,parent),
-  m_audio(),
-  m_length(length),
-  m_playing(false)
+  audio(),
+  length(length),
+  playing(false)
 {
-  if (m_length <= 0)
+  if (length <= 0)
   {
     emit error("[" + filename + "] error: invalid length");
   }
-  if (m_audio.getDeviceCount() < 1)
+  if (audio.getDeviceCount() < 1)
   {
     emit error("[" + filename + "] error: no audio device found");
   }
@@ -37,13 +37,13 @@ int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int n
 
   Q_ASSERT(userData && outputBuffer);
   Music* music = (Music*) userData;
-  if (music->m_playing)
+  if (music->playing)
   {
     music->processAudio(outputBuffer,nBufferFrames,streamTime,status);
   }
   else
   {
-    memset(outputBuffer,0,nBufferFrames*music->m_bytesPerFrame);
+    memset(outputBuffer,0,nBufferFrames*music->bytesPerFrame);
   }
   return 0;
 }

@@ -25,7 +25,7 @@ Shader::~Shader()
 //-----------------------------------------------------------------------------
 void Shader::enable()
 {
-  this->glUseProgram(m_program);
+  this->glUseProgram(program);
 }
 void Shader::disable()
 {
@@ -38,23 +38,23 @@ void Shader::disable()
 //-----------------------------------------------------------------------------
 void Shader::sendi(const char *name, int x)
 {
-	glUniform1i(glGetUniformLocation(m_program,name), x);
+	glUniform1i(glGetUniformLocation(program,name), x);
 }
 void Shader::sendf(const char *name, float x)
 {
-	glUniform1f(glGetUniformLocation(m_program,name), x);
+	glUniform1f(glGetUniformLocation(program,name), x);
 }
 void Shader::sendf(const char *name, float x, float y)
 {
-    glUniform2f(glGetUniformLocation(m_program,name), x,y);
+    glUniform2f(glGetUniformLocation(program,name), x,y);
 }
 void Shader::sendf(const char *name, float x, float y, float z)
 {
-    glUniform3f(glGetUniformLocation(m_program,name), x,y,z);
+    glUniform3f(glGetUniformLocation(program,name), x,y,z);
 }
 void Shader::sendf(const char *name, float x, float y, float z, float w)
 {
-	glUniform4f(glGetUniformLocation(m_program,name), x,y,z,w);
+	glUniform4f(glGetUniformLocation(program,name), x,y,z,w);
 }
 
 
@@ -63,7 +63,7 @@ void Shader::sendf(const char *name, float x, float y, float z, float w)
 //-----------------------------------------------------------------------------
 int Shader::compil( const char *vertex, const char *fragment )
 {
-  m_program = this->glCreateProgram();
+  program = this->glCreateProgram();
 	if( !makeShader(vertex, GL_VERTEX_SHADER_ARB) )
     {
         //QMessageBox::critical(NULL, "Error", "Can't compil the vertex shader !");
@@ -75,7 +75,7 @@ int Shader::compil( const char *vertex, const char *fragment )
         return SHADER_FRAGMENT_ERROR;
     }
 
-    glLinkProgram(m_program);
+    glLinkProgram(program);
 
 	return SHADER_SUCCESS;
 }
@@ -89,7 +89,7 @@ bool Shader::makeShader(const char *txt, GLuint type)
 	
     if( checkShader(object) )
     {
-      this->glAttachShader(m_program, object);
+      this->glAttachShader(program, object);
       this->glDeleteShader(object);
     }
     else
