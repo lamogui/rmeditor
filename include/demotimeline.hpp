@@ -48,7 +48,7 @@ public:
   qint64 addSequence(Sequence* seq); //Return the correct start frame of the seq
   Sequence* isInsideSequence(qint64 frame) const;
 
-  inline Render* getRender() override { return renderer; }
+  inline Render* getRender() override { return render; }
 
   void updateTime() override;
 

@@ -16,8 +16,6 @@ class Scene;
 
 class Sequence : public QGraphicsRectItem
 {
-
-
 public:
   Sequence(Project& project, DemoTimeline& timeline, QDomElement& node, qreal height = 60.0);
   Sequence(Project& project, DemoTimeline& timeline, QDomElement node, Scene& scene, int start, int length=600, qreal height = 60.0);
@@ -50,7 +48,6 @@ public:
     LeftExtend,
     RightExtend
   } MouseAction;
-
 
   void setStartFrame(qint64 frame, bool notify=true); //don't change the length
   void setLength(qint64 length, bool notify=true);

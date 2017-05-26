@@ -56,7 +56,7 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/music.hpp
   ${RMEDITOR_INCLUDE_DIR}/nodefile.hpp
   ${RMEDITOR_INCLUDE_DIR}/project.hpp
-  ${RMEDITOR_INCLUDE_DIR}/renderer.hpp
+  ${RMEDITOR_INCLUDE_DIR}/render.hpp
   ${RMEDITOR_INCLUDE_DIR}/renderwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/scene.hpp
   ${RMEDITOR_INCLUDE_DIR}/sequence.hpp
@@ -89,7 +89,7 @@ set(RMEDITOR_SRC
   ${RMEDITOR_SRC_DIR}/music.cpp
   ${RMEDITOR_SRC_DIR}/nodefile.cpp
   ${RMEDITOR_SRC_DIR}/project.cpp
-  ${RMEDITOR_SRC_DIR}/renderer.cpp
+  ${RMEDITOR_SRC_DIR}/render.cpp
   ${RMEDITOR_SRC_DIR}/renderwidget.cpp
   ${RMEDITOR_SRC_DIR}/scene.cpp
   ${RMEDITOR_SRC_DIR}/sequence.cpp
