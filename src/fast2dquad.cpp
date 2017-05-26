@@ -30,10 +30,10 @@ Fast2DQuad::Fast2DQuad() :
       vbo.write(0, point, 4 * 2 * sizeof(float)); // write positions
       vbo.write(4 * 2 * sizeof(float), uv, 4 * 2 * sizeof(float)); // write uv
     
-      this->glVertexAttribPointer(VERTEX_ATTRIBUTES_POSITION_INDEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-      this->glEnableVertexAttribArray(VERTEX_ATTRIBUTES_POSITION_INDEX);
-      this->glVertexAttribPointer(VERTEX_ATTRIBUTES_TEXCOORD_INDEX, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(4 * 2 * sizeof(float)));
-      this->glEnableVertexAttribArray(VERTEX_ATTRIBUTES_TEXCOORD_INDEX);
+      this->glVertexAttribPointer((GLuint)VertexAttributesIndex::position, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+      this->glEnableVertexAttribArray((GLuint)VertexAttributesIndex::position);
+      this->glVertexAttribPointer((GLuint)VertexAttributesIndex::texCoord, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(4 * 2 * sizeof(float)));
+      this->glEnableVertexAttribArray((GLuint)VertexAttributesIndex::texCoord);
     vao.release();
   vbo.release(); 
 }

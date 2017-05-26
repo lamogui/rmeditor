@@ -1,5 +1,5 @@
-﻿#ifndef RENDERER_HPP
-#define RENDERER_HPP
+﻿#ifndef RMEDITOR_RENDER_HPP
+#define RMEDITOR_RENDER_HPP
 
 #include <QObject>
 #include <QTime>
@@ -8,7 +8,6 @@
 
 class RenderWidget;
 class Camera;
-
 class Render : public QObject, public QOpenGLFunctions_4_5_Core // FIXME : do no inherit from this 
 {
   Q_OBJECT
@@ -62,4 +61,4 @@ protected:
   Fast2DQuad quad;
 };
 
-#endif // !RENDERER_HPP
+#endif // !RMEDITOR_RENDER_HPP

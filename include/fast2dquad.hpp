@@ -1,16 +1,11 @@
-#ifndef DEF_FAST2DQUAD
-#define DEF_FAST2DQUAD
+#ifndef RMEDITOR_FAST2DQUAD_HPP
+#define RMEDITOR_FAST2DQUAD_HPP
 
-#include <QOpenGLFunctions_4_5_Core>
+#include "renderfunctionscache.hpp"
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 
-#define VERTEX_ATTRIBUTES_POSITION_INDEX 1
-#define VERTEX_ATTRIBUTES_NORMAL_INDEX   2
-#define VERTEX_ATTRIBUTES_TEXCOORD_INDEX 3
-
-
-class Fast2DQuad : public QOpenGLFunctions_4_5_Core
+class Fast2DQuad : public RenderFunctionsCache // FIXME : do not inherit from this !!! 
 {
 public:
   Fast2DQuad();
@@ -23,4 +18,4 @@ private:
   QOpenGLVertexArrayObject vao;
 };
 
-#endif // !DEF_FAST2DQUAD
+#endif // !RMEDITOR_FAST2DQUAD_HPP

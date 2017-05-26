@@ -57,6 +57,8 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/nodefile.hpp
   ${RMEDITOR_INCLUDE_DIR}/project.hpp
   ${RMEDITOR_INCLUDE_DIR}/render.hpp
+  ${RMEDITOR_INCLUDE_DIR}/renderer.hpp
+  ${RMEDITOR_INCLUDE_DIR}/renderfunctionscache.hpp
   ${RMEDITOR_INCLUDE_DIR}/renderwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/scene.hpp
   ${RMEDITOR_INCLUDE_DIR}/sequence.hpp
