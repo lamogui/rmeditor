@@ -11,7 +11,7 @@ class Renderer
     Renderer() {}
     virtual ~Renderer() {}
 
-    virtual void glRender(RenderFunctionsCache& gl, Render& target) = 0;
+    virtual void glRender(RenderFunctionsCache& gl) = 0;
 };
 
 #include "fast2dquad.hpp"
@@ -23,18 +23,27 @@ public:
   SimpleQuadWithFragmentShaderRenderer() {}
   ~SimpleQuadWithFragmentShaderRenderer() override {}
 
-  virtual void glRender(RenderFunctionsCache& gl) = 0;
+  void glRender(RenderFunctionsCache& gl) override
+  {
+    QSharedPointer<QOpenGLShaderProgram> shader = shaderProgram.lock();
+    Q_ASSERT(shader);
+    shader->bind();
+    configureUniforms(*shader);
+    quad.draw();
+    shader->release();
+  }
 
   const QWeakPointer<QOpenGLShaderProgram>& getShaderProgram() const {}
   inline void setShaderProgram(QSharedPointer<QOpenGLShaderProgram>& shaderProgram)
   {
     this->shaderProgram = shaderProgram;
-    shaderProgramChangedCallback(*shaderProgram);
+    configureConstUniforms(*shaderProgram);
   }
 
   protected:
-    // to override to set const uniforms
-    virtual void shaderProgramChangedCallback(QOpenGLShaderProgram& program) {}
+    // to override to set uniforms
+    virtual void configureConstUniforms(QOpenGLShaderProgram& program) {}
+    virtual void configureUniforms(QOpenGLShaderProgram& program) {}
 
   private:
     QWeakPointer<QOpenGLShaderProgram> shaderProgram; 
