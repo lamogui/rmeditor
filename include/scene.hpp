@@ -28,7 +28,6 @@ public slots:
 
 private:
   Framework* framework;
-  SceneRender* sceneRender;
   QSharedPointer<Camera> camera;
   QSharedPointer<QOpenGLShaderProgram> shaderProgram;
 

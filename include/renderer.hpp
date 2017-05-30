@@ -2,7 +2,32 @@
 #ifndef RMEDITOR_RENDERER_HPP
 #define RMEDITOR_RENDERER_HPP
 
-#include "renderfunctionscache.hpp" 
+#include "renderfunctionscache.hpp" // because it's a typedef
+#include <QHash>
+#include <QSharedPointer>
+
+class Renderer;
+class RendererComponent
+{
+public:
+  enum Type
+  {
+    Camera
+  };
+
+  RendererComponent(Type type, Renderer* owner = nullptr) : owner(owner), type(type) {}
+
+  Type getType() const { return type; }
+  Renderer* getOwner() const { return owner; }
+  void setOwner(Renderer* owner) { this->owner = owner; }
+
+protected:
+  Renderer* owner;
+
+private:
+  Type type;
+  
+};
 
 class Render;
 class Renderer
@@ -11,7 +36,18 @@ class Renderer
     Renderer() {}
     virtual ~Renderer() {}
 
-    virtual void glRender(RenderFunctionsCache& gl) = 0;
+    virtual void renderChildrens(RenderFunctionsCache& gl) {}            // Pre-render all the internals FBOs/GeometryShaders before "real" render
+    virtual void glRender(RenderFunctionsCache& gl, Render& render) = 0; // You must not bind any FBO in this function 
+
+  protected:
+    bool addComponent(RendererComponent* newComponent);      // Return false if a component of the same type already exists
+    bool removeComponent(RendererComponent::Type toRemove);  // Warning this is not deleting the component, return false if the component type wasn't in the table
+    bool deleteComponent(RendererComponent::Type toDelete);  // return false if the component type wasn't in the table
+    void deleteAllComponents(); 
+
+  private:
+    QHash<RendererComponent::Type, RendererComponent*> components;
+
 };
 
 #include "fast2dquad.hpp"
@@ -23,7 +59,7 @@ public:
   SimpleQuadWithFragmentShaderRenderer() {}
   ~SimpleQuadWithFragmentShaderRenderer() override {}
 
-  void glRender(RenderFunctionsCache& gl) override
+  void glRender(RenderFunctionsCache& gl, Render& render) override
   {
     QSharedPointer<QOpenGLShaderProgram> shader = shaderProgram.lock();
     Q_ASSERT(shader);

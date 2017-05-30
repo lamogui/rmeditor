@@ -74,8 +74,8 @@ bool Scene::build(const QString &text)
 
 
   // link
-  shaderProgram->bindAttributeLocation("position", VERTEX_ATTRIBUTES_POSITION_INDEX);
-  shaderProgram->bindAttributeLocation("texCoords", VERTEX_ATTRIBUTES_TEXCOORD_INDEX);
+  shaderProgram->bindAttributeLocation("position", VertexAttributesIndex::position);
+  shaderProgram->bindAttributeLocation("texCoords", VertexAttributesIndex::texCoord);
 
   if (!shaderProgram->link())
   {

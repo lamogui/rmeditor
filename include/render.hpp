@@ -1,64 +1,53 @@
 ﻿#ifndef RMEDITOR_RENDER_HPP
 #define RMEDITOR_RENDER_HPP
 
-#include <QObject>
-#include <QTime>
 #include <QOpenGLFunctions_4_5_Core>
 #include <QOpenGLFramebufferObject>
 
-class RenderWidget;
-class Camera;
-class Render : public QObject, public QOpenGLFunctions_4_5_Core // FIXME : do no inherit from this 
+class Renderer;
+class Render : public QOpenGLFunctions_4_5_Core // FIXME : do not inherit from this 
 {
-  Q_OBJECT
-
 public:
-  Render(const QSize& initialSize, QObject* parent = nullptr);
-  ~Render() override;
 
-  // The function ! 
-  void render();
+  enum Type
+  {
+    Texture2D,
+    Cubemap // One day 
+  };
+
+  Render(const QSize& initialSize, Type type);
+  virtual ~Render();
 
   // Accessors
   const QOpenGLFramebufferObject& getFBO() const { return *fbo; }
-  QWeakPointer<Camera>& getCamera() { return camera; }
-  const QWeakPointer<Camera>& getCamera() const { return camera; }
+  Type getType() const { return type; }
+  void resize(const QSize& newSize);
 
-  // To override
-  virtual void resize(const QSize& newSize);
-  virtual void attachedWidget(RenderWidget* widget) { (void)widget; } //Called by RenderWidget, widget is nullptr when detached
+  // The function ! 
+  void render(Renderer& renderer);
 
 protected:
-  // To override
-  virtual void glRender() = 0;
-  virtual void createAttachements(const QSize& fboSize);  // note that the default RGBA color attachement is always created !
-  inline virtual void renderChildrens() {} // call here the render function of your childrens 
-
   // utils
   void resizeFBO(const QSize& newSize);
 
+  // to override
+  virtual void createAttachements(const QSize& fboSize) = 0; // note that the default RGBA color attachement is always created !
+
   QOpenGLFramebufferObject* fbo;
-  QWeakPointer<Camera> camera;
+
+private:
+  Type type;
 };
 
-#include "fast2dquad.hpp"
-
-class Scene;
-class SceneRender : public Render
+class RenderTexture2D : public Render
 {
 public:
-  SceneRender(Scene& scene, const QSize& initialSize, QObject *parent=nullptr);
-  
-  // Render 
-  void attachedWidget(RenderWidget* widget) override;
+  RenderTexture2D(const QSize& initialSize);
 
 protected:
-  // Render
-  void glRender() override;
+  // To override
+  void createAttachements(const QSize& fboSize) final;
 
-  Scene* scene;
-  QTime sequenceTime;
-  Fast2DQuad quad;
 };
 
 #endif // !RMEDITOR_RENDER_HPP

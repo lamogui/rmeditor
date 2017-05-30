@@ -1,13 +1,14 @@
-﻿#include "renderer.hpp"
-#include "fast2dquad.hpp"
-#include "shader.hpp"
-
+﻿
+#include "render.hpp"
+#include "renderer.hpp"
 #include <QDebug>
 
-Render::Render(const QSize& initialSize, QObject *parent):
-  QObject(parent),
+/*
+** Render
+*/
+Render::Render(const QSize& initialSize, Type type):
   fbo(new QOpenGLFramebufferObject(initialSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8)),
-  camera(nullptr)
+  type(type)
 {
   createAttachements(initialSize);
 }
@@ -17,12 +18,12 @@ Render::~Render()
   delete fbo;
 }
 
-void Render::render()
+void Render::render(Renderer& renderer)
 {
-  renderChildrens();
+  renderer.renderChildrens(*this);
   fbo->bind();
   this->glViewport(0, 0, (GLsizei)fbo->width(), (GLsizei)fbo->height());
-  glRender();
+  renderer.glRender(*this, *this);
   fbo->release();
 }
 
@@ -32,13 +33,6 @@ void Render::resize(const QSize& newSize)
     resizeFBO(newSize);
 }
 
-void Render::createAttachements(const QSize& fboSize)
-{
-  // fbo->addColorAttachment(fboSize, GL_RGBA8);          // color (always created by default)
-  fbo->addColorAttachment(fboSize, GL_RGB8);              // normal
-  fbo->addColorAttachment(fboSize, GL_DEPTH_COMPONENT32F); // depth
-}
-
 void Render::resizeFBO(const QSize& newSize)
 {
   delete fbo;
@@ -46,8 +40,24 @@ void Render::resizeFBO(const QSize& newSize)
   createAttachements(newSize);
 }
 
-#include "scene.hpp"
+/*
+** RenderTexture2D
+*/
 
+RenderTexture2D::RenderTexture2D(const QSize& initialSize) :
+  Render(initialSize, Texture2D)
+{
+
+}
+
+void RenderTexture2D::createAttachements(const QSize& fboSize)
+{
+  // fbo->addColorAttachment(fboSize, GL_RGBA8);           // color (always created by default)
+  fbo->addColorAttachment(fboSize, GL_RGB8);               // normal
+  fbo->addColorAttachment(fboSize, GL_DEPTH_COMPONENT32F); // depth
+}
+
+/*
 SceneRender::SceneRender(Scene &scene, const QSize& initialSize, QObject* parent):
   Render(initialSize, parent),
   scene(&scene)
@@ -90,5 +100,4 @@ void SceneRender::attachedWidget(RenderWidget *widget)
 
   }
 }
-
-
+*/
