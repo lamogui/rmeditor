@@ -1,22 +1,21 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
-#include "camera.hpp"
 #include "shadercode.hpp"
 
+class Camera;
 class Framework;
-class SceneRender;
-
-
 class Scene : public FragmentShaderCode
 {
 public:
   Scene(const QString& filename, QDomNode node, Framework* framework, LogWidget& log,QObject* parent);
 
-  Render* getRender() const override;
+  Renderer* getRenderer() const override;
   
   QSharedPointer<QOpenGLShaderProgram>& getShaderProgram() {return shaderProgram;}
   const QSharedPointer<QOpenGLShaderProgram>& getShaderProgram() const {return shaderProgram; }
+
+  bool buildable() const override { return true; }
 
   inline Framework* getFramework() const { return framework; }
 
@@ -29,7 +28,7 @@ public slots:
 private:
   Framework* framework;
   QSharedPointer<Camera> camera;
-  QSharedPointer<QOpenGLShaderProgram> shaderProgram;
+  QSharedPointer<ShaderProgram> shaderProgram;
 
 private:
   typedef FragmentShaderCode BaseClass;

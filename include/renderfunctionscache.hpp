@@ -2,8 +2,10 @@
 #define RMEDITOR_RENDERFUNCTIONSCACHE_HPP
 
 #include <QOpenGLFunctions_4_5_Core>
+#include <QOpenGLShaderProgram>
 
 typedef QOpenGLFunctions_4_5_Core RenderFunctionsCache;
+typedef QOpenGLShaderProgram ShaderProgram;
 
 namespace VertexAttributesIndex
 {

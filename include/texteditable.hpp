@@ -6,8 +6,7 @@
 #include "nodefile.hpp"
 
 class LogWidget;
-class Render;
-
+class Renderer;
 class TextEditable : public NodeFile
 {
 
@@ -19,16 +18,15 @@ public:
   //The text to print in the editor and that will be saved in the file
   virtual const QString& getText() const = 0;
 
-
   //Is the object buildable
   virtual bool buildable() const {return false;}
-  inline virtual Render* getRender() const {return nullptr;}
+  inline virtual Renderer* getRenderer() const {return nullptr;}
 
 public slots:
   //Return true is the file is loaded or created (not if it build correctly)
   bool load();
   virtual bool save();
-  virtual bool build(const QString& text) = 0;
+  virtual bool build(const QString& text) {};
 
 
 signals:

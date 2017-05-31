@@ -3,8 +3,8 @@
 
 
 #include <QString>
-#include <QOpenGLShader>
 
+#include "renderfunctionscache.hpp"
 #include "texteditable.hpp"
 
 class ShaderMinifier;
@@ -16,21 +16,15 @@ public:
   FragmentShaderCode(const QString& filename, QDomNode node,LogWidget& log,QObject* parent=nullptr);
 
   const QString& getText() const override;
-  inline QOpenGLShader& getShader() { return shader;}
-
-  bool buildable() const override { return true; }
 
   virtual QString minifiedShaderCode(const ShaderMinifier& minifier) const;
   virtual QString cFormatedShaderCode(const ShaderMinifier& minifier) const;
 
-public slots:
-   bool build(const QString& text) override;
-
 protected:
   // Utils
-  bool handleShaderCompileResult(const QString& shaderCode, QOpenGLShader::ShaderType type);
+  bool handleShaderCompileResult(const QString& shaderCode, ShaderProgram& program, QOpenGLShader::ShaderType type);
+  bool handleShaderLinkResult(ShaderProgram& program);
 
-  QOpenGLShader shader;
   QString fragmentcode;
 
 };

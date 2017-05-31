@@ -5,8 +5,7 @@
 #include "shaderminifier.hpp"
 
 FragmentShaderCode::FragmentShaderCode(const QString &filename,QDomNode node,LogWidget& log, QObject *parent):
-  TextEditable(filename,node,log,parent),
-  shader(QOpenGLShader::Fragment)
+  TextEditable(filename,node,log,parent)
 {
   connectLog(log);
 }
@@ -14,24 +13,6 @@ FragmentShaderCode::FragmentShaderCode(const QString &filename,QDomNode node,Log
 const QString &FragmentShaderCode::getText() const
 {
   return fragmentcode;
-}
-
-bool FragmentShaderCode::build(const QString &text)
-{
-  fragmentcode = text;
-  return handleShaderCompileResult(fragmentcode, QOpenGLShader::Fragment);
-}
-
-bool FragmentShaderCode::handleShaderCompileResult(const QString& shaderCode, QOpenGLShader::ShaderType type)
-{
-  if (shader.compileSourceCode(fragmentcode))
-  {
-    if (!shader.log().isEmpty())
-      log.writeWarning(fileName() + ": " + shader.log());
-    return true;
-  }
-  log.writeError(fileName() + ": " + shader.log());
-  return false;
 }
 
 QString FragmentShaderCode::minifiedShaderCode(const ShaderMinifier& minifier) const
@@ -45,3 +26,26 @@ QString FragmentShaderCode::cFormatedShaderCode(const ShaderMinifier& minifier) 
   return minifier.cFormatedShaderCode(this->fileName(),variable_name,minifiedShaderCode(minifier));
 }
 
+bool FragmentShaderCode::handleShaderCompileResult(const QString& shaderCode, ShaderProgram& program, QOpenGLShader::ShaderType type)
+{
+  if (!program.addShaderFromSourceCode(type, shaderCode))
+  {
+    log.writeError(fileName() + " (at compile): " + program.log());
+    return false;
+  }
+  else if (!program.log().isEmpty())
+    log.writeWarning(fileName() + " (at compile): " + program.log());
+  return true;
+}
+
+bool FragmentShaderCode::handleShaderLinkResult(ShaderProgram& program)
+{
+  if (!program.link())
+  {
+    log.writeError(fileName() + " (at link): " + program.log());
+    return false;
+  }
+  else if (!program.log().isEmpty())
+    log.writeWarning(fileName() + " (at link): " + program.log());
+  return false;
+}

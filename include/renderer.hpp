@@ -6,28 +6,6 @@
 #include <QHash>
 #include <QSharedPointer>
 
-class Renderer;
-class RendererComponent
-{
-public:
-  enum Type
-  {
-    Camera
-  };
-
-  RendererComponent(Type type, Renderer* owner = nullptr) : owner(owner), type(type) {}
-
-  Type getType() const { return type; }
-  Renderer* getOwner() const { return owner; }
-  void setOwner(Renderer* owner) { this->owner = owner; }
-
-protected:
-  Renderer* owner;
-
-private:
-  Type type;
-  
-};
 
 class Render;
 class Renderer
@@ -38,30 +16,21 @@ class Renderer
 
     virtual void renderChildrens(RenderFunctionsCache& gl) {}            // Pre-render all the internals FBOs/GeometryShaders before "real" render
     virtual void glRender(RenderFunctionsCache& gl, Render& render) = 0; // You must not bind any FBO in this function 
-
-  protected:
-    bool addComponent(RendererComponent* newComponent);      // Return false if a component of the same type already exists
-    bool removeComponent(RendererComponent::Type toRemove);  // Warning this is not deleting the component, return false if the component type wasn't in the table
-    bool deleteComponent(RendererComponent::Type toDelete);  // return false if the component type wasn't in the table
-    void deleteAllComponents(); 
-
-  private:
-    QHash<RendererComponent::Type, RendererComponent*> components;
+    virtual bool hasDynamicCamera() const { return false; }              // Can we control the camera of the renderer
 
 };
 
 #include "fast2dquad.hpp"
-#include <QOpenGLShaderProgram>
 
-class SimpleQuadWithFragmentShaderRenderer : public Renderer
+class ReferencedQuadFragmentShaderRenderer : public Renderer
 {
 public:
-  SimpleQuadWithFragmentShaderRenderer() {}
-  ~SimpleQuadWithFragmentShaderRenderer() override {}
+  ReferencedQuadFragmentShaderRenderer() {}
+  ~ReferencedQuadFragmentShaderRenderer() override {}
 
   void glRender(RenderFunctionsCache& gl, Render& render) override
   {
-    QSharedPointer<QOpenGLShaderProgram> shader = shaderProgram.lock();
+    QSharedPointer<ShaderProgram> shader = shaderProgram.lock();
     Q_ASSERT(shader);
     shader->bind();
     configureUniforms(*shader);
@@ -69,8 +38,8 @@ public:
     shader->release();
   }
 
-  const QWeakPointer<QOpenGLShaderProgram>& getShaderProgram() const {}
-  inline void setShaderProgram(QSharedPointer<QOpenGLShaderProgram>& shaderProgram)
+  const QWeakPointer<ShaderProgram>& getShaderProgram() const {}
+  inline void setShaderProgram(QSharedPointer<ShaderProgram>& shaderProgram)
   {
     this->shaderProgram = shaderProgram;
     configureConstUniforms(*shaderProgram);
@@ -78,11 +47,11 @@ public:
 
   protected:
     // to override to set uniforms
-    virtual void configureConstUniforms(QOpenGLShaderProgram& program) {}
-    virtual void configureUniforms(QOpenGLShaderProgram& program) {}
+    virtual void configureConstUniforms(ShaderProgram& program) {}
+    virtual void configureUniforms(ShaderProgram& program) {}
 
   private:
-    QWeakPointer<QOpenGLShaderProgram> shaderProgram; 
+    QWeakPointer<ShaderProgram> shaderProgram;
     Fast2DQuad quad;
       
 };
