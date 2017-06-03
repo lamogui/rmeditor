@@ -103,10 +103,12 @@ void MainWindow::newProject()
   */
 }
 
+#include "scene.hpp"
+
 void MainWindow::open()
 {
-  /*
-  QString f = QFileDialog::getOpenFileName(this,tr("Open project file"),QString(),"*.xml");
+  
+  QString f = QFileDialog::getOpenFileName(this, tr("Open project file"), QString(), "*.glsl");// "*.xml");
   if (!f.isEmpty())
   {
     QDir dir = QFileInfo(f).dir();
@@ -116,15 +118,19 @@ void MainWindow::open()
     }
     else
     {
-      if (project)
+      /*if (project)
       {
         delete project;
       }
       project = new Project(dir,QFileInfo(f).fileName(),*(info->getLogWidget()),this);
       connectProject();
+      */
+      RaymarchingScene* shader = new RaymarchingScene();
+      shader->setPath(QFileInfo(f));
+      editor->appendTextEditable(shader);
     }
   }
-  */
+  
 }
 
 void MainWindow::saveAllShaders()
