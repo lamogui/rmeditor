@@ -11,7 +11,8 @@ public:
   LogWidget(QWidget* parent=0);
 
   //Utils
-  static QString getDate();
+  static QString getFormattedDate();
+  void findAndConnectLogSignalsRecursively(const QObject& object);
 
 public slots:
   //Log
@@ -23,11 +24,7 @@ public slots:
 
   void handleOpengGLLoggedMessage(const QOpenGLDebugMessage& debugMessage);
 
-signals:
-
 private:
-  
-
   bool printTime;
 
 };

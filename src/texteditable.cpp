@@ -1,23 +1,30 @@
 #include "texteditable.hpp"
 #include <QTextStream>
 
-
-TextEditable::TextEditable(const QString &filename, QDomNode node, LogWidget &log, QObject *parent):
-  NodeFile(filename,node,log,parent),
-  log(log)
+TextEditable::TextEditable() :
+  MediaFile()
 {
+  connect(this, &TextEditable::pathChanged, this, TextEditable::load);
+}
+
+TextEditable::TextEditable(const TextEditable& other) :
+  MediaFile(other)
+{
+  Q_ASSERT(false); // Humhum should not be called !
+  connect(this, &TextEditable::pathChanged, this, TextEditable::load);
 }
 
 bool TextEditable::load()
 {
   QString text;
+  QFile file(getPath().absoluteFilePath());
   bool readSuccess = false;
-  if (!this->exists())
+  if (!file.exists())
   {
-    emit warning(QString("File ") + fileName() + QString(" doesn't exists create it"));
-    if (!open(QIODevice::WriteOnly))
+    emit warning(QString("File ") + getPath().fileName() + QString(" doesn't exists create it"));
+    if (!file.open(QIODevice::WriteOnly))
     {
-      emit error(QString("Can't create file ") + fileName());
+      emit error(QString("Can't create file ") + getPath().absoluteFilePath());
     }
     else
     {
@@ -26,35 +33,36 @@ bool TextEditable::load()
   }
   else
   {
-    if (!open(QIODevice::ReadOnly))
+    if (!file.open(QIODevice::ReadOnly))
     {
-      emit error(QString("Can't open file ") + fileName());
+      emit error(QString("Can't open file ") + getPath().absoluteFilePath());
     }
     else
     {
-      QTextStream stream(this);
+      QTextStream stream(&file);
       text = stream.readAll();
       readSuccess = (stream.status() == QTextStream::Ok);
     }
   }
-  close();
+  file.close();
   build(text);
   return readSuccess;
 }
 
 bool TextEditable::save(const QString& text)
 {
-  if (!open(QIODevice::WriteOnly))
+  QFile file(getPath().absoluteFilePath());
+  if (!file.open(QIODevice::WriteOnly))
   {
-    emit error(QString("Can't open file ") + fileName() + QString(" for wrinting"));
+    emit error(QString("Can't open file ") + getPath().absoluteFilePath() + QString(" for wrinting"));
     return false;
   }
 
-  QTextStream stream(this);
+  QTextStream stream(&file);
   stream << text;
   stream.flush();
+  file.close();
 
-  close();
   return true;
 }
 

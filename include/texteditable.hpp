@@ -5,38 +5,40 @@
 
 #include "nodefile.hpp"
 
-class LogWidget;
 class Renderer;
-class TextEditable : public NodeFile
+class TextEditable : public MediaFile /* Represent any text compilable text media */
 {
-
   Q_OBJECT
 
 public:
-  TextEditable(const QString& filename, QDomNode node ,LogWidget& log,QObject* parent);
+  TextEditable();
+  TextEditable(const TextEditable& other);
 
   //The text to print in the editor and that will be saved in the file
   virtual const QString& getText() const = 0;
 
-  //Is the object buildable
+  //Is the text object buildable
   virtual bool buildable() const {return false;}
-  inline virtual Renderer* getRenderer() const {return nullptr;}
 
 public slots:
   //Return true is the file is loaded or created (not if it build correctly)
   bool load();
   virtual bool save();
-  virtual bool build(const QString& text) {};
+  virtual bool build(const QString& text) {}
 
 
 signals:
   void startLineNumberChanged(int line);
   void objectTextChanged(QString text);
 
+  // Log
+  void error(QString);
+  void warning(QString);
 
 protected:
   bool save(const QString& text);
-  LogWidget& log;
 };
+
+Q_DECLARE_METATYPE(TextEditable);
 
 #endif

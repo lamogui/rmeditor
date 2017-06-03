@@ -8,10 +8,12 @@
 #include <QSet>
 #include <QOpenGLDebugLogger>
 
-class Camera;
-class Render;
-class LogWidget;
 
+class Camera;
+class RenderTexture2D;
+class Fast2DQuad;
+class Renderer;
+class LogWidget;
 class RenderWidget : public QOpenGLWidget
 {
     Q_OBJECT
@@ -24,16 +26,12 @@ public:
 
 public slots:
        void resetCamera();
-       Camera* camera() const;
        void takeScreenshot();
-
-       void setRender(Render* renderer);
 
        inline void setOnlyShowTexture(bool e) { onlyShowTexture = e;}
        void startUpdateLoop();
        void stopUpdateLoop();
-
-
+       void setCurrentRenderer(const QWeakPointer<Renderer>& renderer);
 
 protected slots:
        // QGLWidget
@@ -44,24 +42,19 @@ protected slots:
        void keyPressEvent(QKeyEvent* event) override;
        void keyReleaseEvent(QKeyEvent* event) override;
 
-       void onRenderDestroy();
-
-
-
 protected:
-       void initializeGL();
-       void paintGL();
-       void resizeGL(int width, int height);
-
+       void initializeGL() override;
+       void paintGL() override;
 
        QTimer updateTimer;
-       Render* renderer;
+       RenderTexture2D* render;
+       Fast2DQuad* quad;
+       QWeakPointer<Renderer> currentRenderer;
        QPointF previousMousePos;
        QSet<Qt::Key> keysPressed;
        QOpenGLDebugLogger openglDebugLogger;
        LogWidget* logWidget;
        bool captureMouse;
-
        bool onlyShowTexture;
 
 };

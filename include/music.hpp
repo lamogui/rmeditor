@@ -12,12 +12,12 @@
 class RtAudio;
 class Timeline;
 
-class Music : public NodeFile
+class Music : public MediaFile
 {
   Q_OBJECT
 
 public:
-  Music(const QString& filename, double length, QDomNode node ,LogWidget& log,QObject* parent);
+  Music(const QString& filename, double length, QDomNode node, QObject* parent);
   ~Music() override;
 
   virtual double getTime() const = 0;
@@ -27,10 +27,7 @@ public:
 
   bool isPlaying() const { return playing; }
 
-
-
   virtual void exportMusicCData(const QFile& source, const QFile& header) const = 0;
-
 
   /*
     RtAudio stuff

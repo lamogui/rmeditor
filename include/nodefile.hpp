@@ -1,31 +1,58 @@
-#ifndef NODEFILE_HPP
-#define NODEFILE_HPP
+#ifndef MEDIAFILE_HPP
+#define MEDIAFILE_HPP
 
 #include <QDomNode>
-#include <QFile>
+#include <QFileInfo>
+#include "camera.hpp" // QSharedPointer fail !
+#include "renderer.hpp"
 
-class LogWidget;
-
-class NodeFile : public QFile
+class MediaFile : public QObject /* Media */
 {
 
   Q_OBJECT
+  Q_PROPERTY(QFileInfo path MEMBER path READ getPath WRITE setPath NOTIFY pathChanged)
 
 public:
-  NodeFile(const QString& filename, QDomNode node, LogWidget& log,QObject* parent);
-  inline QDomNode getNode() const { return node; }
+  MediaFile();
+  MediaFile(const MediaFile& other);
 
-  //Do the connections to log
-  virtual void connectLog(LogWidget& log);
+  // File Path
+  inline const QFileInfo& getPath() const { return path; }
+  void setPath(const QFileInfo& newPath);
 
+  // Xml
+  inline QDomNode getNode() const { return node; } 
+  inline void setNode(const QDomNode& n) { node = n; }
+
+  // Renderer
+  virtual bool canBeRendered() const { return false; }
+  virtual Renderer* createRenderer() const { return nullptr; }
+  QWeakPointer<Renderer> getDefaultRenderer() { return defaultRenderer; }
+  QWeakPointer<Camera> getDefaultCamera() { return defaultCamera; }
 
 signals:
-  void error(QString err) const;
-  void warning(QString warn) const;
-  void info(QString txt) const;
+  // File path 
+  void pathChanged(QFileInfo); // slot should not change the path !
+
+  // History
+  void propertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue);
+
+  // Xml
+  void xmlPropertyChanged(MediaFile* owner, QString propertyName, QVariant newValue);
+
+
+private slots:
+  void onPropertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue); // not automatic slot
 
 protected:
-  QDomNode node;
+  QDomNode node; /* Physical link to the xml project file */
+  QSharedPointer<Renderer> defaultRenderer; /* allow to see the media even without a timeline */
+  QSharedPointer<Camera> defaultCamera;
+
+private:
+  QFileInfo path; 
 };
 
-#endif
+Q_DECLARE_METATYPE(MediaFile);
+
+#endif // !MEDIAFILE_HPP

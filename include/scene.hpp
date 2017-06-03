@@ -1,37 +1,43 @@
-#ifndef SCENE_HPP
-#define SCENE_HPP
+#ifndef RAYMARCHINGSCENE_HPP
+#define RAYMARCHINGSCENE_HPP
 
-#include "shadercode.hpp"
+#include "quadfragmentshader.hpp"
 
-class Camera;
-class Framework;
-class Scene : public FragmentShaderCode
+
+
+class RaymarchingScene : public QuadFragmentShaderCode
 {
+  Q_OBJECT
+
 public:
-  Scene(const QString& filename, QDomNode node, Framework* framework, LogWidget& log,QObject* parent);
+  RaymarchingScene();
+  RaymarchingScene(const RaymarchingScene& other);
 
-  Renderer* getRenderer() const override;
-  
-  QSharedPointer<QOpenGLShaderProgram>& getShaderProgram() {return shaderProgram;}
-  const QSharedPointer<QOpenGLShaderProgram>& getShaderProgram() const {return shaderProgram; }
-
-  bool buildable() const override { return true; }
-
-  inline Framework* getFramework() const { return framework; }
-
-  static const char* getVertexShaderCode();
-
-
-public slots:
-  bool build(const QString& text) override;
-
-private:
-  Framework* framework;
-  QSharedPointer<Camera> camera;
-  QSharedPointer<ShaderProgram> shaderProgram;
-
-private:
-  typedef FragmentShaderCode BaseClass;
+  // MediaFile Renderer
+  Renderer* createRenderer() const override;
 };
 
-#endif
+Q_DECLARE_METATYPE(RaymarchingScene);
+
+class ReferencedRaymarchingSceneRenderer : public ReferencedQuadFragmentShaderRenderer
+{
+public:
+  ReferencedRaymarchingSceneRenderer() {}
+
+  // Camera
+  inline bool hasDynamicCamera() const override { return true; }     
+  void setCurrentCamera(const QWeakPointer<Camera>& camera) { currentCamera = camera; }
+  Camera* getCurrentCamera() override { return currentCamera.lock().data(); }
+
+protected:
+  // ReferencedQuadFragmentShaderRenderer
+  void configureUniforms(ShaderProgram& program) override;
+
+  QWeakPointer<Camera> currentCamera;
+
+private:
+  typedef ReferencedQuadFragmentShaderRenderer BaseClass;
+};
+
+
+#endif // !RAYMARCHINGSCENE_HPP

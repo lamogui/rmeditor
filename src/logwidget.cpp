@@ -11,7 +11,7 @@ LogWidget::LogWidget(QWidget *parent):
 }
 
 
-QString LogWidget::getDate()
+QString LogWidget::getFormattedDate()
 {
     return QString("[")+QString::number(QTime::currentTime().hour())+":"+QString::number(QTime::currentTime().minute())+":"+QString::number(QTime::currentTime().second())+QString("] ");
 }
@@ -25,7 +25,7 @@ void LogWidget::writeInfo(QString txt)
   this->setTextColor(QColor(0,150,0) );
   if(printTime)
   {
-    txt = getDate() + txt;
+    txt = getFormattedDate() + txt;
   }
   this->insertPlainText(txt+"\n");
 }
@@ -37,7 +37,7 @@ void LogWidget::writeWarning(QString txt)
   this->setTextColor( QColor(255,255,100) );
   if(printTime)
   {
-    txt = getDate() + txt;
+    txt = getFormattedDate() + txt;
   }
   this->insertPlainText(txt+"\n");
 }
@@ -49,7 +49,7 @@ void LogWidget::writeError(QString txt)
   this->setTextColor( QColor(255,0,0) );
   if(printTime)
   {
-    txt = getDate() + txt;
+    txt = getFormattedDate() + txt;
   }
   this->insertPlainText(txt+"\n");
 }
@@ -64,4 +64,23 @@ void LogWidget::handleOpengGLLoggedMessage(const QOpenGLDebugMessage &debugMessa
     writeWarning(debugMessage.message());
   else 
     writeInfo(debugMessage.message());
+}
+
+void LogWidget::findAndConnectLogSignalsRecursively(const QObject& object)
+{
+  const QMetaObject* meta = object.metaObject();
+  if (meta)
+  {
+    if (meta->indexOfSignal(QMetaObject::normalizedSignature("void error(QString)")) != -1)
+      connect(&object, SIGNAL(error(QString)), this, SLOT(writeError(QString)));
+    if (meta->indexOfSignal(QMetaObject::normalizedSignature("void warning(QString)")) != -1)
+      connect(&object, SIGNAL(warning(QString)), this, SLOT(writeWarning(QString)));
+    if (meta->indexOfSignal(QMetaObject::normalizedSignature("void info(QString)")) != -1)
+      connect(&object, SIGNAL(info(QString)), this, SLOT(writeInfo(QString)));
+
+    foreach(const QObject* child, object.children())
+    {
+      findAndConnectLogSignalsRecursively(*child);
+    }
+  }
 }

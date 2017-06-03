@@ -4,9 +4,8 @@
 
 #include <iostream>
 
-#include "framework.hpp"
 #include "logwidget.hpp"
-#include "project.hpp"
+//#include "project.hpp"
 #include "scene.hpp"
 #include "texteditor.hpp"
 #include "texteditable.hpp"
@@ -24,6 +23,7 @@ EditorWidget::~EditorWidget()
     delete ui;
 }
 
+/*
 void EditorWidget::loadProject(Project &project)
 {
   appendTextEditable(&project);
@@ -38,6 +38,7 @@ void EditorWidget::loadProject(Project &project)
     appendTextEditable(te);
   }
 }
+*/
 
 void EditorWidget::on_saveButton_clicked(bool)
 {
@@ -46,11 +47,11 @@ void EditorWidget::on_saveButton_clicked(bool)
   {
     if (te->save())
     {
-      log->writeInfo(tr("saved ") + te->textObject()->fileName());
+      log->writeInfo(tr("saved ") + te->textObject()->getPath().fileName());
     }
     else
     {
-     log->writeError(tr("unable to save the file ") + te->textObject()->fileName());
+     log->writeError(tr("unable to save the file ") + te->textObject()->getPath().fileName());
     }
   }
 }
@@ -62,11 +63,11 @@ void EditorWidget::on_buildButton_clicked(bool)
   {
     if (te->build())
     {
-      log->writeInfo(QString("[") + te->textObject()->fileName() + tr("] build success !"));
+      log->writeInfo(QString("[") + te->textObject()->getPath().fileName() + tr("] build success !"));
     }
     else
     {
-      log->writeError(QString("[") + te->textObject()->fileName() + tr("] build failure !"));
+      log->writeError(QString("[") + te->textObject()->getPath().fileName() + tr("] build failure !"));
     }
   }
 }
@@ -82,7 +83,7 @@ void EditorWidget::on_tab_currentChanged(int index)
   Q_ASSERT(te != nullptr);
   //te->refresh();
   ui->buildButton->setEnabled(te->textObject()->buildable());
-  emit rendererChanged(te->textObject()->getRender());
+  emit rendererChanged(te->textObject()->getPath().getRender());
 
 }
 

@@ -1,22 +1,28 @@
 #ifndef SHADERCODE_HPP
 #define SHADERCODE_HPP
 
-
-#include <QString>
-
-#include "renderfunctionscache.hpp"
 #include "texteditable.hpp"
 
 class ShaderMinifier;
-class FragmentShaderCode : public TextEditable
+class GLSLShaderCode : public TextEditable /* Represent any shader code media text */
 {
   Q_OBJECT
+  Q_PROPERTY(QWeakPointer<GLSLShaderCode> framework MEMBER framework READ getFramework WRITE setFramework)
 
 public:
-  FragmentShaderCode(const QString& filename, QDomNode node,LogWidget& log,QObject* parent=nullptr);
+  GLSLShaderCode();
+  GLSLShaderCode(const GLSLShaderCode& other);
 
+  // accessors
+  const QWeakPointer<GLSLShaderCode>& getFramework() const { return framework; }
+  void setFramework(const QWeakPointer<GLSLShaderCode>& framework);
+
+  // TextEditable
   const QString& getText() const override;
+  
+  QString getShaderCodeRecursive() const;
 
+  // overridable
   virtual QString minifiedShaderCode(const ShaderMinifier& minifier) const;
   virtual QString cFormatedShaderCode(const ShaderMinifier& minifier) const;
 
@@ -25,8 +31,12 @@ protected:
   bool handleShaderCompileResult(const QString& shaderCode, ShaderProgram& program, QOpenGLShader::ShaderType type);
   bool handleShaderLinkResult(ShaderProgram& program);
 
-  QString fragmentcode;
+  QString shaderCode;
 
+private:
+  QWeakPointer<GLSLShaderCode> framework;
 };
+
+Q_DECLARE_METATYPE(GLSLShaderCode);
 
 #endif // !SHADERCODE_HPP

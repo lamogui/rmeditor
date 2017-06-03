@@ -9,11 +9,10 @@ class EditorWidget;
 }
 
 class LogWidget;
-class Project;
+//class Project;
 class Render;
 class TextEditable;
 class TextEditor;
-
 class EditorWidget : public QDockWidget
 {
     Q_OBJECT
@@ -23,7 +22,7 @@ public:
     ~EditorWidget();
 
 public slots:
-    void loadProject(Project& project);
+    //void loadProject(Project& project);
     void appendTextEditable(TextEditable* te);
 
     void saveAllShaders();

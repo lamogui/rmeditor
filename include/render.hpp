@@ -1,11 +1,11 @@
 ﻿#ifndef RMEDITOR_RENDER_HPP
 #define RMEDITOR_RENDER_HPP
 
-#include <QOpenGLFunctions_4_5_Core>
+#include "renderfunctionscache.hpp"
 #include <QOpenGLFramebufferObject>
 
 class Renderer;
-class Render : public QOpenGLFunctions_4_5_Core // FIXME : do not inherit from this 
+class Render : public RenderFunctionsCache // FIXME : do not inherit from this 
 {
 public:
 
@@ -45,7 +45,6 @@ public:
   RenderTexture2D(const QSize& initialSize);
 
 protected:
-  // To override
   void createAttachements(const QSize& fboSize) final;
 
 };

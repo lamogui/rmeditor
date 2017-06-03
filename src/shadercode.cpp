@@ -4,48 +4,78 @@
 #include "logwidget.hpp"
 #include "shaderminifier.hpp"
 
-FragmentShaderCode::FragmentShaderCode(const QString &filename,QDomNode node,LogWidget& log, QObject *parent):
-  TextEditable(filename,node,log,parent)
+/*
+** GLSLShaderCode
+*/
+
+GLSLShaderCode::GLSLShaderCode() :
+  TextEditable()
 {
-  connectLog(log);
+
 }
 
-const QString &FragmentShaderCode::getText() const
+GLSLShaderCode::GLSLShaderCode(const GLSLShaderCode& other) :
+  TextEditable(other)
 {
-  return fragmentcode;
+
 }
 
-QString FragmentShaderCode::minifiedShaderCode(const ShaderMinifier& minifier) const
+void GLSLShaderCode::setFramework(const QWeakPointer<GLSLShaderCode>& newFramework)
 {
-  return minifier.minifiedShaderCode(this->fileName(),fragmentcode);
+  if (newFramework != framework)
+  {
+    QWeakPointer<GLSLShaderCode> oldFramework = framework;
+    framework = newFramework;
+    emit propertyChanged(this, "framework", QVariant::fromValue(oldFramework), QVariant::fromValue(newFramework));
+  }
 }
 
-QString FragmentShaderCode::cFormatedShaderCode(const ShaderMinifier& minifier) const
+const QString &GLSLShaderCode::getText() const
+{
+  return shaderCode;
+}
+
+QString GLSLShaderCode::getShaderCodeRecursive() const
+{
+  if (framework)
+  {
+    return framework.lock()->getShaderCodeRecursive() + getText();
+  }
+  return getText();
+}
+
+QString GLSLShaderCode::minifiedShaderCode(const ShaderMinifier& minifier) const
+{
+  return minifier.minifiedShaderCode(getPath().fileName(), shaderCode);
+}
+
+QString GLSLShaderCode::cFormatedShaderCode(const ShaderMinifier& minifier) const
 {
   QString variable_name = QString("fs_") + this->objectName();
-  return minifier.cFormatedShaderCode(this->fileName(),variable_name,minifiedShaderCode(minifier));
+  return minifier.cFormatedShaderCode(getPath().fileName(),variable_name,minifiedShaderCode(minifier));
 }
 
-bool FragmentShaderCode::handleShaderCompileResult(const QString& shaderCode, ShaderProgram& program, QOpenGLShader::ShaderType type)
+bool GLSLShaderCode::handleShaderCompileResult(const QString& shaderCode, ShaderProgram& program, QOpenGLShader::ShaderType type)
 {
   if (!program.addShaderFromSourceCode(type, shaderCode))
   {
-    log.writeError(fileName() + " (at compile): " + program.log());
+    emit error(getPath().fileName() + " (at compile): " + program.log());
     return false;
   }
   else if (!program.log().isEmpty())
-    log.writeWarning(fileName() + " (at compile): " + program.log());
+   emit warning(getPath().fileName() + " (at compile): " + program.log());
   return true;
 }
 
-bool FragmentShaderCode::handleShaderLinkResult(ShaderProgram& program)
+bool GLSLShaderCode::handleShaderLinkResult(ShaderProgram& program)
 {
   if (!program.link())
   {
-    log.writeError(fileName() + " (at link): " + program.log());
+    emit error(getPath().fileName() + " (at link): " + program.log());
     return false;
   }
   else if (!program.log().isEmpty())
-    log.writeWarning(fileName() + " (at link): " + program.log());
+    emit warning(getPath().fileName() + " (at link): " + program.log());
   return false;
 }
+

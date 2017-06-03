@@ -15,23 +15,26 @@
 #include <GL/glu.h>
 
 #include "camera.hpp"
-#include "fast2dquad.hpp"
+#include "render.hpp"
 #include "renderer.hpp"
-#include "fbo.hpp"
-
+#include "fast2dquad.hpp"
 
 RenderWidget::RenderWidget(QWidget *parent) :
   QOpenGLWidget(parent),
-  renderer(nullptr),
+  render(nullptr),
+  quad(nullptr),
   captureMouse(false),
   onlyShowTexture(false)
 {
+  // Widget config
   setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
-  connect(&updateTimer, SIGNAL(timeout()), this, SLOT(update()));
-  startUpdateLoop();
-  resetCamera();
   setFocusPolicy(Qt::ClickFocus);
 
+  // Update Timer config
+  connect(&updateTimer, SIGNAL(timeout()), this, SLOT(update()));
+  startUpdateLoop();
+
+  // Open GL Context config
   QSurfaceFormat f;
   f.setRenderableType(QSurfaceFormat::OpenGL);
   f.setMajorVersion(4);
@@ -43,12 +46,14 @@ RenderWidget::RenderWidget(QWidget *parent) :
 
 RenderWidget::~RenderWidget()
 {
-  if (renderer)
+  if (render)
   {
-    renderer->attachedWidget(nullptr);
+    delete render;
   }
-
-  Fast2DQuadFree();
+  if (quad)
+  {
+    delete quad;
+  }
 }
 
 
@@ -60,19 +65,22 @@ void RenderWidget::setLogWidget(LogWidget* log)
 //-----------------------------------------------------------------------------
 void RenderWidget::initializeGL()
 {
+  // Debugger 
   Q_ASSERT(logWidget);
   qDebug() << "Created context version: " << format().majorVersion() << "." << format().minorVersion();
   openglDebugLogger.initialize();
   connect(&openglDebugLogger, &QOpenGLDebugLogger::messageLogged, logWidget, &LogWidget::handleOpengGLLoggedMessage);
   openglDebugLogger.startLogging();
 
+  // Render
+  Q_ASSERT(!render);
+  render = new RenderTexture2D(size());
+  render->initializeOpenGLFunctions(); // UGLY !!!
 
-    Fast2DQuadInit();
-    //glMatrixMode(GL_PROJECTION);
-    //gluPerspective(90., 16./9., 0.01, 10000.);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glEnable(GL_TEXTURE_2D);
+  // Fast2DQuad
+  Q_ASSERT(!quad);
+  quad = new Fast2DQuad();
+  quad->initializeOpenGLFunctions(); // UGLY !!!
 }
 
 //-----------------------------------------------------------------------------
@@ -80,14 +88,15 @@ void RenderWidget::initializeGL()
 //-----------------------------------------------------------------------------
 void RenderWidget::paintGL()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
-
+    render->glClear(GL_COLOR_BUFFER_BIT);
+    QSharedPointer<Renderer> renderer = currentRenderer.lock();
     if (renderer)
     {
       if (!onlyShowTexture)
       {
-        if (renderer->getCamera() && !keysPressed.empty())
+        if (renderer->hasDynamicCamera() && !keysPressed.empty())
         {
+          Q_ASSERT(renderer->getCurrentCamera());
           QVector3D delta;
           if (keysPressed.contains(Qt::Key_Up))
           {
@@ -113,45 +122,19 @@ void RenderWidget::paintGL()
           {
             delta += QVector3D(0,-1,0);
           }
-          renderer->getCamera()->translateRelative(delta*0.02f);
+          renderer->getCurrentCamera()->translateRelative(delta*0.02f);
         }
-        renderer->glRender(this->width(),this->height());
+        render->render(*renderer);
       }
 
-      QOpenGLFunctions gl(QOpenGLContext::currentContext());
-
-      glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadIdentity();
-      glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
-
-
-      gl.glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, renderer->getColorTexture());
-      Fast2DQuadDraw();
-
-
-
-      glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-      glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-    }
-
-    //glFlush();
-    //glFinish();
+      makeCurrent();
+      render->glViewport(0, 0, width(), height());
+      render->glActiveTexture(GL_TEXTURE0);
+      render->glBindTexture(GL_TEXTURE_2D, render->getFBO().texture());
+      quad->draw();
+      doneCurrent();
+  }
 }
-
-//-----------------------------------------------------------------------------
-// resizeGL
-//-----------------------------------------------------------------------------
-void RenderWidget::resizeGL(int width, int height)
-{
-    glViewport(0,0,width,height);
-}
-
 
 void RenderWidget::mousePressEvent(QMouseEvent* event)
 {
@@ -179,9 +162,10 @@ void RenderWidget::mouseMoveEvent(QMouseEvent* event)
   {
     float yaw = event->screenPos().x() - previousMousePos.x();
     float pitch = event->screenPos().y() - previousMousePos.y();
-    if (renderer && renderer->getCamera())
+    QSharedPointer<Renderer> renderer = currentRenderer.lock();
+    if (renderer && renderer->hasDynamicCamera())
     {
-      renderer->getCamera()->rotate(yaw*0.25,pitch*0.25,0);
+      renderer->getCurrentCamera()->rotate(yaw*0.25,pitch*0.25,0);
     }
   }
   QWidget::mouseMoveEvent(event);
@@ -195,47 +179,22 @@ void RenderWidget::wheelEvent(QWheelEvent* event)
 
 void RenderWidget::resetCamera()
 {
-  if (renderer && renderer->getCamera())
+  QSharedPointer<Renderer> renderer = currentRenderer.lock();
+  if (renderer && renderer->hasDynamicCamera())
   {
-    renderer->getCamera()->reset();
+    renderer->getCurrentCamera()->reset();
   }
 }
-
 
 void RenderWidget::takeScreenshot()
 {
   update();
-  QImage imageToSave = this->grabFramebuffer();
+  QImage imageToSave = grabFramebuffer();
   QString filename = QFileDialog::getSaveFileName(this, "Save a screenshot", QString(), "Images (*.png *.jpg)");
   if (!filename.isEmpty())
   {
     imageToSave.save(filename);
   }
-}
-
-void RenderWidget::setRender(Render *renderer)
-{
- /* if (!renderer)
-  {
-    return;
-  }
-*/
-  if (this->renderer)
-  {
-    disconnect(this->renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRenderDestroy()));
-    this->renderer->attachedWidget(nullptr);
-  }
-  this->renderer = renderer;
-  if (renderer)
-  {
-    connect(renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRenderDestroy()),Qt::DirectConnection);
-    renderer->attachedWidget(this);
-  }
-}
-
-void RenderWidget::onRenderDestroy()
-{
-  renderer = nullptr;
 }
 
 void RenderWidget::keyPressEvent(QKeyEvent *event)
@@ -260,15 +219,6 @@ void RenderWidget::keyReleaseEvent(QKeyEvent *event)
   keysPressed.remove((Qt::Key)event->key());
 }
 
-Camera* RenderWidget::camera() const
-{
-  if (renderer)
-  {
-    return renderer->getCamera();
-  }
-  return nullptr;
-}
-
 void RenderWidget::startUpdateLoop()
 {
    updateTimer.start(10);
@@ -278,3 +228,9 @@ void RenderWidget::stopUpdateLoop()
 {
   updateTimer.stop();
 }
+
+void RenderWidget::setCurrentRenderer(const QWeakPointer<Renderer>& renderer)
+{
+  currentRenderer = renderer;
+}
+
