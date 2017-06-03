@@ -15,7 +15,7 @@ class Music;
 class Framework;
 class Scene;
 class Timeline;
-
+class LogWidget;
 class Project : public TextEditable
 {
   Q_OBJECT
@@ -75,7 +75,7 @@ class Project : public TextEditable
     DemoTimeline* demoTimeline;
     QString text;
     QDir dir;
-    LogWidget* log;
+    LogWidget* log; 
     QDomDocument document;
     QTimer* textUpdateTimer;
 };

@@ -16,21 +16,8 @@ namespace VertexAttributesIndex
     normal = 2
   };
 
-  std::string&& toString(Enum e)
-  {
-    switch(e)
-    {
-    case position:
-      return "position";
-    case texCoord:
-      return "texCoord";
-    case normal:
-      return "normal";
-    default:
-      Q_ASSERT(false);
-      return "";
-    }
-  }
+  std::string&& toString(Enum e);
+
 };
 
 #endif //! RMEDITOR_RENDERFUNCTIONSCACHE_HPP

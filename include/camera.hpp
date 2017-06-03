@@ -5,8 +5,7 @@
 #include <QQuaternion>
 
 
-class CameraKeyframe;
-
+//class CameraKeyframe;
 class Camera
 {
 public:
@@ -29,7 +28,7 @@ public:
   void translateRelative(const QVector3D& dir);
   void translate(const QVector3D& dir);
 
-  void fromKeyframe(const CameraKeyframe& keyframe);
+  //void fromKeyframe(const CameraKeyframe& keyframe);
 
   void reset();
 
@@ -39,6 +38,7 @@ protected:
 
 };
 
+/*
 #include "keyframe.hpp"
 
 class CameraKeyframe : public Keyframe
@@ -63,5 +63,7 @@ protected:
   QVector3D position;
 
 };
+
+*/
 
 #endif // !CAMERA_HPP

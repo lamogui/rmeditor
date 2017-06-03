@@ -10,7 +10,7 @@ Render::Render(const QSize& initialSize, Type type):
   fbo(new QOpenGLFramebufferObject(initialSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8)),
   type(type)
 {
-  createAttachements(initialSize);
+  //createAttachements(initialSize);
 }
 
 Render::~Render()

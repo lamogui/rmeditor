@@ -1,19 +1,19 @@
 ﻿#ifndef RENDERWIDGET_H
 #define RENDERWIDGET_H
 
-#include <QTime>
-#include <QOpenGLWidget>
-#include <QListWidget>
 #include <QTimer>
 #include <QSet>
 #include <QOpenGLDebugLogger>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLWidget>
 
 
 class Camera;
 class RenderTexture2D;
 class Fast2DQuad;
+class Render;
 class Renderer;
-class LogWidget;
+class LogWidget; // FIXME : remove this !
 class RenderWidget : public QOpenGLWidget
 {
     Q_OBJECT
@@ -22,7 +22,9 @@ public:
        RenderWidget(QWidget *parent = 0);
        ~RenderWidget();
 
-       void setLogWidget(LogWidget* log);
+       void setLogWidget(LogWidget* log); // FIXME : remove this !
+
+       static const char* getDisplayTextureFragmentShaderCode();
 
 public slots:
        void resetCamera();
@@ -33,8 +35,8 @@ public slots:
        void stopUpdateLoop();
        void setCurrentRenderer(const QWeakPointer<Renderer>& renderer);
 
-protected slots:
-       // QGLWidget
+protected:
+       // QWidget
        void mousePressEvent(QMouseEvent* event) override;
        void mouseReleaseEvent(QMouseEvent* event) override;
        void mouseMoveEvent(QMouseEvent* event) override;
@@ -42,17 +44,25 @@ protected slots:
        void keyPressEvent(QKeyEvent* event) override;
        void keyReleaseEvent(QKeyEvent* event) override;
 
-protected:
+       // QOpenGLWidget
        void initializeGL() override;
        void paintGL() override;
 
+       // Time
        QTimer updateTimer;
-       RenderTexture2D* render;
-       Fast2DQuad* quad;
+
+       // Render objects 
+       RenderTexture2D* render;          // fbo
+       Fast2DQuad* quad;                 // geometry
+       QOpenGLShaderProgram quadShader;  // shader
        QWeakPointer<Renderer> currentRenderer;
+       QOpenGLDebugLogger openglDebugLogger;
+
+       // Control (mouse / keyboard)
        QPointF previousMousePos;
        QSet<Qt::Key> keysPressed;
-       QOpenGLDebugLogger openglDebugLogger;
+
+       // Hum let's clean this one day 
        LogWidget* logWidget;
        bool captureMouse;
        bool onlyShowTexture;

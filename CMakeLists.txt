@@ -46,7 +46,7 @@ set(RMEDITOR_H
 #  ${RMEDITOR_INCLUDE_DIR}/demotimeline.hpp
   ${RMEDITOR_INCLUDE_DIR}/editorwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/fast2dquad.hpp
-  ${RMEDITOR_INCLUDE_DIR}/ffmpegencoder.hpp
+#  ${RMEDITOR_INCLUDE_DIR}/ffmpegencoder.hpp
   ${RMEDITOR_INCLUDE_DIR}/highlighter.hpp
   ${RMEDITOR_INCLUDE_DIR}/keyframe.hpp
   ${RMEDITOR_INCLUDE_DIR}/logdockwidget.hpp
@@ -80,7 +80,7 @@ set(RMEDITOR_SRC
 #  ${RMEDITOR_SRC_DIR}/demotimeline.cpp
   ${RMEDITOR_SRC_DIR}/editorwidget.cpp
   ${RMEDITOR_SRC_DIR}/fast2dquad.cpp
-  ${RMEDITOR_SRC_DIR}/ffmpegencoder.cpp
+#  ${RMEDITOR_SRC_DIR}/ffmpegencoder.cpp
   ${RMEDITOR_SRC_DIR}/highlighter.cpp
   #${RMEDITOR_SRC_DIR}/keyframe.cpp
   ${RMEDITOR_SRC_DIR}/logdockwidget.cpp
@@ -93,6 +93,7 @@ set(RMEDITOR_SRC
   ${RMEDITOR_SRC_DIR}/quadfragmentshader.cpp
   ${RMEDITOR_SRC_DIR}/render.cpp
   ${RMEDITOR_SRC_DIR}/renderer.cpp
+  ${RMEDITOR_SRC_DIR}/renderfunctionscache.cpp
   ${RMEDITOR_SRC_DIR}/renderwidget.cpp
   ${RMEDITOR_SRC_DIR}/scene.cpp
 #  ${RMEDITOR_SRC_DIR}/sequence.cpp

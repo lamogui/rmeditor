@@ -83,7 +83,7 @@ void EditorWidget::on_tab_currentChanged(int index)
   Q_ASSERT(te != nullptr);
   //te->refresh();
   ui->buildButton->setEnabled(te->textObject()->buildable());
-  emit rendererChanged(te->textObject()->getPath().getRender());
+  emit rendererChanged(te->textObject()->getDefaultRenderer());
 
 }
 
@@ -99,7 +99,7 @@ void EditorWidget::appendTextEditable(TextEditable *te)
     {
       if (editor->textObject() == te)
       {
-        ui->tab->setTabText(i,te->fileName());
+        ui->tab->setTabText(i,te->getPath().fileName());
         //editor->refresh();
         newWidget = false;
         break;
@@ -109,9 +109,9 @@ void EditorWidget::appendTextEditable(TextEditable *te)
   if (newWidget)
   {
     TextEditor* editor = new TextEditor(*te,ui->tab);
-    ui->tab->addTab(editor,te->fileName());
+    ui->tab->addTab(editor,te->getPath().fileName());
     //editor->refresh();
-    connect(editor,SIGNAL(saved(TextEditor*,bool)),this,SLOT(onTextEditorSaved(TextEditor*,bool)));
+    connect(editor, &TextEditor::saved, this, &EditorWidget::onTextEditorSaved);
   }
 }
 
@@ -126,17 +126,17 @@ void EditorWidget::saveAllShaders()
     TextEditor* editor = dynamic_cast<TextEditor*>(widget);
     if (editor)
     {
-      FragmentShaderCode* shaderCode = dynamic_cast<FragmentShaderCode*>(editor->textObject());
+      GLSLShaderCode* shaderCode = dynamic_cast<GLSLShaderCode*>(editor->textObject());
 
       if (shaderCode)
       {
-        if (dynamic_cast<Framework*>(shaderCode) != nullptr)
-        {
-          frameworks.append(editor);
-        }
-        else if (dynamic_cast<Scene*>(shaderCode) != nullptr)
+        if (dynamic_cast<RaymarchingScene*>(shaderCode) != nullptr)
         {
           scenes.append(editor);
+        }
+        else
+        {
+          frameworks.append(editor);
         }
       }
     }
@@ -164,11 +164,11 @@ void EditorWidget::onTextEditorSaved(TextEditor* e, bool saved)
     {
       if (saved)
       {
-        ui->tab->setTabText(i,editor->textObject()->fileName());
+        ui->tab->setTabText(i,editor->textObject()->getPath().fileName());
       }
       else
       {
-        ui->tab->setTabText(i,editor->textObject()->fileName() + "*");
+        ui->tab->setTabText(i,editor->textObject()->getPath().fileName() + "*");
       }
       break;
     }

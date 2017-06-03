@@ -35,11 +35,14 @@ void Camera::rotate(qreal yaw, qreal pitch, qreal roll)
   rotation *= QQuaternion::fromAxisAndAngle(0,1,0,yaw) * QQuaternion::fromAxisAndAngle(1,0,0,pitch) * QQuaternion::fromAxisAndAngle(0,0,1,roll);
 }
 
+/*
 void Camera::fromKeyframe(const CameraKeyframe &keyframe)
 {
   position = keyframe.getPosition();
   rotation = keyframe.getRotation();
 }
+
+
 
 #include "project.hpp"
 
@@ -93,6 +96,4 @@ void CameraKeyframe::load()
   rotation.setZ(node.attribute("rot_z","0.0").toFloat());
   rotation.setScalar(node.attribute("rot_w","1.0").toFloat());
 }
-
-
-
+*/

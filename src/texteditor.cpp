@@ -2,7 +2,7 @@
 #include <iostream>
 #include "texteditor.hpp"
 #include "highlighter.hpp"
-#include "project.hpp"
+//#include "project.hpp"
 #include "shadercode.hpp"
 
 TextEditor::TextEditor(TextEditable &textObject, QWidget *parent) :
@@ -14,7 +14,7 @@ TextEditor::TextEditor(TextEditable &textObject, QWidget *parent) :
 {
     lineNumberArea = new LineNumberArea(this);
 
-    connect(this,SIGNAL(textChanged()),this,SLOT(onTextEdited()));
+    connect(this, &TextEditor::textChanged, this, &TextEditor::onTextEdited);
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
     connect(&textObject, SIGNAL(startLineNumberChanged(int)), this, SLOT(setStartLineNumber(int)));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
@@ -37,17 +37,17 @@ TextEditor::TextEditor(TextEditable &textObject, QWidget *parent) :
 
 
     timer->setSingleShot(true);
-    if (dynamic_cast<FragmentShaderCode*>(object) != nullptr)
+    if (dynamic_cast<GLSLShaderCode*>(object) != nullptr)
     {
       highlighter->defineGLSLFragmentShaderRules();
       timer->setInterval(1000);  //1 second because we want see our result as fast as possible
       connect(timer, SIGNAL(timeout()), this, SLOT(build()));
       connect(this, SIGNAL(textChanged()), this, SLOT(resetTimer()));
     }
-    else if (dynamic_cast<Project*>(object) != nullptr)
+    /*else if (dynamic_cast<Project*>(object) != nullptr)
     {
       highlighter->defineXMLRule();
-    }
+    }*/
 
     this->setPlainText(object->getText());
 

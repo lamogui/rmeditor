@@ -4,14 +4,14 @@
 TextEditable::TextEditable() :
   MediaFile()
 {
-  connect(this, &TextEditable::pathChanged, this, TextEditable::load);
+  connect(this, SIGNAL(pathChanged(QString)), this, SLOT(load()));
 }
 
 TextEditable::TextEditable(const TextEditable& other) :
   MediaFile(other)
 {
   Q_ASSERT(false); // Humhum should not be called !
-  connect(this, &TextEditable::pathChanged, this, TextEditable::load);
+  connect(this, SIGNAL(pathChanged(QString)), this, SLOT(load()));
 }
 
 bool TextEditable::load()

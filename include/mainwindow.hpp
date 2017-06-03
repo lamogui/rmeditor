@@ -11,11 +11,11 @@ class MainWindow;
 
 class EditorWidget;
 class LogDockWidget;
+/*
 class Project;
 class TimelineDockWidget;
 class Timeline;
-
-
+*/
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -28,8 +28,8 @@ public slots:
     void newProject();
     void open();
     void saveAllShaders();
-    void setTimeline(Timeline* t);
-    void insertCameraKeyframe();
+    //void setTimeline(Timeline* t);
+    //void insertCameraKeyframe();
 
     void exportAsVideo();
     void exportAsLinuxDemo();
@@ -38,14 +38,14 @@ public slots:
     void unfreezeAll();
 
 private:
-    void connectProject();
+    //void connectProject();
 
-    Project* project;
+    //Project* project;
 
     Ui::MainWindow *ui;
     LogDockWidget *info;
     EditorWidget *editor;
-    TimelineDockWidget *timelineWidget;
+    //TimelineDockWidget *timelineWidget;
 };
 
 #endif // MAINWINDOW_H

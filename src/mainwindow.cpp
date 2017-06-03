@@ -6,20 +6,23 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
-#include "demotimeline.hpp"
+//#include "demotimeline.hpp"
 #include "editorwidget.hpp"
 #include "ffmpegencoder.hpp"
 #include "logdockwidget.hpp"
+#include "render.hpp"   // for connect
+#include "renderer.hpp" // for connect
+/*
 #include "music.hpp"
 #include "project.hpp"
 #include "timelinewidget.hpp"
 #include "timelinedockwidget.hpp"
-
+*/
 
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    project(nullptr),
+   // project(nullptr),
     ui(new Ui::MainWindow)
 
 {
@@ -33,13 +36,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->renderWidget->setLogWidget((info->getLogWidget()));
 
     editor = new EditorWidget(*(info->getLogWidget()),this);
-    timelineWidget = new TimelineDockWidget(this);
+    //timelineWidget = new TimelineDockWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea, info);
-    addDockWidget(Qt::BottomDockWidgetArea, timelineWidget);
+    //addDockWidget(Qt::BottomDockWidgetArea, timelineWidget);
     addDockWidget(Qt::LeftDockWidgetArea, editor);
 
-    connect(editor,SIGNAL(rendererChanged(Render*)),this->ui->renderWidget,SLOT(setRender(Render*)));
-    connect(timelineWidget,SIGNAL(rendererChanged(Render*)),this->ui->renderWidget,SLOT(setRender(Render*)));
+    connect(editor, &EditorWidget::rendererChanged, ui->renderWidget, &RenderWidget::setCurrentRenderer);
+    //connect(timelineWidget,SIGNAL(rendererChanged(Render*)),this->ui->renderWidget,SLOT(setRender(Render*)));
 
     //Main window actions
     ui->toolBar->addAction(ui->actionNew);
@@ -67,17 +70,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-  if (project)
+ /* if (project)
   {
     delete project;
-  }
+  }*/
   delete ui;
 }
 
 
 void MainWindow::newProject()
 {
-
+  /*
   QString d = QFileDialog::getExistingDirectory(this,tr("Select project directory"),QDir::currentPath());
   if (!d.isEmpty())
   {
@@ -97,10 +100,12 @@ void MainWindow::newProject()
       project->build(Project::getDefaultProjectText());
     }
   }
+  */
 }
 
 void MainWindow::open()
 {
+  /*
   QString f = QFileDialog::getOpenFileName(this,tr("Open project file"),QString(),"*.xml");
   if (!f.isEmpty())
   {
@@ -119,6 +124,7 @@ void MainWindow::open()
       connectProject();
     }
   }
+  */
 }
 
 void MainWindow::saveAllShaders()
@@ -126,6 +132,7 @@ void MainWindow::saveAllShaders()
   editor->saveAllShaders();
 }
 
+/*
 void MainWindow::connectProject()
 {
   editor->loadProject(*project);
@@ -150,9 +157,10 @@ void MainWindow::insertCameraKeyframe()
   }
 }
 
+*/
 
 void MainWindow::exportAsVideo()
-{
+{/*
   if (project && project->getDemoTimeline())
   {
     freezeAll();
@@ -182,7 +190,7 @@ void MainWindow::exportAsVideo()
     connect(encoder,SIGNAL(finished()),this,SLOT(unfreezeAll()));
     connect(encoder,SIGNAL(finished()),encoder,SLOT(deleteLater()));
     encoder->start(QThread::HighPriority);
-  }
+  }*/
 }
 
 
@@ -195,7 +203,7 @@ void MainWindow::freezeAll()
   ui->menuFile->setEnabled(false);
   ui->menuExport->setEnabled(false);
 
-  timelineWidget->setEnabled(false);
+  //timelineWidget->setEnabled(false);
   editor->setEnabled(false);
 
  // timeline->getTimelineWidget()->stopUpdateLoop();
@@ -209,7 +217,7 @@ void MainWindow::unfreezeAll()
   ui->menuFile->setEnabled(true);
   ui->menuExport->setEnabled(true);
 
-  timelineWidget->setEnabled(true);
+  //timelineWidget->setEnabled(true);
   editor->setEnabled(true);
 
   ui->renderWidget->setOnlyShowTexture(false);
@@ -221,6 +229,7 @@ void MainWindow::unfreezeAll()
 
 void MainWindow::exportAsLinuxDemo()
 {
+  /*
   if (project)
   {
     QString d = QFileDialog::getExistingDirectory(this,tr("Select demo build directory"));
@@ -229,4 +238,5 @@ void MainWindow::exportAsLinuxDemo()
       project->exportAsLinuxDemo(QDir(d));
     }
   }
+  */
 }

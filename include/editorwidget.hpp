@@ -10,7 +10,7 @@ class EditorWidget;
 
 class LogWidget;
 //class Project;
-class Render;
+class Renderer;
 class TextEditable;
 class TextEditor;
 class EditorWidget : public QDockWidget
@@ -29,7 +29,7 @@ public slots:
 
 
 signals:
-    void rendererChanged(Render* renderer);
+    void rendererChanged(QWeakPointer<Renderer> renderer);
 
 private slots:
     void on_buildButton_clicked(bool);

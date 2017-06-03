@@ -24,12 +24,13 @@ public slots:
   //Return true is the file is loaded or created (not if it build correctly)
   bool load();
   virtual bool save();
-  virtual bool build(const QString& text) {}
+  virtual bool build(const QString& text) { return false; }
 
 
 signals:
+  // text edition 
   void startLineNumberChanged(int line);
-  void objectTextChanged(QString text);
+  void objectTextChanged(QString text); // for project (probably)
 
   // Log
   void error(QString);
@@ -38,7 +39,5 @@ signals:
 protected:
   bool save(const QString& text);
 };
-
-Q_DECLARE_METATYPE(TextEditable);
 
 #endif

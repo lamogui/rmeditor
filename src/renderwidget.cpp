@@ -1,23 +1,16 @@
 ﻿
-#include "renderwidget.hpp"
-#include "logwidget.hpp"
-#include <iostream>
+#include "renderwidget.hpp" 
+#include "logwidget.hpp" // FIXME : remove this !
 
-#include <QMessageBox>
-#include <QTimer>
-#include <QFileDialog>
-#include <QDir>
-#include <QMouseEvent>
-#include <QOpenGLFunctions>
-#include <QVector3D>
-
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <QFileDialog> // for take screen shots 
+#include <QMouseEvent>  
+#include <QVector3D>   // for camera control
 
 #include "camera.hpp"
 #include "render.hpp"
 #include "renderer.hpp"
 #include "fast2dquad.hpp"
+#include "quadfragmentshader.hpp" // for vertex quad shader ! 
 
 RenderWidget::RenderWidget(QWidget *parent) :
   QOpenGLWidget(parent),
@@ -60,6 +53,21 @@ RenderWidget::~RenderWidget()
 void RenderWidget::setLogWidget(LogWidget* log)
   {logWidget = log;}
 
+const char* RenderWidget::getDisplayTextureFragmentShaderCode()
+{
+  static const char* vertexShader =
+    "#version 450\n"
+    "uniform sampler2D colorTexture;"
+    "smooth in vec2 coords;"
+    "smooth in vec2 uv;"
+    "layout(location = 0) out vec4 color;"
+    "void main()"
+    "{"
+    "color = texture(colorTexture, coords);"
+    "}";
+  return vertexShader;
+}
+
 //-----------------------------------------------------------------------------
 // initializeGL
 //-----------------------------------------------------------------------------
@@ -76,11 +84,32 @@ void RenderWidget::initializeGL()
   Q_ASSERT(!render);
   render = new RenderTexture2D(size());
   render->initializeOpenGLFunctions(); // UGLY !!!
+  render->glDisable(GL_DEPTH_TEST);
 
   // Fast2DQuad
   Q_ASSERT(!quad);
   quad = new Fast2DQuad();
   quad->initializeOpenGLFunctions(); // UGLY !!!
+
+  // Shader
+  if (quadShader.create())
+  {
+    if (!quadShader.addShaderFromSourceCode(QOpenGLShader::Vertex, QuadFragmentShaderCode::getVertexShaderCode()))
+      logWidget->writeError("Fatal error! could not compile vertex shader: " + quadShader.log());
+    else if (!quadShader.addShaderFromSourceCode(QOpenGLShader::Fragment, getDisplayTextureFragmentShaderCode()))
+      logWidget->writeError("Fatal error! could not compile fragment shader: " + quadShader.log());
+    else
+    {
+      // link
+      quadShader.bindAttributeLocation("position", VertexAttributesIndex::position);
+      quadShader.bindAttributeLocation("texCoords", VertexAttributesIndex::texCoord);
+
+      if (!quadShader.link())
+        logWidget->writeError("Fatal error! could not link shader: " + quadShader.log());
+    }
+  }
+  else
+    logWidget->writeError("Fatal erreor! could not create shader program");
 }
 
 //-----------------------------------------------------------------------------
@@ -88,52 +117,55 @@ void RenderWidget::initializeGL()
 //-----------------------------------------------------------------------------
 void RenderWidget::paintGL()
 {
-    render->glClear(GL_COLOR_BUFFER_BIT);
-    QSharedPointer<Renderer> renderer = currentRenderer.lock();
-    if (renderer)
+  render->glClear(GL_COLOR_BUFFER_BIT);
+  QSharedPointer<Renderer> renderer = currentRenderer.lock();
+  if (renderer)
+  {
+    if (!onlyShowTexture)
     {
-      if (!onlyShowTexture)
+      if (renderer->hasDynamicCamera() && !keysPressed.empty())
       {
-        if (renderer->hasDynamicCamera() && !keysPressed.empty())
+        Q_ASSERT(renderer->getCurrentCamera());
+        QVector3D delta;
+        if (keysPressed.contains(Qt::Key_Up))
         {
-          Q_ASSERT(renderer->getCurrentCamera());
-          QVector3D delta;
-          if (keysPressed.contains(Qt::Key_Up))
-          {
-            delta += QVector3D(0,0,1);
-          }
-          if (keysPressed.contains(Qt::Key_Down))
-          {
-            delta += QVector3D(0,0,-1);
-          }
-          if (keysPressed.contains(Qt::Key_Left))
-          {
-            delta += QVector3D(-1,0,0);
-          }
-          if (keysPressed.contains(Qt::Key_Right))
-          {
-            delta += QVector3D(1,0,0);
-          }
-          if (keysPressed.contains(Qt::Key_PageUp))
-          {
-            delta += QVector3D(0,1,0);
-          }
-          if (keysPressed.contains(Qt::Key_PageDown))
-          {
-            delta += QVector3D(0,-1,0);
-          }
-          renderer->getCurrentCamera()->translateRelative(delta*0.02f);
+          delta += QVector3D(0, 0, 1);
         }
-        render->render(*renderer);
+        if (keysPressed.contains(Qt::Key_Down))
+        {
+          delta += QVector3D(0, 0, -1);
+        }
+        if (keysPressed.contains(Qt::Key_Left))
+        {
+          delta += QVector3D(-1, 0, 0);
+        }
+        if (keysPressed.contains(Qt::Key_Right))
+        {
+          delta += QVector3D(1, 0, 0);
+        }
+        if (keysPressed.contains(Qt::Key_PageUp))
+        {
+          delta += QVector3D(0, 1, 0);
+        }
+        if (keysPressed.contains(Qt::Key_PageDown))
+        {
+          delta += QVector3D(0, -1, 0);
+        }
+        renderer->getCurrentCamera()->translateRelative(delta*0.02f);
       }
-
-      makeCurrent();
-      render->glViewport(0, 0, width(), height());
-      render->glActiveTexture(GL_TEXTURE0);
-      render->glBindTexture(GL_TEXTURE_2D, render->getFBO().texture());
-      quad->draw();
-      doneCurrent();
+      render->render(*renderer);
+    }
   }
+
+  makeCurrent();
+  render->glViewport(0, 0, width(), height());
+  quadShader.bind();
+  quadShader.setUniformValue("textureColor", 0);
+  render->glActiveTexture(GL_TEXTURE0);
+  render->glBindTexture(GL_TEXTURE_2D, render->getFBO().texture());
+  quad->draw();
+  quadShader.release();
+  doneCurrent();
 }
 
 void RenderWidget::mousePressEvent(QMouseEvent* event)

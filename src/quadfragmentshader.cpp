@@ -36,7 +36,7 @@ const char* QuadFragmentShaderCode::getVertexShaderCode()
     "{"
     "coords         = texCoords;"
     "uv             = position;"
-    "gl_Position    = vec3(position, 0.0);"
+    "gl_Position    = vec4(position, 0.0, 0.0);"
     "}";
   return vertexShader;
 }
