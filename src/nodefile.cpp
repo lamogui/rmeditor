@@ -3,9 +3,7 @@
 #include "camera.hpp"
 #include "logwidget.hpp"
 
-MediaFile::MediaFile() :
-  defaultRenderer(createRenderer()),
-  defaultCamera(defaultRenderer && defaultRenderer->hasDynamicCamera() ? new Camera : nullptr)
+MediaFile::MediaFile()
 {
   connect(this, &MediaFile::propertyChanged, this, &MediaFile::onPropertyChanged);
 }
@@ -17,6 +15,16 @@ MediaFile::MediaFile(const MediaFile& other):
 
   // only copy properties
   setPath(other.getPath());
+}
+
+void MediaFile::initializeGL(RenderFunctionsCache& gl)
+{
+  defaultRenderer.reset(createRenderer());
+  if (defaultRenderer)
+  {
+    defaultRenderer->initializeGL(gl);
+    defaultCamera.reset(defaultRenderer->hasDynamicCamera() ? new Camera : nullptr);
+  }
 }
 
 void MediaFile::setPath(const QFileInfo& newPath)

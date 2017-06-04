@@ -73,6 +73,10 @@ const char* RenderWidget::getDisplayTextureFragmentShaderCode()
 //-----------------------------------------------------------------------------
 void RenderWidget::initializeGL()
 {
+  // Functions 
+  renderFunctions.initializeOpenGLFunctions();
+  renderFunctions.glDisable(GL_DEPTH_TEST);
+
   // Debugger 
   Q_ASSERT(logWidget);
   qDebug() << "Created context version: " << format().majorVersion() << "." << format().minorVersion();
@@ -82,23 +86,26 @@ void RenderWidget::initializeGL()
 
   // Render
   Q_ASSERT(!render);
-  render = new RenderTexture2D(size());
-  render->initializeOpenGLFunctions(); // UGLY !!!
-  render->glDisable(GL_DEPTH_TEST);
+  render = new RenderTexture2D();
+  render->initializeGL(renderFunctions, size());
 
   // Fast2DQuad
   Q_ASSERT(!quad);
   quad = new Fast2DQuad();
-  quad->initializeOpenGLFunctions(); // UGLY !!!
+  quad->initializeGL(renderFunctions);
 
   // Shader
   if (quadShader.create())
   {
     if (!quadShader.addShaderFromSourceCode(QOpenGLShader::Vertex, QuadFragmentShaderCode::getVertexShaderCode()))
       logWidget->writeError("Fatal error! could not compile vertex shader: " + quadShader.log());
-    else if (!quadShader.addShaderFromSourceCode(QOpenGLShader::Fragment, getDisplayTextureFragmentShaderCode()))
+    else if (quadShader.log().size() > 0)
+      logWidget->writeWarning("Fatal Warning ! while compiling vertex shader: " + quadShader.log());
+
+    if (!quadShader.addShaderFromSourceCode(QOpenGLShader::Fragment, getDisplayTextureFragmentShaderCode()))
       logWidget->writeError("Fatal error! could not compile fragment shader: " + quadShader.log());
-    else
+    else if (quadShader.log().size() > 0)
+      logWidget->writeWarning("Fatal Warning ! while compiling fragment shader: " + quadShader.log());
     {
       // link
       quadShader.bindAttributeLocation("position", VertexAttributesIndex::position);
@@ -106,6 +113,8 @@ void RenderWidget::initializeGL()
 
       if (!quadShader.link())
         logWidget->writeError("Fatal error! could not link shader: " + quadShader.log());
+      else if (quadShader.log().size() > 0)
+        logWidget->writeWarning("Fatal Warning ! while linking shader: " + quadShader.log());
     }
   }
   else
@@ -117,7 +126,6 @@ void RenderWidget::initializeGL()
 //-----------------------------------------------------------------------------
 void RenderWidget::paintGL()
 {
-  render->glClear(GL_COLOR_BUFFER_BIT);
   QSharedPointer<Renderer> renderer = currentRenderer.lock();
   if (renderer)
   {
@@ -153,19 +161,20 @@ void RenderWidget::paintGL()
         }
         renderer->getCurrentCamera()->translateRelative(delta*0.02f);
       }
-      render->render(*renderer);
+      render->render(renderFunctions, *renderer);
     }
   }
 
-  makeCurrent();
-  render->glViewport(0, 0, width(), height());
+  static int k = 0;
+  renderFunctions.glViewport(0, 0, width(), height());
+  renderFunctions.glClearColor(0, 0, 0, 0);
+  renderFunctions.glClear(GL_COLOR_BUFFER_BIT);
   quadShader.bind();
   quadShader.setUniformValue("textureColor", 0);
-  render->glActiveTexture(GL_TEXTURE0);
-  render->glBindTexture(GL_TEXTURE_2D, render->getFBO().texture());
-  quad->draw();
+  renderFunctions.glActiveTexture(GL_TEXTURE0);
+  renderFunctions.glBindTexture(GL_TEXTURE_2D, render->getFBO().texture());
+  quad->draw(renderFunctions);
   quadShader.release();
-  doneCurrent();
 }
 
 void RenderWidget::mousePressEvent(QMouseEvent* event)

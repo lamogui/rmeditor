@@ -7,12 +7,17 @@
 RaymarchingScene::RaymarchingScene() :
   QuadFragmentShaderCode()
 {
-  defaultRenderer->setCurrentCamera(defaultCamera); // Ugly !!
+
 }
 
 RaymarchingScene::RaymarchingScene(const RaymarchingScene& other) :
   QuadFragmentShaderCode(other)
 {
+}
+
+void RaymarchingScene::initializeGL(RenderFunctionsCache& gl)
+{
+  BaseClass::initializeGL(gl);
   defaultRenderer->setCurrentCamera(defaultCamera);
 }
 

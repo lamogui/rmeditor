@@ -88,7 +88,7 @@ void Highlighter::defineGLSLFragmentShaderRules()
                   << "\\bvec3\\b" << "\\bvec4\\b" << "\\bmat2\\b"
                   << "\\bmat3\\b" << "\\bmat4\\b" << "\\bin\\b"
                   << "\\out\\b" << "\\binout\\b" << "\\bvoid\\b"
-                  << "\\buniform\\b" << "\\bvarying\\b" << "\\battribute\\b" << "\\bstruct\\b"
+                  << "\\buniform\\b" << "\\bvarying\\b" << "\\battribute\\b" << "\\bstruct\\b" << "\\bsmooth\\b"
                   << "\\bsampler1D\\b" << "\\bsampler2D\\b" << "\\bsampler3D\\b" << "\\bgl_FragColor\\b";
   foreach (const QString &pattern, typePatterns) {
       rule.pattern = QRegExp(pattern);

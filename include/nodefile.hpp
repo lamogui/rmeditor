@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include "camera.hpp" // QSharedPointer fail !
 #include "renderer.hpp"
+#include "renderfunctionscache.hpp"
 
 class MediaFile : public QObject /* Media */
 {
@@ -15,6 +16,8 @@ class MediaFile : public QObject /* Media */
 public:
   MediaFile();
   MediaFile(const MediaFile& other);
+
+  virtual void initializeGL(RenderFunctionsCache& gl);
 
   // File Path
   inline const QFileInfo& getPath() const { return path; }

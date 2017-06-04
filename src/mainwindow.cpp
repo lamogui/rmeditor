@@ -35,7 +35,10 @@ MainWindow::MainWindow(QWidget *parent) :
     info->getLogWidget()->setPrintTime(false);
     ui->renderWidget->setLogWidget((info->getLogWidget()));
 
-    editor = new EditorWidget(*(info->getLogWidget()),this);
+    editor = new EditorWidget(this);
+    info->getLogWidget()->findAndConnectLogSignalsRecursively(*editor); 
+
+
     //timelineWidget = new TimelineDockWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea, info);
     //addDockWidget(Qt::BottomDockWidgetArea, timelineWidget);
@@ -125,9 +128,14 @@ void MainWindow::open()
       project = new Project(dir,QFileInfo(f).fileName(),*(info->getLogWidget()),this);
       connectProject();
       */
+
+      ui->renderWidget->makeCurrent();
       RaymarchingScene* shader = new RaymarchingScene();
+      info->getLogWidget()->findAndConnectLogSignalsRecursively(*shader);
+      shader->initializeGL(ui->renderWidget->getRenderFunctions());
       shader->setPath(QFileInfo(f));
       editor->appendTextEditable(shader);
+      ui->renderWidget->doneCurrent();
     }
   }
   

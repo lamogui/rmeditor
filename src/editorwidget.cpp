@@ -10,17 +10,16 @@
 #include "texteditor.hpp"
 #include "texteditable.hpp"
 
-EditorWidget::EditorWidget(LogWidget &log, QWidget *parent) :
+EditorWidget::EditorWidget(QWidget *parent) :
     QDockWidget(parent),
-    log(&log),
     ui(new Ui::EditorWidget)
 {
-    ui->setupUi(this);
+  ui->setupUi(this);
 }
 
 EditorWidget::~EditorWidget()
 {
-    delete ui;
+  delete ui;
 }
 
 /*
@@ -47,11 +46,11 @@ void EditorWidget::on_saveButton_clicked(bool)
   {
     if (te->save())
     {
-      log->writeInfo(tr("saved ") + te->textObject()->getPath().fileName());
+      emit info(tr("saved ") + te->textObject()->getPath().fileName());
     }
     else
     {
-     log->writeError(tr("unable to save the file ") + te->textObject()->getPath().fileName());
+      emit error(tr("unable to save the file ") + te->textObject()->getPath().fileName());
     }
   }
 }
@@ -63,11 +62,11 @@ void EditorWidget::on_buildButton_clicked(bool)
   {
     if (te->build())
     {
-      log->writeInfo(QString("[") + te->textObject()->getPath().fileName() + tr("] build success !"));
+      emit info(QString("[") + te->textObject()->getPath().fileName() + tr("] build success !"));
     }
     else
     {
-      log->writeError(QString("[") + te->textObject()->getPath().fileName() + tr("] build failure !"));
+      emit error(QString("[") + te->textObject()->getPath().fileName() + tr("] build failure !"));
     }
   }
 }

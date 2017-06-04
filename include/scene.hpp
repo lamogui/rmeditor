@@ -13,8 +13,13 @@ public:
   RaymarchingScene();
   RaymarchingScene(const RaymarchingScene& other);
 
+  void initializeGL(RenderFunctionsCache& gl) override;
+
   // MediaFile Renderer
   Renderer* createRenderer() const override;
+
+private:
+  typedef QuadFragmentShaderCode BaseClass;
 };
 
 Q_DECLARE_METATYPE(RaymarchingScene);

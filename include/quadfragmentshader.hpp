@@ -49,6 +49,7 @@ public:
   void setShaderCode(const QuadFragmentShaderCode* s) { shaderCode = s; }
 
   // Rendering
+  void initializeGL(RenderFunctionsCache& gl) override;
   void glRender(RenderFunctionsCache& gl, Render& render) override;
 
 protected:

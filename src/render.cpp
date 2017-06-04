@@ -6,8 +6,7 @@
 /*
 ** Render
 */
-Render::Render(const QSize& initialSize, Type type):
-  fbo(new QOpenGLFramebufferObject(initialSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8)),
+Render::Render(Type type):
   type(type)
 {
   //createAttachements(initialSize);
@@ -15,15 +14,21 @@ Render::Render(const QSize& initialSize, Type type):
 
 Render::~Render()
 {
-  delete fbo;
 }
 
-void Render::render(Renderer& renderer)
+void Render::initializeGL(RenderFunctionsCache& renderFunctions, const QSize& initialFBOSize)
 {
-  renderer.renderChildrens(*this);
+  fbo.reset(new QOpenGLFramebufferObject(initialFBOSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8));
+}
+
+void Render::render(RenderFunctionsCache& renderFunctions, Renderer& renderer)
+{
+  renderer.renderChildrens(renderFunctions);
   fbo->bind();
-  this->glViewport(0, 0, (GLsizei)fbo->width(), (GLsizei)fbo->height());
-  renderer.glRender(*this, *this);
+  renderFunctions.glClearColor(1, 0, 0, 1);
+  renderFunctions.glClear(GL_COLOR_BUFFER_BIT);
+  renderFunctions.glViewport(0, 0, (GLsizei)fbo->width(), (GLsizei)fbo->height());
+  renderer.glRender(renderFunctions, *this);
   fbo->release();
 }
 
@@ -35,8 +40,7 @@ void Render::resize(const QSize& newSize)
 
 void Render::resizeFBO(const QSize& newSize)
 {
-  delete fbo;
-  fbo = new QOpenGLFramebufferObject(newSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8);
+  fbo.reset(new QOpenGLFramebufferObject(newSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8));
   createAttachements(newSize);
 }
 
@@ -44,8 +48,8 @@ void Render::resizeFBO(const QSize& newSize)
 ** RenderTexture2D
 */
 
-RenderTexture2D::RenderTexture2D(const QSize& initialSize) :
-  Render(initialSize, Texture2D)
+RenderTexture2D::RenderTexture2D() :
+  Render(Texture2D)
 {
 
 }

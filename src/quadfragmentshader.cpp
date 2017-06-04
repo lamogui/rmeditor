@@ -34,9 +34,9 @@ const char* QuadFragmentShaderCode::getVertexShaderCode()
     "smooth out vec2 uv;"
     "void main()"
     "{"
-    "coords         = texCoords;"
-    "uv             = position;"
-    "gl_Position    = vec4(position, 0.0, 0.0);"
+    "coords         = texCoords;" // [0 .. 1]
+    "uv             = position;"  // [-1 .. 1]
+    "gl_Position    = vec4(position, 0.0, 1.0);" // w = 1 because https://stackoverflow.com/questions/2422750/in-opengl-vertex-shaders-what-is-w-and-why-do-i-divide-by-it
     "}";
   return vertexShader;
 }
@@ -72,6 +72,11 @@ bool QuadFragmentShaderCode::build(const QString &text)
 ** ReferencedQuadFragmentShaderRenderer
 */
 
+void ReferencedQuadFragmentShaderRenderer::initializeGL(RenderFunctionsCache& gl)
+{
+  quad.initializeGL(gl);
+}
+
 void ReferencedQuadFragmentShaderRenderer::glRender(RenderFunctionsCache& gl, Render& render)
 {
   QSharedPointer<ShaderProgram> shader = shaderCode ? shaderCode->getShaderProgram() : nullptr;
@@ -79,7 +84,7 @@ void ReferencedQuadFragmentShaderRenderer::glRender(RenderFunctionsCache& gl, Re
   {
     shader->bind();
     configureUniforms(*shader);
-    quad.draw();
+    quad.draw(gl);
     shader->release();
   }
 }

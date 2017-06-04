@@ -7,6 +7,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
 
+#include "renderfunctionscache.hpp"
 
 class Camera;
 class RenderTexture2D;
@@ -23,6 +24,8 @@ public:
        ~RenderWidget();
 
        void setLogWidget(LogWidget* log); // FIXME : remove this !
+
+       RenderFunctionsCache& getRenderFunctions() { return renderFunctions; }
 
        static const char* getDisplayTextureFragmentShaderCode();
 
@@ -52,6 +55,7 @@ protected:
        QTimer updateTimer;
 
        // Render objects 
+       RenderFunctionsCache renderFunctions;
        RenderTexture2D* render;          // fbo
        Fast2DQuad* quad;                 // geometry
        QOpenGLShaderProgram quadShader;  // shader

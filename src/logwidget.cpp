@@ -1,5 +1,6 @@
 #include <QTime>
 #include <QString>
+#include <QMetaMethod>
 #include "logwidget.hpp"
 
 
@@ -71,11 +72,11 @@ void LogWidget::findAndConnectLogSignalsRecursively(const QObject& object)
   const QMetaObject* meta = object.metaObject();
   if (meta)
   {
-    if (meta->indexOfSignal(QMetaObject::normalizedSignature("void error(QString)")) != -1)
+    if (meta->indexOfSignal("error(QString)") != -1)
       connect(&object, SIGNAL(error(QString)), this, SLOT(writeError(QString)));
-    if (meta->indexOfSignal(QMetaObject::normalizedSignature("void warning(QString)")) != -1)
+    if (meta->indexOfSignal("warning(QString)") != -1)
       connect(&object, SIGNAL(warning(QString)), this, SLOT(writeWarning(QString)));
-    if (meta->indexOfSignal(QMetaObject::normalizedSignature("void info(QString)")) != -1)
+    if (meta->indexOfSignal("info(QString)") != -1)
       connect(&object, SIGNAL(info(QString)), this, SLOT(writeInfo(QString)));
 
     foreach(const QObject* child, object.children())

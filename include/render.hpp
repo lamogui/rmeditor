@@ -5,7 +5,7 @@
 #include <QOpenGLFramebufferObject>
 
 class Renderer;
-class Render : public RenderFunctionsCache // FIXME : do not inherit from this 
+class Render
 {
 public:
 
@@ -15,16 +15,18 @@ public:
     Cubemap // One day 
   };
 
-  Render(const QSize& initialSize, Type type);
+  Render(Type type);
   virtual ~Render();
 
+  void initializeGL(RenderFunctionsCache& renderFunctions, const QSize& initialFBOSize);
+
   // Accessors
-  const QOpenGLFramebufferObject& getFBO() const { return *fbo; }
+  const QOpenGLFramebufferObject& getFBO() const { return *fbo; } // Ugly !
   Type getType() const { return type; }
   void resize(const QSize& newSize);
 
   // The function ! 
-  void render(Renderer& renderer);
+  void render(RenderFunctionsCache& renderFunctions, Renderer& renderer);
 
 protected:
   // utils
@@ -33,7 +35,7 @@ protected:
   // to override
   virtual void createAttachements(const QSize& fboSize) = 0; // note that the default RGBA color attachement is always created !
 
-  QOpenGLFramebufferObject* fbo;
+  QSharedPointer<QOpenGLFramebufferObject> fbo;
 
 private:
   Type type;
@@ -42,7 +44,7 @@ private:
 class RenderTexture2D : public Render
 {
 public:
-  RenderTexture2D(const QSize& initialSize);
+  RenderTexture2D();
 
 protected:
   void createAttachements(const QSize& fboSize) final;

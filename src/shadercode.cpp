@@ -76,6 +76,6 @@ bool GLSLShaderCode::handleShaderLinkResult(ShaderProgram& program)
   }
   else if (!program.log().isEmpty())
     emit warning(getPath().fileName() + " (at link): " + program.log());
-  return false;
+  return true;
 }
 

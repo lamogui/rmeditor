@@ -11,9 +11,9 @@ namespace VertexAttributesIndex
 {
   enum Enum
   {
-    position = 0,
-    texCoord = 1,
-    normal = 2
+    position = 1,
+    texCoord = 2,
+    normal = 3
   };
 
   std::string&& toString(Enum e);

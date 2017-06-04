@@ -5,13 +5,14 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 
-class Fast2DQuad : public RenderFunctionsCache // FIXME : do not inherit from this !!! 
+class Fast2DQuad 
 {
 public:
   Fast2DQuad();
-  ~Fast2DQuad() override;
+  virtual ~Fast2DQuad();
 
-  void draw();
+  void initializeGL(RenderFunctionsCache& gl);
+  void draw(RenderFunctionsCache& gl);
 
 private:
   QOpenGLBuffer vbo;

@@ -20,6 +20,7 @@ public:
   virtual ~Renderer() {}
 
   // Rendering
+  virtual void initializeGL(RenderFunctionsCache& gl) = 0;
   virtual void renderChildrens(RenderFunctionsCache& gl) {}            // Pre-render all the internals FBOs/GeometryShaders before "real" render
   virtual void glRender(RenderFunctionsCache& gl, Render& render) = 0; // You must not bind any FBO in this function 
 
