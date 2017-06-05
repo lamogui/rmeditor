@@ -2,20 +2,16 @@
 #define SHADERCODE_HPP
 
 #include "texteditable.hpp"
+#include <QPointer>
 
 class ShaderMinifier;
 class GLSLShaderCode : public TextEditable /* Represent any shader code media text */
 {
   Q_OBJECT
-  Q_PROPERTY(QWeakPointer<GLSLShaderCode> framework MEMBER framework READ getFramework WRITE setFramework)
 
 public:
   GLSLShaderCode();
-  GLSLShaderCode(const GLSLShaderCode& other);
-
-  // accessors
-  const QWeakPointer<GLSLShaderCode>& getFramework() const { return framework; }
-  void setFramework(const QWeakPointer<GLSLShaderCode>& framework);
+  GLSLShaderCode(const GLSLShaderCode& other); // for Q_DECLARE_METATYPE do not use !
 
   // TextEditable
   const QString& getText() const override;
@@ -34,9 +30,11 @@ protected:
   QString shaderCode;
 
 private:
-  QWeakPointer<GLSLShaderCode> framework;
+  //QPointer<GLSLShaderCode> framework;
+  DECLARE_PROPERTY_REFERENCE(QPointer<GLSLShaderCode>, framework, Framework)
 };
 
+// FIXME : create a class instatiator that to the job of QMetaType without need a copy constructor
 Q_DECLARE_METATYPE(GLSLShaderCode);
 
 #endif // !SHADERCODE_HPP

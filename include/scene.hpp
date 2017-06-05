@@ -22,7 +22,8 @@ private:
   typedef QuadFragmentShaderCode BaseClass;
 };
 
-Q_DECLARE_METATYPE(RaymarchingScene);
+// FIXME : create a class instatiator that to the job of QMetaType without need a copy constructor
+Q_DECLARE_METATYPE(RaymarchingScene); // only to instantiate from class name 
 
 class ReferencedRaymarchingSceneRenderer : public ReferencedQuadFragmentShaderRenderer
 {

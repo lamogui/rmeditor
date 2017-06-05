@@ -14,21 +14,13 @@ GLSLShaderCode::GLSLShaderCode() :
 
 }
 
-GLSLShaderCode::GLSLShaderCode(const GLSLShaderCode& other) :
-  TextEditable(other)
+GLSLShaderCode::GLSLShaderCode(const GLSLShaderCode&) :
+  TextEditable()
 {
-
+  Q_ASSERT(false); // Do not use this constructor (forbiden by QObject)
 }
 
-void GLSLShaderCode::setFramework(const QWeakPointer<GLSLShaderCode>& newFramework)
-{
-  if (newFramework != framework)
-  {
-    QWeakPointer<GLSLShaderCode> oldFramework = framework;
-    framework = newFramework;
-    emit propertyChanged(this, "framework", QVariant::fromValue(oldFramework), QVariant::fromValue(newFramework));
-  }
-}
+GENERATE_PROPERTY_SETTER_REFERENCE(GLSLShaderCode, QPointer<GLSLShaderCode>, framework, Framework)
 
 const QString &GLSLShaderCode::getText() const
 {
@@ -39,7 +31,7 @@ QString GLSLShaderCode::getShaderCodeRecursive() const
 {
   if (framework)
   {
-    return framework.lock()->getShaderCodeRecursive() + getText();
+    return framework->getShaderCodeRecursive() + getText();
   }
   return getText();
 }

@@ -5,37 +5,45 @@
 #include "music.hpp"
 
 
-Timeline::Timeline(Music &music, double height, double framerate, LogWidget &log):
-  QGraphicsScene(&music),
-  height(height),
-  framerate(framerate),
-  music(&music)
+Timeline::Timeline(const QWeakPointer<Music>& music):
+  QGraphicsScene(music.lock().data()),
+  music(music),
+  framerate(0)
 {
-  setSceneRect(0,0,this->music->getLength()*framerate,height);
+  QSharedPointer<Music> m = this->music.lock();
+  Q_ASSERT(m);
+  //setSceneRect(0,0,m->getLength()*framerate,height);
 
-  connectLog(log);
+  CONNECT_XML_SAVED_OBJECT(Timeline);
 }
 
-
-void Timeline::connectLog(LogWidget &log)
+void Timeline::setFramerate(double newFramerate)
 {
-  connect(this,SIGNAL(error(QString)),&log,SLOT(writeError(QString)));
-  connect(this,SIGNAL(warning(QString)),&log,SLOT(writeWarning(QString)));
-  connect(this,SIGNAL(info(QString)),&log,SLOT(writeInfo(QString)));
+  if (newFramerate <= 0)
+  { 
+    emit error(objectName() + ": invalide framerate: " + newFramerate);
+    newFramerate = 0;
+  }
+  if (framerate != framerate)
+  {
+    double oldFramerate = framerate;
+    framerate = newFramerate;
+    emit propertyChanged(this, "framerate", oldFramerate, framerate);
+    emit framerateChanged(framerate);
+  }
 }
-
 
 qint64 Timeline::currentFrame() const
 {
-  return (qint64)(getMusic()->getTime()*framerate);
+  return (qint64)(getMusic().lock()->getTime()*framerate);
 }
 
-qint64 Timeline::length() const
+qint64 Timeline::getLength() const
 {
-  return (qint64)(music->getLength()*framerate);
+  return (qint64)(getMusic().lock()->getLength()*framerate);
 }
 
 void Timeline::requestFramePosition(qint64 frame)
 {
-  music->setPosition(((double)frame/framerate) + (0.5/framerate));
+  getMusic().lock()->setPosition(((double)frame/framerate) + (0.5/framerate));
 }

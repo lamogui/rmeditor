@@ -3,7 +3,7 @@
 #ifndef TEXTEDITABLE_HPP
 #define TEXTEDITABLE_HPP
 
-#include "nodefile.hpp"
+#include "mediafile.hpp"
 
 class Renderer;
 class TextEditable : public MediaFile /* Represent any text compilable text media */
@@ -12,7 +12,6 @@ class TextEditable : public MediaFile /* Represent any text compilable text medi
 
 public:
   TextEditable();
-  TextEditable(const TextEditable& other);
 
   //The text to print in the editor and that will be saved in the file
   virtual const QString& getText() const = 0;

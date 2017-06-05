@@ -11,12 +11,6 @@ QuadFragmentShaderCode::QuadFragmentShaderCode() :
 
 }
 
-QuadFragmentShaderCode::QuadFragmentShaderCode(const QuadFragmentShaderCode& other) :
-  GLSLShaderCode(other)
-{
-
-}
-
 Renderer* QuadFragmentShaderCode::createRenderer() const
 {
   ReferencedQuadFragmentShaderRenderer* renderer = new ReferencedQuadFragmentShaderRenderer();
@@ -48,7 +42,7 @@ bool QuadFragmentShaderCode::build(const QString &text)
   QString code;
   if (getFramework())
   {
-    code += getFramework().lock()->getShaderCodeRecursive();
+    code += getFramework()->getShaderCodeRecursive();
     emit startLineNumberChanged(code.count(QChar::LineFeed));
   }
   code += shaderCode;

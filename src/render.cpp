@@ -25,7 +25,7 @@ void Render::render(RenderFunctionsCache& renderFunctions, Renderer& renderer)
 {
   renderer.renderChildrens(renderFunctions);
   fbo->bind();
-  renderFunctions.glClearColor(1, 0, 0, 1);
+  renderFunctions.glClearColor(0, 0, 0, 1);
   renderFunctions.glClear(GL_COLOR_BUFFER_BIT);
   renderFunctions.glViewport(0, 0, (GLsizei)fbo->width(), (GLsizei)fbo->height());
   renderer.glRender(renderFunctions, *this);

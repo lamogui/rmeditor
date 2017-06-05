@@ -43,7 +43,7 @@ set(RMEDITOR_INCLUDE_DIR include)
 set(RMEDITOR_H
 #  ${RMEDITOR_INCLUDE_DIR}/4klangmusic.hpp
   ${RMEDITOR_INCLUDE_DIR}/camera.hpp
-#  ${RMEDITOR_INCLUDE_DIR}/demotimeline.hpp
+  ${RMEDITOR_INCLUDE_DIR}/demotimeline.hpp
   ${RMEDITOR_INCLUDE_DIR}/editorwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/fast2dquad.hpp
 #  ${RMEDITOR_INCLUDE_DIR}/ffmpegencoder.hpp
@@ -52,24 +52,27 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/logdockwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/logwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/mainwindow.hpp
-#  ${RMEDITOR_INCLUDE_DIR}/music.hpp
-  ${RMEDITOR_INCLUDE_DIR}/nodefile.hpp
-#  ${RMEDITOR_INCLUDE_DIR}/project.hpp
+  ${RMEDITOR_INCLUDE_DIR}/mediafile.hpp
+  ${RMEDITOR_INCLUDE_DIR}/music.hpp
+  ${RMEDITOR_INCLUDE_DIR}/project.hpp
   ${RMEDITOR_INCLUDE_DIR}/quadfragmentshader.hpp
   ${RMEDITOR_INCLUDE_DIR}/render.hpp
   ${RMEDITOR_INCLUDE_DIR}/renderer.hpp
   ${RMEDITOR_INCLUDE_DIR}/renderfunctionscache.hpp
   ${RMEDITOR_INCLUDE_DIR}/renderwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/scene.hpp
-#  ${RMEDITOR_INCLUDE_DIR}/sequence.hpp
+  ${RMEDITOR_INCLUDE_DIR}/sequence.hpp
   ${RMEDITOR_INCLUDE_DIR}/shadercode.hpp
   ${RMEDITOR_INCLUDE_DIR}/shaderminifier.hpp
   ${RMEDITOR_INCLUDE_DIR}/texteditable.hpp
   ${RMEDITOR_INCLUDE_DIR}/texteditor.hpp
-#  ${RMEDITOR_INCLUDE_DIR}/timeline.hpp
-#  ${RMEDITOR_INCLUDE_DIR}/timelinedockwidget.hpp
-#  ${RMEDITOR_INCLUDE_DIR}/timelinewidget.hpp
+  ${RMEDITOR_INCLUDE_DIR}/timeline.hpp
+  ${RMEDITOR_INCLUDE_DIR}/timelinedockwidget.hpp
+  ${RMEDITOR_INCLUDE_DIR}/timelinetrack.hpp
+  ${RMEDITOR_INCLUDE_DIR}/timelinewidget.hpp
 #  ${RMEDITOR_INCLUDE_DIR}/tunefish4music.hpp
+  ${RMEDITOR_INCLUDE_DIR}/undocommands.hpp
+  ${RMEDITOR_INCLUDE_DIR}/xmlsavedobject.hpp
 )
 
 #sources
@@ -77,34 +80,36 @@ set(RMEDITOR_SRC_DIR src)
 set(RMEDITOR_SRC 
 #  ${RMEDITOR_SRC_DIR}/4klangmusic.cpp
   ${RMEDITOR_SRC_DIR}/camera.cpp
-#  ${RMEDITOR_SRC_DIR}/demotimeline.cpp
+  ${RMEDITOR_SRC_DIR}/demotimeline.cpp
   ${RMEDITOR_SRC_DIR}/editorwidget.cpp
   ${RMEDITOR_SRC_DIR}/fast2dquad.cpp
-#  ${RMEDITOR_SRC_DIR}/ffmpegencoder.cpp
+  ${RMEDITOR_SRC_DIR}/ffmpegencoder.cpp
   ${RMEDITOR_SRC_DIR}/highlighter.cpp
-  #${RMEDITOR_SRC_DIR}/keyframe.cpp
+  ${RMEDITOR_SRC_DIR}/keyframe.cpp
   ${RMEDITOR_SRC_DIR}/logdockwidget.cpp
   ${RMEDITOR_SRC_DIR}/logwidget.cpp
   ${RMEDITOR_SRC_DIR}/main.cpp
   ${RMEDITOR_SRC_DIR}/mainwindow.cpp
-#  ${RMEDITOR_SRC_DIR}/music.cpp
-  ${RMEDITOR_SRC_DIR}/nodefile.cpp
-#  ${RMEDITOR_SRC_DIR}/project.cpp
+  ${RMEDITOR_SRC_DIR}/mediafile.cpp
+  ${RMEDITOR_SRC_DIR}/music.cpp
+  ${RMEDITOR_SRC_DIR}/project.cpp
   ${RMEDITOR_SRC_DIR}/quadfragmentshader.cpp
   ${RMEDITOR_SRC_DIR}/render.cpp
   ${RMEDITOR_SRC_DIR}/renderer.cpp
   ${RMEDITOR_SRC_DIR}/renderfunctionscache.cpp
   ${RMEDITOR_SRC_DIR}/renderwidget.cpp
   ${RMEDITOR_SRC_DIR}/scene.cpp
-#  ${RMEDITOR_SRC_DIR}/sequence.cpp
+  ${RMEDITOR_SRC_DIR}/sequence.cpp
   ${RMEDITOR_SRC_DIR}/shadercode.cpp
   ${RMEDITOR_SRC_DIR}/shaderminifier.cpp
   ${RMEDITOR_SRC_DIR}/texteditable.cpp
   ${RMEDITOR_SRC_DIR}/texteditor.cpp
-#  ${RMEDITOR_SRC_DIR}/timeline.cpp
-#  ${RMEDITOR_SRC_DIR}/timelinedockwidget.cpp
-#  ${RMEDITOR_SRC_DIR}/timelinewidget.cpp
+  ${RMEDITOR_SRC_DIR}/timeline.cpp
+  ${RMEDITOR_SRC_DIR}/timelinedockwidget.cpp
+  ${RMEDITOR_SRC_DIR}/timelinetrack.cpp
+  ${RMEDITOR_SRC_DIR}/timelinewidget.cpp
 #  ${RMEDITOR_SRC_DIR}/tunefish4music.cpp
+  ${RMEDITOR_SRC_DIR}/undocommands.cpp
 )
 
 #ui

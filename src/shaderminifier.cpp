@@ -1,18 +1,8 @@
 
 #include "shaderminifier.hpp"
 
-#include "logwidget.hpp"
-
-ShaderMinifier::ShaderMinifier(LogWidget &log)
+ShaderMinifier::ShaderMinifier()
 {
-  connectLog(log);
-}
-
-void ShaderMinifier::connectLog(LogWidget& log)
-{
-  connect(this,SIGNAL(error(QString)),&log,SLOT(writeError(QString)));
-  connect(this,SIGNAL(warning(QString)),&log,SLOT(writeWarning(QString)));
-  connect(this,SIGNAL(info(QString)),&log,SLOT(writeInfo(QString)));
 }
 
 QString ShaderMinifier::minifiedShaderCode(const QString &filename, const QString& original) const
@@ -116,13 +106,3 @@ QString ShaderMinifier::cFormatedShaderCode(const QString &filename, const QStri
   return cCode;
 }
 
-
-QString ShaderMinifier::generatedHeaderString()
-{
-  return QString();
-}
-
-QString ShaderMinifier::generatedSourceString()
-{
-  return QString();
-}

@@ -9,7 +9,7 @@
 
 
 #include "camera.hpp"
-#include "renderer.hpp"
+#include "quadfragmentshader.hpp"
 #include "timeline.hpp"
 
 class DemoTimeline;
@@ -17,7 +17,7 @@ class Project;
 class Sequence;
 
 
-class DemoRender : public Render
+class DemoTimelineRenderer : public 
 {
 public:
   DemoRender(DemoTimeline&  timeline, const QSize& initialSize);

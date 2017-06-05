@@ -11,8 +11,9 @@ RaymarchingScene::RaymarchingScene() :
 }
 
 RaymarchingScene::RaymarchingScene(const RaymarchingScene& other) :
-  QuadFragmentShaderCode(other)
+  RaymarchingScene()
 {
+  Q_ASSERT(false); // do not use this constructor (forbiden by QObject)
 }
 
 void RaymarchingScene::initializeGL(RenderFunctionsCache& gl)

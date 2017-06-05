@@ -2,28 +2,27 @@
 #define MUSIC_HPP
 
 #include <QMutex>
-#include <QProgressBar>
-#include "nodefile.hpp"
-#include "texture.hpp"
+#include <QOpenGLTexture>
 
 #include <rtaudio/RtAudio.h>
+#include "mediafile.hpp"
 
 
 class RtAudio;
 class Timeline;
-
 class Music : public MediaFile
 {
   Q_OBJECT
+  Q_PROPERTY(bool playing MEMBER playing READ isPlaying) // don't use macro because volatile bool + read only + non standard getter name
 
 public:
-  Music(const QString& filename, double length, QDomNode node, QObject* parent);
+  Music();
   ~Music() override;
 
   virtual double getTime() const = 0;
+  virtual double getLength() const = 0;
 
-  inline double getLength() const { return length; }
-  inline Texture2D& getNoteVelocityTex() { return noteVelocityTex; }
+  inline QWeakPointer<QOpenGLTexture> getNoteVelocityTexture() { return noteVelocityTexture; }
 
   bool isPlaying() const { return playing; }
 
@@ -44,8 +43,6 @@ public slots:
   inline void play() { playing = true; }
   inline void pause() { playing = false;}
 
-
-
 protected:
 
   //Use this callback
@@ -54,11 +51,30 @@ protected:
 
   static void rtAudioError(RtAudioError::Type type, const std::string &errorText);
 
+  // RtAudio
   size_t bytesPerFrame; //Rt audio bytes per frame
   RtAudio audio;
-  Texture2D noteVelocityTex;
-  double length;
+
+  // Usefull variables
+  QSharedPointer<QOpenGLTexture> noteVelocityTexture;
+
+  // Control
   volatile bool playing;
 };
 
-#endif
+class ExternalLengthMusic : public Music
+{
+  Q_OBJECT
+
+public:
+  ExternalLengthMusic();
+
+signals:
+  // Log 
+  void error(QString);
+
+private:
+  DECLARE_PROPERTY(double, length, Length)
+};
+
+#endif // !MUSIC_HPP

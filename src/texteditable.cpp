@@ -7,13 +7,6 @@ TextEditable::TextEditable() :
   connect(this, SIGNAL(pathChanged(QFileInfo)), this, SLOT(load()));
 }
 
-TextEditable::TextEditable(const TextEditable& other) :
-  MediaFile(other)
-{
-  Q_ASSERT(false); // Humhum should not be called !
-  connect(this, SIGNAL(pathChanged(QFileInfo)), this, SLOT(load()));
-}
-
 bool TextEditable::load()
 {
   QString text;

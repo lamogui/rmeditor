@@ -24,7 +24,6 @@ class TextEditor : public QPlainTextEdit
      void lineNumberAreaPaintEvent(QPaintEvent *event);
      int lineNumberAreaWidth();
 
-
      inline TextEditable* textObject() const { return object; }
 
 public slots:
@@ -34,7 +33,6 @@ public slots:
 
 signals:
      void saved(TextEditor* editor, bool);
-
 
 protected:
      void resizeEvent(QResizeEvent *event);

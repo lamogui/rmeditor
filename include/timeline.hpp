@@ -6,41 +6,53 @@
 #include <QPainter>
 #include <QRectF>
 
-class LogWidget;
+#include "xmlsavedobject.hpp"
+
 class Music;
 class Render;
-
 class Timeline : public QGraphicsScene
 {
   Q_OBJECT
+  PROPERTY_CALLBACK_OBJECT
+  Q_PROPERTY(double framerate MEMBER framerate READ getFramerate WRITE setFramerate NOTIFY framerateChanged)
+  XML_SAVED_OBJECT
 
 public:
-  Timeline(Music& music, double height, double framerate, LogWidget& log);
+  Timeline(const Music& music);
 
+  // Property 
   inline double getFramerate() const { return framerate; }
-  inline Music* getMusic() const { return music; }
-  qint64 length() const; //in frames
+  void setFramerate(double newFramerate);
 
-  //Do the connections to log
-  void connectLog(LogWidget& log);
+  // For now this should never be null
+  const QWeakPointer<Music>& getMusic() const { return music; }
 
+  // frame timings shortcuts
+  qint64 getLength() const; 
   qint64 currentFrame() const;
 
   virtual Render* getRender() { return nullptr; }
   virtual void updateTime() = 0;
 
 signals:
-  void error(QString err) const;
-  void warning(QString warn) const;
-  void info(QString txt) const;
+  // Log
+  void error(QString);
+  void warning(QString);
+  void info(QString);
+
+  // property 
+  void framerateChanged(double);
 
 public slots:
-  void requestFramePosition(qint64 frame);
+  void requestFramePosition(qint64 frame); // shortcut
 
 protected:
-  double height;
+  // links
+  QPointer<Music> music; // should never be null
+
+private:
+  // property                      
   double framerate;
-  Music* music;
 
 };
 

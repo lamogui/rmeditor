@@ -10,21 +10,22 @@
 #include "timeline.hpp"
 #include "renderer.hpp"
 
-Music::Music(const QString &filename, double length, QDomNode node, LogWidget &log, QObject *parent):
-  NodeFile(filename,node,log,parent),
+/*
+** Music
+*/
+
+Music::Music():
+  MediaFile(),
   audio(),
-  length(length),
   playing(false)
 {
-  if (length <= 0)
-  {
-    emit error("[" + filename + "] error: invalid length");
-  }
+  /* 
+  // FIXME : move this elsewhere
   if (audio.getDeviceCount() < 1)
   {
     emit error("[" + filename + "] error: no audio device found");
   }
-
+  */
 }
 
 Music::~Music()
@@ -52,6 +53,26 @@ void Music::rtAudioError(RtAudioError::Type type, const std::string &errorText)
 {
   (void) type;
   qDebug() << tr("rtAudio error: ") + QString::fromStdString(errorText);
+}
+
+/*
+** ExternalLengthMusic
+*/
+
+ExternalLengthMusic::ExternalLengthMusic() : 
+  Music(),
+  length(0)
+{
+}
+
+void ExternalLengthMusic::setLength(double newlength)
+{
+  if (newlength <= 0)
+  {
+    newlength = 0;
+    emit error("[" + getPath().fileName() + "] error: invalid length " + newlength);
+  }
+  SET_PROPERTY(double, length)
 }
 
 

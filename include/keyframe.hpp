@@ -2,51 +2,30 @@
 #define KEYFRAME_HPP
 
 #include <QColor>
-#include <QDomElement>
-#include <QGraphicsItem>
-#include <QObject>
+#include <QGraphicsObject>
 
+#include "xmlsavedobject.hpp"
 
-class Project;
-class Sequence;
-
-class Keyframe : public QObject, public QGraphicsItem
+class KeyframeTrack; // Should be the parent
+class Keyframe : public QGraphicsObject
 {
 
   Q_OBJECT
-  Q_INTERFACES(QGraphicsItem)
+  PROPERTY_CALLBACK_OBJECT
+  XML_SAVED_OBJECT
   
   public:
-    Keyframe(qint64 rel_frame,Project& project, Sequence *seq, QDomElement& node);
-    Keyframe(Project& project, Sequence *seq, QDomElement& node);
+    //Keyframe(qint64 rel_frame,Project& project, Sequence *seq, QDomElement& node);
+    //Keyframe(Project& project, Sequence *seq, QDomElement& node);
 
+    Keyframe(KeyframeTrack* parent = nullptr);
     ~Keyframe() override;
-
-    virtual void load();
-
-    inline Sequence* getSequence() const { return sequence; }
-    inline qint64 relativeFrame() const { return (qint64)pos().x(); }
-    inline qint64 absoluteFrame() const { return (qint64)scenePos().x(); }
-
-    void setRelativeFrame(qint64 frame, bool notify = true);
-    void setAbsoluteFrame(qint64 frame, bool notify = true);
 
     // QGraphicsItem
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     QRectF boundingRect() const override;
 
-    void notifyChanged();
-
-    qint64 checkFrameAvailable(qint64 rel_frame);
-
-    QDomElement& getNode() { return node; }
-
-
-  signals:
-    void requestFramePosition(qint64 frame);
-
   protected:
-
     // QGraphicsItem
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
@@ -56,18 +35,38 @@ class Keyframe : public QObject, public QGraphicsItem
     void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
-    void positionChanged(qint64 previous);
+  signals:
+    void requestFramePosition(qint64 absoluteFrame);
 
   protected:
-    Sequence* sequence;
-    Project* project;
-    QDomElement node;
+    // Aspect 
     QColor color;
     QColor selectedColor;
-    qint64 originalAbsoluteFrame;
+
+    // Movement
+    qint64 mousePressRelativeFrame;
     QPointF mousePressPos;
     bool mouseCapture;
 
+  private:
+    // Property
+    DECLARE_PROPERTY_NOTIFY(qint64, relativeFrame, RelativeFrame)
+};
+
+#include <QMap>
+class Sequence;
+class KeyframeTrack : public QGraphicsObject
+{
+  Q_OBJECT
+  PROPERTY_CALLBACK_OBJECT
+  XML_SAVED_OBJECT
+
+public:
+  KeyframeTrack();
+
+
+private:
+  QMap<qint64, Keyframe*> keyframes;
 };
 
 #endif // !KEYFRAME_HPP

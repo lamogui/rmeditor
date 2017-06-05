@@ -149,9 +149,13 @@ vec4 rm(vec3 ro, vec3 rd)
 void main()
 {
 	vec3 color = vec3(1.);
-	vec2 uv = vec2(coords.x*xy_scale_factor,coords.y);
+	//vec2 uv = vec2(coords.x*xy_scale_factor,coords.y);
+  //vec3 rd = normalize(vec3(uv,2.0));
 	vec3 ro = cam_position;
-	vec3 rd = rotate_dir(cam_rotation, normalize(vec3(uv,2.0)));
+  vec2 uv = vec2(coords.x,coords.y) * 0.5 + vec2(0.5);
+  vec2 c = vec2((uv.x + 0.5) * 6.28318530718 , uv.y * 3.14159265359);
+  vec3 rd = vec3(sin(c.x) * sin(uv.y), -cos(c.y), cos(c.x) * sin(uv.y));
+	rd = rotate_dir(cam_rotation, rd);
 
 	/*snare = max(
 					 max(

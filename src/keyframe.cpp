@@ -11,6 +11,11 @@
 #include "project.hpp"
 #include "sequence.hpp"
 
+/*
+** Keyframe
+*/
+
+/*
 
 Keyframe::Keyframe(Project &project, Sequence* seq, QDomElement &node):
   QObject(nullptr), //lol
@@ -47,34 +52,26 @@ void Keyframe::load()
   qint64 frame = node.attribute("frame","0").toLongLong();
   setPos(checkFrameAvailable(frame),pos().y());
 }
+*/
+
+Keyframe::Keyframe(KeyframeTrack* parent) :
+  QGraphicsObject(parent),  // set GraphicsItem parent
+  color(255, 195, 77, 255),
+  selectedColor(255, 105, 0, 255),
+  mouseCapture(false),
+  relativeFrame(-1)
+{
+  setParent(parent); // set Object parent
+}
 
 Keyframe::~Keyframe()
 {
-  QApplication::restoreOverrideCursor();
+  // QApplication::restoreOverrideCursor();
 }
 
-void Keyframe::notifyChanged()
-{
-  project->notifyDocumentChanged();
-}
+GENERATE_PROPERTY_SETTER_NOTIFY(Keyframe, qint64, relativeFrame, RelativeFrame)
 
-void Keyframe::setRelativeFrame(qint64 frame, bool notify)
-{
-  qint64 previous_frame = relativeFrame();
-
-  if (previous_frame != frame && frame >=0)
-  {
-    qint64 new_frame = checkFrameAvailable(frame);
-    setPos(new_frame,this->pos().y());
-    node.setAttribute(QString("frame"),relativeFrame());
-    positionChanged(previous_frame);
-  }
-  if (notify)
-  {
-    notifyChanged();
-  }
-}
-
+/*
 void Keyframe::setAbsoluteFrame(qint64 frame, bool notify)
 {
   if (this->parentItem())
@@ -86,8 +83,7 @@ void Keyframe::setAbsoluteFrame(qint64 frame, bool notify)
     setRelativeFrame(frame,notify);
   }
 }
-
-
+*/
 
 void Keyframe::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
@@ -97,7 +93,8 @@ void Keyframe::mousePressEvent(QGraphicsSceneMouseEvent* event)
   if (boundingRect().contains(event->pos()))
   {
     mouseCapture = true;
-    originalAbsoluteFrame = absoluteFrame();
+    mousePressRelativeFrame = (qint64)(mousePressPos.x() - parentItem()->scenePos().x());
+    Q_ASSERT(mousePressRelativeFrame >= 0);
   }
 
 }
@@ -107,32 +104,19 @@ void Keyframe::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
   QGraphicsItem::mouseMoveEvent(event);
   if (mouseCapture)
   {
-    setAbsoluteFrame(event->scenePos().x() - mousePressPos.x()  + originalAbsoluteFrame,false);
+    setX(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x());
   }
 }
-
 
 void Keyframe::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
   QGraphicsItem::mouseReleaseEvent(event);
   if (mouseCapture)
   {
-    setAbsoluteFrame(event->scenePos().x() - mousePressPos.x()  + originalAbsoluteFrame,true);
+    setX(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x()); // probably useless
+    if (receivers(SIGNAL()) == 1)
   }
   mouseCapture = false;
-}
-
-qint64 Keyframe::checkFrameAvailable(qint64 rel_frame)
-{
-  if (sequence)
-  {
-    return sequence->nearestFrameAvailableForKeyframe(rel_frame);
-  }
-  else
-  {
-    Q_ASSERT(0 && "Not supported yet");
-    return rel_frame;
-  }
 }
 
 QRectF Keyframe::boundingRect() const
@@ -156,33 +140,20 @@ void Keyframe::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
   painter->drawRect(boundingRect());
 }
 
-void Keyframe::positionChanged(qint64 previous)
-{
-  if (sequence)
-  {
-    sequence->keyframePositionChanged(previous,this);
-  }
-  else
-  {
-    Q_ASSERT(0 && "Not supported yet");
-  }
-
-}
-
 void Keyframe::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
   QGraphicsItem::mouseDoubleClickEvent(event);
-  emit requestFramePosition(this->absoluteFrame());
+  emit requestFramePosition((qint64)scenePos().x()); // FIXME : use parent
 }
 
 void Keyframe::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
   QGraphicsItem::hoverEnterEvent(event);
-  QApplication::setOverrideCursor(Qt::UpArrowCursor);
+ // QApplication::setOverrideCursor(Qt::UpArrowCursor);
 }
 
 void Keyframe::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
   QGraphicsItem::hoverLeaveEvent(event);
-  QApplication::restoreOverrideCursor();
+ // QApplication::restoreOverrideCursor();
 }

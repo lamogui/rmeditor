@@ -12,7 +12,6 @@ class QuadFragmentShaderCode : public GLSLShaderCode
 
 public:
   QuadFragmentShaderCode();
-  QuadFragmentShaderCode(const QuadFragmentShaderCode& other);
 
   // MediaFile Renderer
   bool canBeRendered() const override { return true; }
@@ -35,8 +34,6 @@ public slots:
 protected:
   QSharedPointer<ShaderProgram> shaderProgram;
 };
-
-Q_DECLARE_METATYPE(QuadFragmentShaderCode);
 
 class ReferencedQuadFragmentShaderRenderer : public Renderer
 {
