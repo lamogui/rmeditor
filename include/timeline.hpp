@@ -7,6 +7,7 @@
 #include <QRectF>
 
 #include "xmlsavedobject.hpp"
+#include "music.hpp" // QPointer incomplete type is not allowed !
 
 class Music;
 class Render;
@@ -25,7 +26,7 @@ public:
   void setFramerate(double newFramerate);
 
   // For now this should never be null
-  const QWeakPointer<Music>& getMusic() const { return music; }
+  const QPointer<Music>& getMusic() const { return music; }
 
   // frame timings shortcuts
   qint64 getLength() const; 

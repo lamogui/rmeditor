@@ -15,9 +15,6 @@ class Keyframe : public QGraphicsObject
   XML_SAVED_OBJECT
   
   public:
-    //Keyframe(qint64 rel_frame,Project& project, Sequence *seq, QDomElement& node);
-    //Keyframe(Project& project, Sequence *seq, QDomElement& node);
-
     Keyframe(KeyframeTrack* parent = nullptr);
     ~Keyframe() override;
 

@@ -118,3 +118,15 @@ void RemoveFromVectorUndoCommand::undo()
     ownTarget = false;
   }
 }
+
+
+/*
+** Utils
+*/
+
+QObject* GetUndoReceiver(QObject& context)
+{
+  QObject* parent = ; 
+
+
+}

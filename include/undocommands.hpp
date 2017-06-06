@@ -70,8 +70,23 @@ private:
 
 #define UNDOCOMMANDS_SENDER_OBJECT \
   signals: \
-    void sendUndoCommand(QUndoCommand* command); \
+    void sendUndoCommand(QUndoCommand*); \
   private:
+
+#define UNDOCOMMANDS_RECEIVER_OBJECT \
+  public: \
+    QUndoStack& getUndoStack() { return undoStack; }
+  public slots: \
+    void receiveUndoCommand(QUndoCommand* cmd) \
+    {
+      undoStack->push(cmd);
+    }
+  protected: \
+    QUndoStack undoStack; \
+  private:
+
+// Utils
+QObject* GetUndoReceiver(QObject& context);
 
  
 

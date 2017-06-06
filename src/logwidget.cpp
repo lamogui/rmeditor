@@ -11,10 +11,23 @@ LogWidget::LogWidget(QWidget *parent):
   
 }
 
-
 QString LogWidget::getFormattedDate()
 {
-    return QString("[")+QString::number(QTime::currentTime().hour())+":"+QString::number(QTime::currentTime().minute())+":"+QString::number(QTime::currentTime().second())+QString("] ");
+  return QString("[")+QString::number(QTime::currentTime().hour())+":"+QString::number(QTime::currentTime().minute())+":"+QString::number(QTime::currentTime().second())+QString("] ");
+}
+
+LogWidget* LogWidget::getLogWidget(const QObject& context)
+{
+  QObject* parent = context.parent();
+  while (parent)
+  {
+    LogWidget* log = qobject_cast<LogWidget*>(parent);
+    if (log)
+      return log;
+    parent = parent->parent();
+  }
+  Q_ASSERT(false && "could not find LogWidget in parents");
+  return nullptr;
 }
 
 //Log

@@ -2,16 +2,13 @@
 #include "timeline.hpp"
 
 #include "logwidget.hpp"
-#include "music.hpp"
 
 
-Timeline::Timeline(const QWeakPointer<Music>& music):
-  QGraphicsScene(music.lock().data()),
-  music(music),
+Timeline::Timeline(const Music& music):
+  QGraphicsScene(&music),
+  music(&music),
   framerate(0)
 {
-  QSharedPointer<Music> m = this->music.lock();
-  Q_ASSERT(m);
   //setSceneRect(0,0,m->getLength()*framerate,height);
 
   CONNECT_XML_SAVED_OBJECT(Timeline);

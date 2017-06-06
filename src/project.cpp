@@ -5,11 +5,13 @@
 #include <QTextStream>
 
 #include "demotimeline.hpp"
-#include "framework.hpp"
 #include "scene.hpp"
 #include "shaderminifier.hpp"
-#include "tunefish4music.hpp"
-#include "4klangmusic.hpp"
+#include "logwidget.hpp" // EVil !!! 
+
+
+//#include "tunefish4music.hpp"
+//#include "4klangmusic.hpp"
 
 Project::Project(const QDir &dir, const QString &filename, LogWidget &log, QObject *parent):
   TextEditable(filename, QDomNode() ,log,parent),
@@ -512,7 +514,8 @@ void Project::exportScenesSources(const QDir &dir) const
   QMap<QString,Scene*>::const_iterator it;
   for  (it = rmScenes.constBegin(); it !=rmScenes.constEnd(); it++)
   {
-    ShaderMinifier minifier(*log);
+    ShaderMinifier minifier;
+    log->findAndConnectLogSignalsRecursively(minifier);
 
 
 

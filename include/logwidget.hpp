@@ -12,6 +12,7 @@ public:
 
   //Utils
   static QString getFormattedDate();
+  static LogWidget* getLogWidget(const QObject& context);
   void findAndConnectLogSignalsRecursively(const QObject& object);
 
 public slots:
