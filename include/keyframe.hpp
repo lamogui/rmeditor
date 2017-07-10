@@ -47,7 +47,7 @@ class Keyframe : public QGraphicsObject
 
   private:
     // Property
-    DECLARE_PROPERTY_NOTIFY(qint64, relativeFrame, RelativeFrame)
+    DECLARE_PROPERTY(qint64, relativeFrame, RelativeFrame)
 };
 
 #include <QMap>
@@ -59,8 +59,14 @@ class KeyframeTrack : public QGraphicsObject
   XML_SAVED_OBJECT
 
 public:
-  KeyframeTrack();
+  KeyframeTrack(Sequence* parent = nullptr);
 
+public slots:
+  void appendKeyframe(Keyframe* keyframe); // take ownership
+  void removeKeyframe(Keyframe* keyframe); // remove ownership
+
+protected:
+  void keyframeRequestFramePosition();
 
 private:
   QMap<qint64, Keyframe*> keyframes;

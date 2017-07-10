@@ -26,6 +26,9 @@ public:
   QWeakPointer<Renderer> getDefaultRenderer() { return defaultRenderer; }
   QWeakPointer<Camera> getDefaultCamera() { return defaultCamera; }
 
+signals: 
+  void pathChanged(QFileInfo); // Meta compiler doesn't support signals declared inside macros !
+
 protected:
   QSharedPointer<Renderer> defaultRenderer; /* allow to see the media even without a timeline */
   QSharedPointer<Camera> defaultCamera;

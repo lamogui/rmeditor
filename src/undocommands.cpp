@@ -126,7 +126,24 @@ void RemoveFromVectorUndoCommand::undo()
 
 QObject* GetUndoReceiver(QObject& context)
 {
-  QObject* parent = ; 
-
-
+  QObject* object = &context; 
+  while (object)
+  {
+    const QMetaObject* meta = object->metaObject();
+    if (meta)
+    {
+      if (meta->indexOfSlot("receiveUndoCommand(QUndoCommand*)"))
+        return object;
+    }
+    object = object->parent();
+  }
+  return nullptr;
 }
+
+void ConnectToUndoReceiver(QObject& object)
+{
+  QObject* receiver = GetUndoReceiver(object);
+  if (receiver)
+    QObject::connect(&object, SIGNAL(sendUndoCommand(QUndoCommand*)), receiver, SLOT(receiveUndoCommand(QUndoCommand*)));
+}
+

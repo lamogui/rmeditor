@@ -87,7 +87,6 @@ private:
 
 // Utils
 QObject* GetUndoReceiver(QObject& context);
-
- 
+void ConnectToUndoReceiver(QObject& object);
 
 #endif // !UNDOCOMMANDS_HPP

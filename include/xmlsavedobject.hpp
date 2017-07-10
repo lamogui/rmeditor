@@ -90,8 +90,6 @@
 
 #define DECLARE_PROPERTY_NOTIFY(Type, variableName, VariableName) \
   Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName WRITE set##VariableName NOTIFY variableName##Changed) \
-  signals: \
-    void variableName##Changed(Type); \
   DECLARE_PROPERTY_GETTER_AND_SETTER(Type, variableName, VariableName);
 
 #define DECLARE_PROPERTY_REFERENCE(Type, variableName, VariableName) \
@@ -99,10 +97,8 @@
   DECLARE_PROPERTY_GETTER_AND_SETTER_REFERENCE(Type, variableName, VariableName)
 
 #define DECLARE_PROPERTY_REFERENCE_NOTIFY(Type, variableName, VariableName) \
-  Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName WRITE set##VariableName NOTIFY variableName##Changed) \
-  signals: \
-    void variableName##Changed(Type); \
-  DECLARE_PROPERTY_GETTER_AND_SETTER_REFERENCE(Type, variableName, VariableName)
+  DECLARE_PROPERTY_GETTER_AND_SETTER_REFERENCE(Type, variableName, VariableName) \
+  Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName WRITE set##VariableName NOTIFY variableName##Changed)
 
 
 /*
