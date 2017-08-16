@@ -35,6 +35,10 @@ protected:
   QSharedPointer<ShaderProgram> shaderProgram;
 };
 
+
+/*
+** ReferencedQuadFragmentShaderRenderer: Intermediate class for all renderer based on a signle fraglent shader (using a quad)
+*/
 class ReferencedQuadFragmentShaderRenderer : public Renderer
 {
 public:

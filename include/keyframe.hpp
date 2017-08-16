@@ -3,19 +3,22 @@
 
 #include <QColor>
 #include <QGraphicsObject>
+#include <QPolygonF>
+#include <QPainterPath>
 
 #include "xmlsavedobject.hpp"
+#include "undocommands.hpp"
 
-class KeyframeTrack; // Should be the parent
 class Keyframe : public QGraphicsObject
 {
 
   Q_OBJECT
   PROPERTY_CALLBACK_OBJECT
   XML_SAVED_OBJECT
+  UNDOCOMMANDS_SENDER_OBJECT
   
   public:
-    Keyframe(KeyframeTrack* parent = nullptr);
+    Keyframe(QGraphicsObject* parent = nullptr);
     ~Keyframe() override;
 
     // QGraphicsItem
@@ -39,6 +42,8 @@ class Keyframe : public QGraphicsObject
     // Aspect 
     QColor color;
     QColor selectedColor;
+    QPolygonF shape;
+    QPainterPath painterPath;
 
     // Movement
     qint64 mousePressRelativeFrame;
@@ -48,28 +53,6 @@ class Keyframe : public QGraphicsObject
   private:
     // Property
     DECLARE_PROPERTY(qint64, relativeFrame, RelativeFrame)
-};
-
-#include <QMap>
-class Sequence;
-class KeyframeTrack : public QGraphicsObject
-{
-  Q_OBJECT
-  PROPERTY_CALLBACK_OBJECT
-  XML_SAVED_OBJECT
-
-public:
-  KeyframeTrack(Sequence* parent = nullptr);
-
-public slots:
-  void appendKeyframe(Keyframe* keyframe); // take ownership
-  void removeKeyframe(Keyframe* keyframe); // remove ownership
-
-protected:
-  void keyframeRequestFramePosition();
-
-private:
-  QMap<qint64, Keyframe*> keyframes;
 };
 
 #endif // !KEYFRAME_HPP

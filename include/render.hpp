@@ -5,6 +5,9 @@
 #include <QOpenGLFramebufferObject>
 
 class Renderer;
+/*
+** Render : a render represent the final layer / picture which the renderer draw into
+*/
 class Render
 {
 public:

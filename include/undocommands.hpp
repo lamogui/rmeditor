@@ -28,40 +28,116 @@ private:
   typedef QUndoCommand BaseClass;
 };
 
-class AppendInVectorUndoCommand : public QUndoCommand
+template <class TargetClass, typename ValueClass>
+class InsertInContainerUndoCommand : public QUndoCommand
 {
 public:
-  AppendInVectorUndoCommand(QObject& targetOwner, QObject& target, const QMetaMethod& appendMethod, const QMetaMethod& removeMethod, QUndoCommand *parent = nullptr);
-  ~AppendInVectorUndoCommand() override;
+  typedef void (*TargetClass::Method)(ValueClass& target);
 
-  void redo() override;
-  void undo() override;
+  InsertInContainerUndoCommand(TargetClass& targetOwner, ValueClass& target, Method insertMethod, Method removeMethod, QUndoCommand *parent = nullptr) :
+    QUndoCommand(parent),
+    targetOwner(&targetOwner), target(&target), insertMethod(insertMethod), removeMethod(removeMethod), ownTarget(true)
+  {
+    setText("Insert " + target.objectName() + " into " + targetOwner.objectName());
+  }
+
+  ~InsertInContainerUndoCommand() override
+  {
+    if (ownTarget && target)
+      delete target.data();
+  }
+
+  void redo() override
+  {
+    if (targetOwner && target)
+    {
+      targetOwner->*insertMethod(*target);
+      ownTarget = false;
+    }
+    else
+    {
+      Q_ASSERT(false && "target or target owner has been destroyed !");
+    }
+    BaseClass::redo();
+  }
+
+  void undo() override
+  {
+    BaseClass::undo();
+    if (target && targetOwner)
+    {
+      targetOwner->*removeMethod(*target);
+      ownTarget = true;
+    }
+    else
+    {
+      Q_ASSERT(false && "target or target owner has been destroyed !");
+    }
+  }
 
 protected:
-  QPointer<QObject> targetOwner;
-  QPointer<QObject> target;
-  QMetaMethod appendMethod;
-  QMetaMethod removeMethod;
+  QPointer<TargetClass> targetOwner;
+  QPointer<ValueClass> target;
+  Method insertMethod;
+  Method removeMethod;
   bool ownTarget;
 
 private:
   typedef QUndoCommand BaseClass;
 };
 
-class RemoveFromVectorUndoCommand : public QUndoCommand
+template <class TargetClass, typename ValueClass>
+class RemoveFromContainerUndoCommand : public QUndoCommand
 {
 public:
-  RemoveFromVectorUndoCommand(QObject& targetOwner, QObject& target, const QMetaMethod& removeMethod, const QMetaMethod& appendMethod, QUndoCommand *parent = nullptr);
-  ~RemoveFromVectorUndoCommand() override;
+  typedef void(*TargetClass::Method)(ValueClass& target);
 
-  void redo() override;
-  void undo() override;
+  RemoveFromContainerUndoCommand(TargetClass& targetOwner, ValueClass& target, Method removeMethod, Method insertMethod, QUndoCommand *parent = nullptr) :
+    QUndoCommand(parent),
+    targetOwner(&targetOwner), target(&target), removeMethod(removeMethod), insertMethod(insertMethod), ownTarget(false)
+  {
+    setText("Remove " + target.objectName() + " from " + targetOwner.objectName());
+  }
+
+  ~RemoveFromContainerUndoCommand() override
+  {
+    if (ownTarget && target)
+      delete target.data();
+  }
+
+  void redo() override
+  {
+    if (targetOwner && target)
+    {
+      targetOwner->*removeMethod(*target);
+      ownTarget = true;
+    }
+    else
+    {
+      Q_ASSERT(false && "target or target owner has been destroyed !");
+    }
+    BaseClass::redo();
+  }
+
+  void undo() override
+  {
+    BaseClass::undo();
+    if (target && targetOwner)
+    {
+      targetOwner->*insertMethod(*target);
+      ownTarget = false;
+    }
+    else
+    {
+      Q_ASSERT(false && "target or target owner has been destroyed !");
+    }
+  }
 
 protected:
-  QPointer<QObject> targetOwner;
-  QPointer<QObject> target;
-  QMetaMethod removeMethod;
-  QMetaMethod appendMethod;
+  QPointer<TargetClass> targetOwner;
+  QPointer<ValueClass> target;
+  Method removeMethod;
+  Method insertMethod;
   bool ownTarget;
 
 private:
@@ -75,15 +151,19 @@ private:
 
 #define UNDOCOMMANDS_RECEIVER_OBJECT \
   public: \
-    QUndoStack& getUndoStack() { return undoStack; }
+    QUndoStack& getUndoStack() { return undoStack; } \
   public slots: \
     void receiveUndoCommand(QUndoCommand* cmd) \
-    {
-      undoStack->push(cmd);
-    }
+    { \
+      undoStack->push(cmd); \
+    } \
   protected: \
     QUndoStack undoStack; \
   private:
+
+#define ASSERT_IF_UNIQUE_RECEIVER(S) \
+  Q_ASSERT(receivers(SIGNAL(S)) == 1); \
+  if (receivers(SIGNAL(S)) == 1)
 
 // Utils
 QObject* GetUndoReceiver(QObject& context);

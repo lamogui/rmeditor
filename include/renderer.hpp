@@ -11,7 +11,7 @@ class Render;
 class Camera;
 
 /*
-** Renderer : class that tell how to render a media 
+** Renderer : class that know how to render a media using opengl
 */
 class Renderer 
 {

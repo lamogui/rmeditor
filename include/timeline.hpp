@@ -11,22 +11,21 @@
 
 class Music;
 class Render;
+/*
+** Timeline : Any "frame precision" seekable timeline which is linked to the master = the music should inherit from this
+*/
 class Timeline : public QGraphicsScene
 {
   Q_OBJECT
   PROPERTY_CALLBACK_OBJECT
-  Q_PROPERTY(double framerate MEMBER framerate READ getFramerate WRITE setFramerate NOTIFY framerateChanged)
   XML_SAVED_OBJECT
 
 public:
-  Timeline(const Music& music);
-
-  // Property 
-  inline double getFramerate() const { return framerate; }
-  void setFramerate(double newFramerate);
+  Timeline(Music& music); // The music is the parent of the timeline, if it's doesn't exists anymore the timeline should be destroyed ! 
 
   // For now this should never be null
-  const QPointer<Music>& getMusic() const { return music; }
+  const Music& getMusic() const { return music; }
+  Music& getMusic() { return music; }
 
   // frame timings shortcuts
   qint64 getLength() const; 
@@ -42,18 +41,17 @@ signals:
   void info(QString);
 
   // property 
-  void framerateChanged(double);
+  void framerateChanged(double); // meta compiler doesn't support signal declaration inside macros...
 
 public slots:
   void requestFramePosition(qint64 frame); // shortcut
 
 protected:
   // links
-  QPointer<Music> music; // should never be null
+  Music& music; // shortcut to casted parent
 
 private:
-  // property                      
-  double framerate;
+  DECLARE_PROPERTY_NOTIFY(double, framerate, Framerate);
 
 };
 

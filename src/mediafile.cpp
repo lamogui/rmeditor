@@ -3,7 +3,7 @@
 #include "camera.hpp"
 #include "logwidget.hpp"
 
-MediaFile::MediaFile()
+MediaFile::MediaFile(QObject* parent) : QObject(parent)
 {
   CONNECT_XML_SAVED_OBJECT(MediaFile);
 }

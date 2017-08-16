@@ -16,17 +16,21 @@ class DemoTimeline;
 class Project;
 class Sequence;
 
-
-class DemoTimelineRenderer : public 
+/*
+** DemoTimelineRenderer : know how to render a DemoTimeline
+*/
+class DemoTimelineRenderer : public Renderer
 {
 public:
-  DemoRender(DemoTimeline&  timeline, const QSize& initialSize);
+  DemoTimelineRenderer(DemoTimeline&  timeline, const QSize& initialSize); // Timeline is the parent
+
+  // Rendering
+  void initializeGL(RenderFunctionsCache& gl) override;
+  void renderChildrens(RenderFunctionsCache& gl) override;
+  void glRender(RenderFunctionsCache& gl, Render& render) override; 
 
 protected:
-  void glRender() override;
-  void renderChildrens() override;
-
-  DemoTimeline* timeline;
+  DemoTimeline& timeline; 
 };
 
 
@@ -89,9 +93,12 @@ protected:
   double trackHeight;
   Project* project;
   DemoRender* render;
-  QMap<qint64, Sequence*> sequences;
   QPointF mousePressPos;
 
+private:
+  DECLARE_PROPERTY_REFERENCE_NOTIFY(QVector<TimelineTrack>, tracks, Tracks)
 };
+
+Q_DECLARE_METATYPE(QVector<TimelineTrack>)
 
 #endif

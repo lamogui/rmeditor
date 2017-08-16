@@ -107,8 +107,7 @@
 
 #define XML_SAVED_OBJECT \
   public: \
-    inline QDomNode getNode() const { return node; } \
-    inline void setNode(const QDomNode& n) { node = n; } \
+    Q_INVOKABLE inline void setNode(const QDomNode& n) { node = n; } \
   signals: \
     void xmlPropertyChanged(QDomNode node, QString propertyName, QVariant newValue); \
   private slots: \
@@ -117,12 +116,11 @@
      Q_ASSERT(owner == this); \
      emit xmlPropertyChanged(node, propertyName, newValue); \
    } \
-  protected: \
-    QDomNode node; \
-  private:
+  private: \
+    QDomNode node; 
 
 #define CONNECT_XML_SAVED_OBJECT(className) connect(this, &className::propertyChanged, this, &className::onPropertyChanged) // do this inside the constructor 
-#define CONNECT_XML_SAVED_OBJECT_TO_TARGET(xmlSavedObject, target) \
-  connect(xmlSavedObject, SIGNAL(xmlPropertyChanged(QDomNode, QString, QVariant)), target, SLOT(childNodePropertyChange(QDomNode, QString, QVariant)));
+//#define CONNECT_XML_SAVED_OBJECT_TO_TARGET(xmlSavedObject, target) \
+//  connect(xmlSavedObject, SIGNAL(xmlPropertyChanged(QDomNode, QString, QVariant)), target, SLOT(childNodePropertyChange(QDomNode, QString, QVariant)));
 
 #endif // !XMLSAVEDOBJECT_HPP

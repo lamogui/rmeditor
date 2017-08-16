@@ -3,15 +3,15 @@
 
 #include "quadfragmentshader.hpp"
 
-
-
+/*
+** RaymarchingScene : textfile media that contains a fragment shader using an external camera 
+*/
 class RaymarchingScene : public QuadFragmentShaderCode
 {
   Q_OBJECT
 
 public:
   RaymarchingScene();
-  RaymarchingScene(const RaymarchingScene& other);
 
   void initializeGL(RenderFunctionsCache& gl) override;
 
@@ -22,9 +22,11 @@ private:
   typedef QuadFragmentShaderCode BaseClass;
 };
 
-// FIXME : create a class instatiator that to the job of QMetaType without need a copy constructor
-Q_DECLARE_METATYPE(RaymarchingScene); // only to instantiate from class name 
-
+/*
+** ReferencedRaymarchingSceneRenderer : 
+** the same as ReferencedQuadFragmentShaderRenderer but taking 
+** in account external camera to facilitate the process
+*/
 class ReferencedRaymarchingSceneRenderer : public ReferencedQuadFragmentShaderRenderer
 {
 public:

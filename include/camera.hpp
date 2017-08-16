@@ -4,16 +4,11 @@
 #include <QVector3D>
 #include <QQuaternion>
 
-
-//class CameraKeyframe;
 class Camera
 {
 public:
   Camera();
-  //Camera(const Camera& cpy);
   virtual ~Camera();
-
-  //const Camera& operator= (const Camera& cpy);
 
   inline const QVector3D& getPosition() const { return position;}
   inline const QQuaternion& getRotation() const { return rotation; }
@@ -28,8 +23,6 @@ public:
   void translateRelative(const QVector3D& dir);
   void translate(const QVector3D& dir);
 
-  //void fromKeyframe(const CameraKeyframe& keyframe);
-
   void reset();
 
 protected:
@@ -38,32 +31,24 @@ protected:
 
 };
 
-/*
+
 #include "keyframe.hpp"
 
 class CameraKeyframe : public Keyframe
 {
 public:
-  CameraKeyframe(Project& project, Sequence *seq, QDomElement& node);
-  CameraKeyframe(qint64 rel_frame, Project& project, Sequence *seq, QDomElement& node, const QVector3D& pos, const QQuaternion& q);
+  CameraKeyframe(QGraphicsObject* parent);
 
-
-  void setPosition(const QVector3D& p);
-  void setRotation(const QQuaternion& q);
-
-  inline const QVector3D& getPosition() const { return position;}
-  inline const QQuaternion& getRotation() const { return rotation; }
-
+  // utils
   void fromCamera(Camera& cam);
 
-  virtual void load();
-
-protected:
-  QQuaternion rotation;
-  QVector3D position;
-
+private:
+  // properties
+  DECLARE_PROPERTY_REFERENCE(QQuaternion, rotation, Rotation)
+  DECLARE_PROPERTY_REFERENCE(QVector3D, position, Position)
 };
 
-*/
+Q_DECLARE_METATYPE(CameraKeyframe*)
+
 
 #endif // !CAMERA_HPP

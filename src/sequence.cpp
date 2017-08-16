@@ -1,6 +1,5 @@
 ﻿#include "sequence.hpp"
 
-
 #include <QDebug>
 
 #include <QApplication>
@@ -8,17 +7,11 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneHoverEvent>
 
-#include "demotimeline.hpp"
-#include "fbo.hpp"
-#include "fast2dquad.hpp"
-#include "camera.hpp"
-#include "keyframe.hpp"
-#include "project.hpp"
-#include "scene.hpp"
-#include "timelinewidget.hpp"
+#include "mediafile.hpp"
 
+/*
 Sequence::Sequence(Project &project, DemoTimeline &timeline, QDomElement &node, qreal height):
-  QGraphicsRectItem(nullptr),
+  QGraphicsObject(nullptr),
   node(node),
   project(&project),
   timeline(&timeline),
@@ -48,49 +41,13 @@ Sequence::Sequence(Project& project, DemoTimeline &timeline, QDomElement node, S
 
   create(start,length);
 }
+*/
 
-Sequence::~Sequence()
+Sequence::Sequence(QGraphicsObject* parent) : 
+  QGraphicsObject(parent),
+  startFrame(-1), // invalid position
+  length(1) // minimal length is 1 frame else the sequence doesn't "exists" 
 {
-  QApplication::restoreOverrideCursor();
-  QMap<qint64,CameraKeyframe*>::iterator it;
-  for (it = cameraKeyframes.begin(); it != cameraKeyframes.end(); it++)
-  {
-    delete it.value(); //Maybe useless because of QGraphicsItem parenting
-  }
-}
-
-void Sequence::load()
-{
-  QString start_str = node.attribute("start","0");
-  QString length_str = node.attribute("length","600");
-  QString sceneName = node.attribute("scene","");
-
-  qint64 start = start_str.toInt();
-  qint64 length = length_str.toInt();
-  scene = project->getRayMarchScene(sceneName);
-
-  create(start,length); //prevent a bug with CameraKeyframe
-
-  cameraNode = node.firstChildElement("camera");
-  if (!cameraNode.isNull())
-  {
-    QDomElement e = cameraNode.firstChildElement("keyframe");
-    while (!e.isNull())
-    {
-      CameraKeyframe* keyframe = new CameraKeyframe(*project,this,e);
-      Q_ASSERT(!cameraKeyframes.contains(keyframe->relativeFrame()));
-      keyframe->setPos(keyframe->pos().x(), this->rect().height()-5);
-      QObject::connect(keyframe,SIGNAL(requestFramePosition(qint64)),timeline,SLOT(requestFramePosition(qint64)));
-      cameraKeyframes[keyframe->relativeFrame()] = keyframe;
-      e = e.nextSiblingElement("keyframe");
-    }
-  }
-  else
-  {
-    cameraNode = project->getDocument().createElement("camera");
-    cameraNode = node.appendChild(cameraNode).toElement();
-  }
-  renderImages();
 
 }
 
@@ -108,23 +65,23 @@ void Sequence::create(int start, int length)
   renderImages();
 }
 
+void Sequence::insertCameraKeyframe(CameraKeyframe& keyframe)
+{
+  QVariant oldValue;
+  QVariant newValue = QVariant::fromValue(&keyframe);
+  emit propertyChanged(this, "cameraKeyframes", oldValue, newValue);
+}
 
-void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void Sequence::removeCameraKeyframe(CameraKeyframe& keyframe)
 {
 
-  if (this->isSelected())
-  {
-    setBrush(selectedBrush());
-  }
-  else
-  {
-    setBrush(idleBrush());
-  }
+}
 
-  QGraphicsRectItem::paint(painter,option,widget);
+void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{  
+  QGraphicsObject::paint(painter,option,widget);
+  QBrush fillBrush(isSelected() ? selectedBrush() : idleBrush());
   qreal scale = getScaleFromWidget(widget);
-
-
   QRectF r(QPointF(5*scale,5),QSizeF(preview.size()));
   r.setWidth(r.width()*scale);
   if (r.bottom() > this->rect().bottom() - 5)
@@ -144,9 +101,9 @@ void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
   textFont.setStretch((int)(100*scale));
   painter->setFont(textFont);
   QRectF textRect = QRectF(r.right() + 5*scale,r.top(),this->rect().right()-(r.right()+5*scale),this->rect().height());
-  if (scene)
+  if (!media.isNull())
   {
-    painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,scene->objectName() + " (" + scene->fileName() + ")");
+    painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,media.data()->objectName() + " (" + scene->fileName() + ")");
   }
   else
   {
@@ -185,7 +142,7 @@ void Sequence::renderImages()
 }
 
 
-void Sequence::setStartFrame(qint64 frame, bool notify)
+void Sequence::setStartFrame(qint64 frame)
 {
   qint64 previous_frame = startFrame();
   if (frame < 0)

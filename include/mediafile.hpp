@@ -8,14 +8,18 @@
 #include "renderfunctionscache.hpp"
 #include "xmlsavedobject.hpp"
 
-class MediaFile : public QObject /* Media */
+
+/*
+** MediaFile : Any media file, it' could be rendered or not and could have a fixed length or not...
+*/
+class MediaFile : public QObject 
 {
   Q_OBJECT
   PROPERTY_CALLBACK_OBJECT
-  XML_SAVED_OBJECT
+  XML_SAVED_OBJECT // TODO : one day try to put PROPERTY_CALLBACK_OBJECT inside the XML_SAVED_OBJECT macro and see if Qt meta compiler is happy
 
 public:
-  MediaFile();
+  MediaFile(QObject* parent = nullptr);
 
   // OpenGL
   virtual void initializeGL(RenderFunctionsCache& gl);

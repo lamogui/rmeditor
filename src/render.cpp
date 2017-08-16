@@ -56,7 +56,7 @@ RenderTexture2D::RenderTexture2D() :
 
 void RenderTexture2D::createAttachements(const QSize& fboSize)
 {
-  // fbo->addColorAttachment(fboSize, GL_RGBA8);           // color (always created by default)
+  // fbo->addColorAttachment(fboSize, GL_RGBA8);           // color (always created by default by qt)
   fbo->addColorAttachment(fboSize, GL_RGB8);               // normal
   fbo->addColorAttachment(fboSize, GL_DEPTH_COMPONENT32F); // depth
 }

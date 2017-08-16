@@ -10,12 +10,6 @@ RaymarchingScene::RaymarchingScene() :
 
 }
 
-RaymarchingScene::RaymarchingScene(const RaymarchingScene& other) :
-  RaymarchingScene()
-{
-  Q_ASSERT(false); // do not use this constructor (forbiden by QObject)
-}
-
 void RaymarchingScene::initializeGL(RenderFunctionsCache& gl)
 {
   BaseClass::initializeGL(gl);

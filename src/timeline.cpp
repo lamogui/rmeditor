@@ -4,9 +4,9 @@
 #include "logwidget.hpp"
 
 
-Timeline::Timeline(const Music& music):
+Timeline::Timeline(Music& music):
   QGraphicsScene(&music),
-  music(&music),
+  music(music),
   framerate(0)
 {
   //setSceneRect(0,0,m->getLength()*framerate,height);
@@ -32,15 +32,15 @@ void Timeline::setFramerate(double newFramerate)
 
 qint64 Timeline::currentFrame() const
 {
-  return (qint64)(getMusic().lock()->getTime()*framerate);
+  return (qint64)(getMusic().getTime()*framerate);
 }
 
 qint64 Timeline::getLength() const
 {
-  return (qint64)(getMusic().lock()->getLength()*framerate);
+  return (qint64)(getMusic().getLength()*framerate);
 }
 
 void Timeline::requestFramePosition(qint64 frame)
 {
-  getMusic().lock()->setPosition(((double)frame/framerate) + (0.5/framerate));
+  getMusic().setPosition(((double)frame/framerate) + (0.5/framerate));
 }

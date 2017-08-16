@@ -15,53 +15,21 @@
 ** Keyframe
 */
 
-/*
-
-Keyframe::Keyframe(Project &project, Sequence* seq, QDomElement &node):
-  QObject(nullptr), //lol
-  QGraphicsItem(seq),
-  sequence(seq),
-  project(&project),
-  node(node),
-  color(255,195,77,255),
-  selectedColor(255,105,0,255),
-  mouseCapture(false)
-{
-  this->setFlags(QGraphicsItem::ItemIsSelectable);
-  setAcceptHoverEvents(true);
-}
-
-Keyframe::Keyframe(qint64 rel_frame, Project &project, Sequence* seq, QDomElement &node):
-  QObject(nullptr), //lol
-  QGraphicsItem(seq),
-  sequence(seq),
-  project(&project),
-  node(node),
-  color(255,195,77,255),
-  selectedColor(255,105,0,255),
-  mouseCapture(false)
-{
-  node.setTagName("keyframe");
-  setRelativeFrame(rel_frame);
-  this->setFlags(QGraphicsItem::ItemIsSelectable);
-  setAcceptHoverEvents(true);
-}
-
-void Keyframe::load()
-{
-  qint64 frame = node.attribute("frame","0").toLongLong();
-  setPos(checkFrameAvailable(frame),pos().y());
-}
-*/
-
-Keyframe::Keyframe(KeyframeTrack* parent) :
+Keyframe::Keyframe(QGraphicsObject* parent) :
   QGraphicsObject(parent),  // set GraphicsItem parent
   color(255, 195, 77, 255),
   selectedColor(255, 105, 0, 255),
   mouseCapture(false),
   relativeFrame(-1)
 {
-  setParent(parent); // set Object parent
+  float l = 5;
+  shape.append(QPointF(-l, 0));
+  shape.append(QPointF(0, -l));
+  shape.append(QPointF(l, 0));
+  shape.append(QPointF(0, l));
+  painterPath.addPolygon(shape);
+
+  setParent(parent); // set Object parent 
 }
 
 Keyframe::~Keyframe()
@@ -69,43 +37,34 @@ Keyframe::~Keyframe()
   // QApplication::restoreOverrideCursor();
 }
 
-GENERATE_PROPERTY_SETTER_NOTIFY(Keyframe, qint64, relativeFrame, RelativeFrame)
-
-/*
-void Keyframe::setAbsoluteFrame(qint64 frame, bool notify)
+void Keyframe::setRelativeFrame(qint64 newrelativeFrame)
 {
-  if (this->parentItem())
+  if (newrelativeFrame != relativeFrame)
   {
-    setRelativeFrame(frame - this->parentItem()->pos().x(),notify);
-  }
-  else
-  {
-    setRelativeFrame(frame,notify);
+    qint64 oldValue = relativeFrame;
+    relativeFrame = newrelativeFrame;
+    setX(relativeFrame); // set graphical position
+    emit propertyChanged(this, "relativeFrame", oldValue, relativeFrame);
   }
 }
-*/
 
 void Keyframe::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
   QGraphicsItem::mousePressEvent(event);
-
+  
   mousePressPos = event->scenePos();
-  if (boundingRect().contains(event->pos()))
+  if (shape.containsPoint(event->pos(), Qt::OddEvenFill))
   {
+    mousePressRelativeFrame = getRelativeFrame();
     mouseCapture = true;
-    mousePressRelativeFrame = (qint64)(mousePressPos.x() - parentItem()->scenePos().x());
-    Q_ASSERT(mousePressRelativeFrame >= 0);
   }
-
 }
 
 void Keyframe::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
   QGraphicsItem::mouseMoveEvent(event);
   if (mouseCapture)
-  {
-    setX(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x());
-  }
+    setRelativeFrame(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x());
 }
 
 void Keyframe::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
@@ -113,31 +72,27 @@ void Keyframe::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
   QGraphicsItem::mouseReleaseEvent(event);
   if (mouseCapture)
   {
-    setX(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x()); // probably useless
-    if (receivers(SIGNAL()) == 1)
+    ASSERT_IF_UNIQUE_RECEIVER(sendUndoCommand(QUndoCommand*))
+    {
+      emit sendUndoCommand(new ModifyPropertyCommand(*this, "relativeFrame", mousePressRelativeFrame, (qint64)(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x())));
+    }
   }
   mouseCapture = false;
 }
 
 QRectF Keyframe::boundingRect() const
-{
-  qreal l = 5;
-  return QRectF(-l,-l,2*l,2*l);
-}
+  {return painterPath.boundingRect();}
 
 void Keyframe::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
   (void)option; (void) widget;
-  QBrush fillBrush(color);
+  QBrush fillBrush(mouseCapture || isSelected() ? selectedColor : color);
   QPen pen(QColor(255,64,35));
-  if (mouseCapture)
-  {
-    fillBrush.setColor(selectedColor);
-  }
 
-  painter->setPen(pen);
-  painter->fillRect(boundingRect(),fillBrush);
-  painter->drawRect(boundingRect());
+  painter->fillPath(painterPath, fillBrush);
+  painter->strokePath(painterPath, pen);
+  //painter->fillRect(boundingRect(),fillBrush);
+  //painter->drawRect(boundingRect());
 }
 
 void Keyframe::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)

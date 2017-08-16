@@ -1,46 +1,53 @@
 ﻿#ifndef SEQUENCE_HPP
 #define SEQUENCE_HPP
 
-#include <QBrush>
-#include <QColor>
-#include <QGraphicsRectItem>
-#include <QDomElement>
+#include <QGraphicsObject>
 
+#include "xmlsavedobject.hpp"
+#include "undocommands.hpp"
 
-class DemoTimeline;
-class Camera;
 class CameraKeyframe;
-class Keyframe;
-class Project;
-class Scene;
+class MediaFile;
+class Renderer;
 
-class Sequence : public QGraphicsRectItem
+template <class cl>
+using Int64Map = QMap<qint64, cl>; // Compiler bug with macros because of ',' ! 
+class Sequence : public QGraphicsObject 
 {
-public:
-  Sequence(Project& project, DemoTimeline& timeline, QDomElement& node, qreal height = 60.0);
-  Sequence(Project& project, DemoTimeline& timeline, QDomElement node, Scene& scene, int start, int length=600, qreal height = 60.0);
-  ~Sequence() override;
+  Q_OBJECT
+  PROPERTY_CALLBACK_OBJECT
+  XML_SAVED_OBJECT
+  UNDOCOMMANDS_SENDER_OBJECT
 
+public:
+  Sequence(QGraphicsObject* parent = nullptr);
+
+  // Utils 
+  inline qint64 getEndFrame() const { getStartFrame() + getLength(); }
+  inline bool isInside(qint64 frame) const { return (frame >= getStartFrame() && frame < getEndFrame()); }
+  inline bool overlap(const Sequence& seq) const { return (isInside(seq.getStartFrame())||
+                                                           isInside(seq.getEndFrame())||
+                                                           (seq.getStartFrame() < getStartFrame() && seq.getEndFrame() > getEndFrame())); }
+  
+
+  // Accessors
+  void insertCameraKeyframe(CameraKeyframe& keyframe);
+  void removeCameraKeyframe(CameraKeyframe& keyframe);
+
+
+  // Graphcis
+  QBrush selectedBrush() { return QBrush(QColor(200, 200, 255)); }
+  QBrush idleBrush() { return QBrush(QColor(200, 200, 200)); }
+
+
+  // GraphicsItem
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
-  inline bool isInside(qint64 frame) const { return (frame >= startFrame() && frame < endFrame()); }
-  inline bool overlap(const Sequence& seq) const { return (isInside(seq.startFrame())||
-                                                           isInside(seq.endFrame())||
-                                                           (seq.startFrame() < startFrame() && seq.endFrame() > endFrame())); }
 
-  inline qint64 startFrame() const { return pos().x(); }
-  inline qint64 endFrame() const { return pos().x() + length(); }
-  inline qint64 length() const { return rect().width(); }
-
-  inline QMap<qint64, CameraKeyframe*> getCameraKeyframes() const { return cameraKeyframes; }
-
-  QBrush selectedBrush() { return QBrush(QColor(200,200,255)); }
-  QBrush idleBrush() { return QBrush(QColor(200,200,200)); }
-
-  inline Scene* glScene() { return scene; }
-
+  /*
   void setCamera(qint64 relative_frame, Camera& cam) const;
   void insertCameraKeyframe(qint64 rel_frame, const QVector3D& pos, const QQuaternion& rot);
+  */
 
   typedef enum
   {
@@ -49,15 +56,10 @@ public:
     RightExtend
   } MouseAction;
 
-  void setStartFrame(qint64 frame, bool notify=true); //don't change the length
-  void setLength(qint64 length, bool notify=true);
-
   //Do not use this is only used by DemoTimeline (I know it's ugly)
   inline void forceSetStartFrame(qint64 frame) { this->setPos(QPointF((qreal)frame,this->pos().y())); }
-  inline qint64 getOrginalLength() const { return orginalLength; }
   void deleteCameraKeyframe(CameraKeyframe* key); // key must be correctly in sequence
-  inline QDomElement& getNode() { return node; }
-
+  
   //Used by keyframes
   qint64 nearestFrameAvailableForKeyframe(qint64 rel_frame) const;
   void keyframePositionChanged(qint64 previous_frame, Keyframe* keyframe);
@@ -80,19 +82,24 @@ protected:
   qreal getScaleFromWidget(const QWidget *widget) const;
 
 
-protected:
-  QDomElement node;
-  QDomElement cameraNode;
-  Project* project;
-  DemoTimeline* timeline;
-  Scene* scene;
+private:
+  // properties
+  DECLARE_PROPERTY_REFERENCE(QPointer<MediaFile>, media, Media)
+  DECLARE_PROPERTY(qint64, startFrame, StartFrame)
+  DECLARE_PROPERTY(quint64, length, Length)
+  DECLARE_PROPERTY_REFERENCE(Int64Map<CameraKeyframe*>, cameraKeyframes, CameraKeyframes)
+
+  // Internal 
+  QSharedPointer<Renderer> renderer;
+
+  // Graphical
   QImage preview;
+
+  // Movement
   QPointF mousePressPos;
   qint64 mousePressStartFrame;
-  qint64 orginalLength;
+  qint64 mousePressLength;
   MouseAction currentAction;
-  QMap<qint64, CameraKeyframe*> cameraKeyframes;
-
 };
 
 

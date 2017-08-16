@@ -42,7 +42,9 @@ find_package(Qt5Network REQUIRED)
 set(RMEDITOR_INCLUDE_DIR include)
 set(RMEDITOR_H
 #  ${RMEDITOR_INCLUDE_DIR}/4klangmusic.hpp
+  ${RMEDITOR_INCLUDE_DIR}/call_once.h
   ${RMEDITOR_INCLUDE_DIR}/camera.hpp
+  ${RMEDITOR_INCLUDE_DIR}/classmanager.hpp
   ${RMEDITOR_INCLUDE_DIR}/demotimeline.hpp
   ${RMEDITOR_INCLUDE_DIR}/editorwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/fast2dquad.hpp
@@ -64,6 +66,7 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/sequence.hpp
   ${RMEDITOR_INCLUDE_DIR}/shadercode.hpp
   ${RMEDITOR_INCLUDE_DIR}/shaderminifier.hpp
+  ${RMEDITOR_INCLUDE_DIR}/singleton.h
   ${RMEDITOR_INCLUDE_DIR}/texteditable.hpp
   ${RMEDITOR_INCLUDE_DIR}/texteditor.hpp
   ${RMEDITOR_INCLUDE_DIR}/timeline.hpp
@@ -80,10 +83,11 @@ set(RMEDITOR_SRC_DIR src)
 set(RMEDITOR_SRC 
 #  ${RMEDITOR_SRC_DIR}/4klangmusic.cpp
   ${RMEDITOR_SRC_DIR}/camera.cpp
+  ${RMEDITOR_SRC_DIR}/classmanager.cpp
   ${RMEDITOR_SRC_DIR}/demotimeline.cpp
   ${RMEDITOR_SRC_DIR}/editorwidget.cpp
   ${RMEDITOR_SRC_DIR}/fast2dquad.cpp
-  ${RMEDITOR_SRC_DIR}/ffmpegencoder.cpp
+#  ${RMEDITOR_SRC_DIR}/ffmpegencoder.cpp
   ${RMEDITOR_SRC_DIR}/highlighter.cpp
   ${RMEDITOR_SRC_DIR}/keyframe.cpp
   ${RMEDITOR_SRC_DIR}/logdockwidget.cpp

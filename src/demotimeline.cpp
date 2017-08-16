@@ -15,6 +15,15 @@
 #include <QTextStream>
 #include <QTimer>
 
+/*
+** DemoTimelineRenderer
+*/
+
+DemoTimelineRenderer::DemoTimelineRenderer(DemoTimeline&  timeline, const QSize& initialSize)
+  : Renderer(),  timeline(timeline)
+{
+
+}
 
 DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogWidget &log):
   Timeline(*(project.getMusic()),2*60.0,fps,log),
