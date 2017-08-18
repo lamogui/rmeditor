@@ -7,7 +7,11 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneHoverEvent>
 
+#include "render.hpp" // for rendering preview
 #include "mediafile.hpp"
+#include "renderfunctionscache.hpp"
+#include "timelinewidget.hpp" // fucking scale
+#include "undocommands.hpp"
 
 /*
 Sequence::Sequence(Project &project, DemoTimeline &timeline, QDomElement &node, qreal height):
@@ -43,30 +47,55 @@ Sequence::Sequence(Project& project, DemoTimeline &timeline, QDomElement node, S
 }
 */
 
-Sequence::Sequence(QGraphicsObject* parent) : 
+Sequence::Sequence(QGraphicsObject* parent) :
   QGraphicsObject(parent),
   startFrame(-1), // invalid position
-  length(1) // minimal length is 1 frame else the sequence doesn't "exists" 
+  length(2), // minimal length is 1 frame else the sequence doesn't "exists", but actual impl only support at least 2 frames
+  camera(new Camera), 
+  height(60),
+  renderCache(nullptr)
 {
-
+  setFlags(QGraphicsItem::ItemIsSelectable);
+  setAcceptHoverEvents(true);
 }
 
-void Sequence::create(int start, int length)
+void Sequence::setMedia(const QPointer<MediaFile>& mediaFile)
 {
-  setRect(0,0,length,rect().height());
-  setPos(start,pos().y());
-
-  orginalLength = length;
-  setBrush(idleBrush());
-  setFlags(QGraphicsItem::ItemIsSelectable);
-
-  setAcceptHoverEvents(true);
-
-  renderImages();
+  if (media != mediaFile)
+  {
+    QPointer<MediaFile> oldMedia;
+    media = mediaFile;
+    if (!media.isNull())
+    {
+      Q_ASSERT(media->canBeRendered());
+      renderer.reset(media->createRenderer());
+      if (renderer->hasDynamicCamera() && cameraKeyframes.size())
+      {
+        renderer->setCurrentCamera(camera);
+      }
+      if (renderCache)
+      {
+        renderer->initializeGL(*renderCache);
+        renderImages();
+      }
+    }
+    emit propertyChanged(this, "media", QVariant::fromValue(oldMedia), QVariant::fromValue(media));
+  }
 }
 
 void Sequence::insertCameraKeyframe(CameraKeyframe& keyframe)
 {
+  Q_ASSERT(keyframe.getRelativeFrame() >= 0 && keyframe.getRelativeFrame() < getLength()); // not terribble but should work
+  Q_ASSERT(cameraKeyframes.constFind(keyframe.getRelativeFrame()) != cameraKeyframes.constEnd()); // Error erase previous keyframe
+
+  keyframe.setParent(this);
+  keyframe.setParentItem(this);
+
+  connect(&keyframe, &Keyframe::propertyChanged, this, &Sequence::keyframePropertyChanged);
+  connect(&keyframe, &Keyframe::requestFramePosition, this, &Sequence::keyframeRequestFramePosition);
+
+  cameraKeyframes.insert(keyframe.getRelativeFrame(), &keyframe);
+  
   QVariant oldValue;
   QVariant newValue = QVariant::fromValue(&keyframe);
   emit propertyChanged(this, "cameraKeyframes", oldValue, newValue);
@@ -74,120 +103,123 @@ void Sequence::insertCameraKeyframe(CameraKeyframe& keyframe)
 
 void Sequence::removeCameraKeyframe(CameraKeyframe& keyframe)
 {
+  Int64Map<CameraKeyframe*>::iterator it = cameraKeyframes.find(keyframe.getRelativeFrame());
+  Q_ASSERT(it != cameraKeyframes.end());
+  Q_ASSERT(it.value() == &keyframe);
 
+  cameraKeyframes.erase(it);
+
+  disconnect(&keyframe, &Keyframe::propertyChanged, this, &Sequence::keyframePropertyChanged);
+  disconnect(&keyframe, &Keyframe::requestFramePosition, this, &Sequence::keyframeRequestFramePosition);
+
+  QVariant oldValue = QVariant::fromValue(&keyframe);
+  QVariant newValue; 
+  emit propertyChanged(this, "cameraKeyframes", oldValue, newValue);
 }
 
 void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {  
-  QGraphicsObject::paint(painter,option,widget);
+  BaseClass::paint(painter,option,widget);
   QBrush fillBrush(isSelected() ? selectedBrush() : idleBrush());
+  QRectF rect = boundingRect();
+
   qreal scale = getScaleFromWidget(widget);
-  QRectF r(QPointF(5*scale,5),QSizeF(preview.size()));
-  r.setWidth(r.width()*scale);
-  if (r.bottom() > this->rect().bottom() - 5)
+  QRectF previewRect(QPointF(5*scale,5),QSizeF(preview.size()));
+  previewRect.setWidth(previewRect.width()*scale);
+  if (previewRect.bottom() > rect.bottom() - 5)
   {
-    r.setBottom(this->rect().bottom() - 5);
-    r.setWidth(r.width() * r.height() / (float) (preview.size().height()));
+    previewRect.setBottom(rect.bottom() - 5);
+    previewRect.setWidth(rect.width() * previewRect.height() / (float) (preview.size().height()));
   }
-  if (r.width() > (this->rect().width() - 10*scale))
+  if (previewRect.width() > (rect.width() - 10*scale))
   {
-    r.setWidth((this->rect().width() - 10*scale));
+    previewRect.setWidth((rect.width() - 10*scale));
   }
-  if (length() > 10)
+  if (getLength() > 10)
   {
-    painter->drawImage(r,preview);
+    painter->drawImage(previewRect,preview);
   }
   QFont textFont;
   textFont.setStretch((int)(100*scale));
   painter->setFont(textFont);
-  QRectF textRect = QRectF(r.right() + 5*scale,r.top(),this->rect().right()-(r.right()+5*scale),this->rect().height());
+  QRectF textRect = QRectF(previewRect.right() + 5*scale,previewRect.top(), previewRect.right()-(previewRect.right()+5*scale), rect.height());
   if (!media.isNull())
   {
-    painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,media.data()->objectName() + " (" + scene->fileName() + ")");
+    painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,media.data()->objectName() + " (" + media->getPath().fileName() + ")");
   }
   else
   {
-    painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,QString("Invalid scene: ") + node.attribute("scene"));
+    painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,QString("Missing media"));
   }
+}
+
+QRectF Sequence::boundingRect() const
+{
+  return QRectF(0, 0, getLength(), getHeight());
+}
+
+void Sequence::initializeGL(RenderFunctionsCache& renderCache)
+{
+  this->renderCache = &renderCache;
+  renderImages();
+  if (!renderer.isNull())
+    renderer->initializeGL(renderCache);
 }
 
 void Sequence::renderImages()
 {
-  if (scene)
+  Q_ASSERT(renderCache);
+  if (!renderer.isNull())
   {
-    size_t height = rect().height() - 10;
-    FBO fbo(4*height/3,height);
-    fbo.enable();
-
-    scene->getShader().enable();
-
-    Camera cam;
-    this->setCamera(0,cam);
-
-    scene->getShader().sendf("cam_rotation",cam.getRotation().x(),cam.getRotation().y(),cam.getRotation().z(),cam.getRotation().scalar());
-    scene->getShader().sendf("cam_position",cam.getPosition().x(),cam.getPosition().y(),cam.getPosition().z());
-
-    scene->getShader().sendf("xy_scale_factor",(float)fbo.getSizeX()/(float)fbo.getSizeY());
-    scene->getShader().sendf("sequence_time",0.f);
-    scene->getShader().sendf("track_time",(float)this->pos().x()/timeline->getFramerate());
-
-    Fast2DQuadDraw();
-    scene->getShader().disable();
-
-    preview = fbo.getImage();
-
-    fbo.disable();
-
+    size_t height = getHeight() - 10;
+    RenderTexture2D render;
+    render.initializeGL(*renderCache, QSize(4 * height / 3, height));
+    preview = render.getImage();
+    render.render(*renderCache, *renderer);
   }
 }
 
-
 void Sequence::setStartFrame(qint64 frame)
 {
-  qint64 previous_frame = startFrame();
+  qint64 previous_frame = getStartFrame();
   if (frame < 0)
   {
     frame = 0;
   }
-  setPos((qreal)frame,pos().y());
-  timeline->sequenceStartFrameChanged(previous_frame,this);
-  node.setAttribute("start",QString::number(startFrame()));
-  if (notify)
+  if (frame != previous_frame)
   {
-    project->notifyDocumentChanged();
+    startFrame = frame;
+    emit propertyChanged(this, "startFrame", previous_frame, startFrame);
   }
-  renderImages();
 }
 
-void Sequence::setLength(qint64 length, bool notify)
+void Sequence::setLength(quint64 length)
 {
-  qint64 maxlength = timeline->maxSequenceLengthBeforeOverlap(this);
+  /*qint64 maxlength = timeline->maxSequenceLengthBeforeOverlap(this);
   if (length > maxlength)
   {
     length = maxlength;
-  }
-  if (length < 0)
+  }*/
+  if (length < 2)
   {
-    length = 1;
+    length = 2;
   }
-  QRectF r = rect();
-  r.setWidth(length);
-  setRect(r);
-  node.setAttribute("length",QString::number(length));
-  if (notify)
+  
+  quint64 oldLength = getLength();
+  if (oldLength != length)
   {
-    project->notifyDocumentChanged();
+    this->length = length;
+    update(QRect(startFrame, 0, length, height));
+    emit propertyChanged(this, "length", oldLength, length);
   }
 }
 
-
-
 void Sequence::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-  QGraphicsRectItem::mousePressEvent(event);
+  BaseClass::mousePressEvent(event);
   mousePressPos = event->scenePos();
-  mousePressStartFrame = startFrame();
-  orginalLength = length();
+  mousePressStartFrame = getStartFrame();
+  mousePressLength = getLength();
   qreal scale = getScaleFromWidget(event->widget());
 
   if (isInsideRightExtend(event->pos(),scale))
@@ -196,58 +228,82 @@ void Sequence::mousePressEvent(QGraphicsSceneMouseEvent* event)
     QApplication::setOverrideCursor(Qt::SizeHorCursor);
 
   }
+  else if (isInsideLeftExtend(event->pos(), scale))
+  {
+    currentAction = LeftExtend;
+    QApplication::setOverrideCursor(Qt::SizeHorCursor);
+  }
   else
   {
     currentAction = Move;
     QApplication::setOverrideCursor(Qt::ClosedHandCursor);
   }
-
-
 }
 
 void Sequence::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-  QGraphicsRectItem::mouseMoveEvent(event);
+  BaseClass::mouseMoveEvent(event);
+  qint64 delta = event->scenePos().x() - mousePressPos.x();
   if (currentAction==Move)
   {
-    qint64 delta = event->scenePos().x() - mousePressPos.x();
-    setStartFrame(mousePressStartFrame + delta,false);
-
+    setStartFrame(mousePressStartFrame + delta);
   }
   else if (currentAction==RightExtend)
   {
-    qint64 delta = event->scenePos().x() - mousePressPos.x();
-    setLength(orginalLength + delta,false);
+    qint64 v = mousePressLength + delta;
+    setLength(v < 0 ? 0 : v);
   }
-
+  else if (currentAction==LeftExtend)
+  {
+    qint64 v = mousePressStartFrame - delta;
+    setStartFrame(mousePressStartFrame + delta);
+    setLength(v < 0 ? 0: v);
+  }
 }
 
 void Sequence::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-  QGraphicsRectItem::mouseReleaseEvent(event);
+  BaseClass::mouseReleaseEvent(event);
+  qint64 delta = event->scenePos().x() - mousePressPos.x();
   if (currentAction==Move)
   {
-    qint64 delta = event->scenePos().x() - mousePressPos.x();
-    setStartFrame(mousePressStartFrame+delta,true);
+    ASSERT_IF_UNIQUE_RECEIVER(sendUndoCommand(QUndoCommand*))
+    {
+      emit sendUndoCommand(new ModifyPropertyCommand(*this, "startFrame", mousePressStartFrame, mousePressStartFrame + delta));
+    }
   }
   else if (currentAction==RightExtend)
   {
-    qint64 delta = event->scenePos().x() - mousePressPos.x();
-    setLength(orginalLength + delta,true);
+    ASSERT_IF_UNIQUE_RECEIVER(sendUndoCommand(QUndoCommand*))
+    {
+      qint64 v = mousePressLength + delta;
+      emit sendUndoCommand(new ModifyPropertyCommand(*this, "length", mousePressLength, v < 0 ? 0 : v));
+    }
+  }
+  else if (currentAction == LeftExtend)
+  {
+    ASSERT_IF_UNIQUE_RECEIVER(sendUndoCommand(QUndoCommand*))
+    {
+      qint64 v = mousePressStartFrame - delta;
+      QUndoCommand* cmd = new QUndoCommand("Extend sequence");
+      QUndoCommand* startFrameCmd = new ModifyPropertyCommand(*this, "startFrame", mousePressStartFrame, mousePressStartFrame + delta, cmd);
+      QUndoCommand* lengthCmd = new ModifyPropertyCommand(*this, "length", mousePressLength, v < 0 ? 0 : v, cmd);
+      emit sendUndoCommand(cmd);
+    }
   }
   QApplication::restoreOverrideCursor();
-  orginalLength = length();
 }
 
+/*
 qint64 Sequence::nearestFrameAvailableForKeyframe(qint64 rel_frame) const
 {
   if (rel_frame < 0)
   {
     rel_frame = 0;
   }
-  else if (rel_frame >= length())
+  else if (rel_frame >= getLength())
   {
-    rel_frame = length();
+    rel_frame = getLength();
   }
 
   QMap<qint64,CameraKeyframe*>::const_iterator it = cameraKeyframes.find(rel_frame);
@@ -258,16 +314,8 @@ qint64 Sequence::nearestFrameAvailableForKeyframe(qint64 rel_frame) const
   }
   return rel_frame;
 }
-
-void Sequence::keyframePositionChanged(qint64 previous_frame, Keyframe* keyframe)
-{
-  //Q_ASSERT(cameraKeyframes.contains(previous_frame));
-  Q_ASSERT(!cameraKeyframes.contains(keyframe->relativeFrame()));
-  cameraKeyframes.remove(previous_frame);
-  cameraKeyframes[keyframe->relativeFrame()] = (CameraKeyframe*)keyframe;
-}
-
-void Sequence::setCamera(qint64 relative_frame, Camera &cam) const
+*/
+void Sequence::setFramePosition(qint64 framePosition)
 {
   CameraKeyframe* begin = nullptr;
   CameraKeyframe* end = nullptr;
@@ -275,11 +323,11 @@ void Sequence::setCamera(qint64 relative_frame, Camera &cam) const
   QMap<qint64,CameraKeyframe*>::ConstIterator it;
   for (it = cameraKeyframes.constBegin(); it != cameraKeyframes.constEnd(); ++it)
   {
-    if (it.key() <= relative_frame)
+    if (it.key() <= framePosition)
     {
       begin = it.value();
     }
-    else if (it.key() > relative_frame)
+    else if (it.key() > framePosition)
     {
       end = it.value();
       break;
@@ -288,70 +336,35 @@ void Sequence::setCamera(qint64 relative_frame, Camera &cam) const
 
   if (begin && end)
   {
-    float delta = (qreal)(relative_frame - begin->relativeFrame())/
-                  (qreal)(end->relativeFrame() - begin->relativeFrame());
+    float delta = (qreal)(framePosition - begin->getRelativeFrame())/
+                  (qreal)(end->getRelativeFrame() - begin->getRelativeFrame());
 
     float delta_inv = 1.f-delta;
     QVector3D p = end->getPosition() * delta + begin->getPosition() * delta_inv;
     QQuaternion q = QQuaternion::nlerp(begin->getRotation(),end->getRotation(),delta);
-    cam.setPosition(p);
-    cam.setRotation(q);
+    camera->setPosition(p);
+    camera->setRotation(q);
 
   }
   else if (begin)
   {
-    cam.fromKeyframe(*begin);
+    camera->fromKeyframe(*begin);
   }
   else if (end)
   {
-    cam.fromKeyframe(*end);
+    camera->fromKeyframe(*end);
   }
   else
   {
-    cam.reset();
+    camera->reset();
   }
 }
-
-void Sequence::insertCameraKeyframe(qint64 rel_frame, const QVector3D &pos, const QQuaternion &rot)
-{
-  QMap<qint64,CameraKeyframe*>::iterator it = cameraKeyframes.find(rel_frame);
-  CameraKeyframe* keyframe = (it != cameraKeyframes.end()) ? it.value() : nullptr;
-  if (keyframe)
-  {
-    keyframe->setPosition(pos);
-    keyframe->setRotation(rot);
-  }
-  else
-  {
-    QDomElement e = project->getDocument().createElement("keyframe");
-    e = cameraNode.appendChild(e).toElement();
-    keyframe = new CameraKeyframe(rel_frame,*project,this,e,pos,rot);
-    QObject::connect(keyframe,SIGNAL(requestFramePosition(qint64)),timeline,SLOT(requestFramePosition(qint64)));
-    keyframe->setPos(keyframe->pos().x(), this->rect().height()-5);
-    cameraKeyframes[keyframe->relativeFrame()] = keyframe;
-  }
-
-  if (rel_frame == 0)
-  {
-    renderImages();
-  }
-}
-
-void Sequence::deleteCameraKeyframe(CameraKeyframe *key)
-{
-  QMap<qint64,CameraKeyframe*>::iterator it = cameraKeyframes.find(key->relativeFrame());
-  cameraNode.removeChild(it.value()->getNode()).clear();
-  delete it.value();
-  cameraKeyframes.erase(it);
-  project->notifyDocumentChanged();
-}
-
 
 void Sequence::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-  QGraphicsRectItem::hoverEnterEvent(event);
+  BaseClass::hoverEnterEvent(event);
   qreal scale = getScaleFromWidget(event->widget());
-  if (isInsideRightExtend(event->pos(),scale))
+  if (isInsideRightExtend(event->pos(),scale) || isInsideLeftExtend(event->pos(), scale))
   {
     QApplication::setOverrideCursor(Qt::SizeHorCursor);
   }
@@ -363,9 +376,9 @@ void Sequence::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 
 void Sequence::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-  QGraphicsRectItem::hoverMoveEvent(event);
+  BaseClass::hoverMoveEvent(event);
   qreal scale = getScaleFromWidget(event->widget());
-  if (isInsideRightExtend(event->pos(),scale))
+  if (isInsideRightExtend(event->pos(),scale) || isInsideLeftExtend(event->pos(), scale))
   {
     QApplication::changeOverrideCursor(Qt::SizeHorCursor);
   }
@@ -377,13 +390,18 @@ void Sequence::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
 void Sequence::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-  QGraphicsRectItem::hoverLeaveEvent(event);
+  BaseClass::hoverLeaveEvent(event);
   QApplication::restoreOverrideCursor();
 }
 
 bool Sequence::isInsideRightExtend(QPointF rel_pos, qreal scale) const
 {
-  return (rel_pos.x()>=length()-3.0*scale); //Ugly
+  return (rel_pos.x()>=getLength()-3.0*scale); //Ugly
+}
+
+bool Sequence::isInsideLeftExtend(QPointF rel_pos, qreal scale) const
+{
+	return (rel_pos.x()<=3.0*scale); //Ugly
 }
 
 qreal Sequence::getScaleFromWidget(const QWidget *widget) const
@@ -394,4 +412,51 @@ qreal Sequence::getScaleFromWidget(const QWidget *widget) const
     w = qobject_cast<const TimelineWidget*>(widget->parent());
   }
   return w ? 1.0 / w->getScale().x() : 1.0;
+}
+
+void Sequence::keyframePropertyChanged(QObject* owner, const QString& propertyName, const QVariant& oldValue, const QVariant& newValue)
+{
+  if (propertyName == "relativeFrame")
+  {
+    CameraKeyframe* keyframe = qobject_cast<CameraKeyframe*>(owner);
+    qint64 oldFrame = oldValue.toInt();
+    qint64 newFrame = newValue.toInt();
+    if (cameraKeyframes.contains(oldFrame) && cameraKeyframes[oldFrame] == keyframe)
+      cameraKeyframes.remove(oldFrame); 
+
+    if (cameraKeyframes.contains(newFrame)) // fuck !
+    {
+      // search around the keyframe a free space avaiable
+      qint64 newFrameLeft = newFrame;
+      while (cameraKeyframes.contains(newFrameLeft))
+        newFrameLeft--;
+
+      qint64 newFrameRight;
+      while (cameraKeyframes.contains(newFrameRight))
+        newFrameRight--;
+
+      if (newFrameLeft >= 0 && newFrameRight <= getLength())
+      {
+        if (newFrame - newFrameLeft < newFrameRight - newFrame)
+          newFrame = newFrameLeft;
+        else
+          newFrame = newFrameRight;
+      }
+      else if (newFrameLeft >= 0)
+        newFrame = newFrameLeft;
+      else if (newFrameRight <= getLength())
+        newFrame = newFrameRight;
+      else
+        Q_ASSERT(false);
+
+      keyframe->setRelativeFrame(newFrame);
+    }
+    else
+      cameraKeyframes.insert(newFrame, keyframe); // avoid re-entrancy 
+  }
+}
+
+void Sequence::keyframeRequestFramePosition(qint64 position)
+{
+  emit requestFramePosition(position);
 }

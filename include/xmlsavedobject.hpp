@@ -8,6 +8,13 @@
 #include <QDomElement>
 
 /*
+** Ugly things
+*/
+
+template <class cl>
+using Int64Map = QMap<qint64, cl>; // Compiler bug with macros because of ',' ! 
+
+/*
 ** Properties
 */
 
@@ -61,7 +68,7 @@
 #define GENERATE_PROPERTY_SETTER_REFERENCE(Class, Type, variableName, VariableName) \
   void Class::set##VariableName(const Type& new##variableName) \
   { \
-    SET_PROPERTY(Type, variableName, variableName##variableName) \
+    SET_PROPERTY(Type, variableName) \
   }
 
 #define GENERATE_PROPERTY_SETTER_REFERENCE_NOTIFY(Class, Type, variableName, VariableName) \

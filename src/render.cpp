@@ -61,6 +61,12 @@ void RenderTexture2D::createAttachements(const QSize& fboSize)
   fbo->addColorAttachment(fboSize, GL_DEPTH_COMPONENT32F); // depth
 }
 
+QImage RenderTexture2D::getImage()
+{
+  Q_ASSERT(fbo);
+  return fbo->toImage(true, 0);
+}
+
 /*
 SceneRender::SceneRender(Scene &scene, const QSize& initialSize, QObject* parent):
   Render(initialSize, parent),

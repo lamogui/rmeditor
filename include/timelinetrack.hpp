@@ -9,8 +9,6 @@
 class Renderer;
 class Sequence; 
 class DemoTimeline;
-template <class cl>
-using Int64Map = QMap<qint64, cl>; // Compiler bug with macros because of ',' ! 
 
 /*
 ** TimelineTrack : a timeline track of a DemoTimeline
@@ -26,7 +24,7 @@ public:
 
 private:
 
-  DECLARE_PROPERTY_REFERENCE_NOTIFY(Int64Map<Sequence*>, sequences, Sequences)
+  DECLARE_PROPERTY_REFERENCE(Int64Map<Sequence*>, sequences, Sequences)
 };
 
 Q_DECLARE_METATYPE(Int64Map<Sequence*>);

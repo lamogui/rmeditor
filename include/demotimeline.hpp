@@ -96,7 +96,7 @@ protected:
   QPointF mousePressPos;
 
 private:
-  DECLARE_PROPERTY_REFERENCE_NOTIFY(QVector<TimelineTrack>, tracks, Tracks)
+  DECLARE_PROPERTY_REFERENCE(QVector<TimelineTrack>, tracks, Tracks)
 };
 
 Q_DECLARE_METATYPE(QVector<TimelineTrack>)

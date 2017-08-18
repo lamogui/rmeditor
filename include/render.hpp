@@ -44,10 +44,14 @@ private:
   Type type;
 };
 
+#include <QImage>
+
 class RenderTexture2D : public Render
 {
 public:
   RenderTexture2D();
+
+  QImage getImage();
 
 protected:
   void createAttachements(const QSize& fboSize) final;

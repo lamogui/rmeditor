@@ -32,7 +32,7 @@ template <class TargetClass, typename ValueClass>
 class InsertInContainerUndoCommand : public QUndoCommand
 {
 public:
-  typedef void (*TargetClass::Method)(ValueClass& target);
+  typedef void (TargetClass::*Method)(ValueClass& target);
 
   InsertInContainerUndoCommand(TargetClass& targetOwner, ValueClass& target, Method insertMethod, Method removeMethod, QUndoCommand *parent = nullptr) :
     QUndoCommand(parent),
@@ -90,7 +90,7 @@ template <class TargetClass, typename ValueClass>
 class RemoveFromContainerUndoCommand : public QUndoCommand
 {
 public:
-  typedef void(*TargetClass::Method)(ValueClass& target);
+  typedef void(TargetClass::*Method)(ValueClass& target);
 
   RemoveFromContainerUndoCommand(TargetClass& targetOwner, ValueClass& target, Method removeMethod, Method insertMethod, QUndoCommand *parent = nullptr) :
     QUndoCommand(parent),

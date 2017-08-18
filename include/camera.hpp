@@ -4,6 +4,7 @@
 #include <QVector3D>
 #include <QQuaternion>
 
+class CameraKeyframe;
 class Camera
 {
 public:
@@ -22,6 +23,8 @@ public:
   void rotate(qreal yaw, qreal pitch, qreal roll ); //Degrees
   void translateRelative(const QVector3D& dir);
   void translate(const QVector3D& dir);
+
+  void fromKeyframe(const CameraKeyframe& keyframe);
 
   void reset();
 

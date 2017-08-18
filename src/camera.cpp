@@ -16,6 +16,12 @@ Camera::~Camera()
 
 }
 
+void Camera::fromKeyframe(const CameraKeyframe& keyframe)
+{
+  rotation = keyframe.getRotation();
+  position = keyframe.getPosition();
+}
+
 void Camera::reset()
 {
   rotation = QQuaternion(1,0,0,0);
