@@ -21,9 +21,10 @@ class TimelineTrack : public QObject
 
 public:
   TimelineTrack(DemoTimeline& parent); 
+  
+  
 
 private:
-
   DECLARE_PROPERTY_REFERENCE(Int64Map<Sequence*>, sequences, Sequences)
 };
 

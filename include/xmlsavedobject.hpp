@@ -99,6 +99,15 @@ using Int64Map = QMap<qint64, cl>; // Compiler bug with macros because of ',' !
   Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName WRITE set##VariableName NOTIFY variableName##Changed) \
   DECLARE_PROPERTY_GETTER_AND_SETTER(Type, variableName, VariableName);
 
+#define DECLARE_PROPERTY_CONTAINER(Type, ValueType, variableName, VariableName, ValueName) \
+  Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName) \
+  public: \
+    GENERATE_PROPERTY_REFERENCE_GETTER(Type, variableName, get##VariableName) \
+    void insert##ValueName(ValueType ValueName); \
+    void remove##ValueName(ValueType ValueName); \
+  private: \
+    Type variableName;
+
 #define DECLARE_PROPERTY_REFERENCE(Type, variableName, VariableName) \
   Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName WRITE set##VariableName) \
   DECLARE_PROPERTY_GETTER_AND_SETTER_REFERENCE(Type, variableName, VariableName)

@@ -83,36 +83,37 @@ void Sequence::setMedia(const QPointer<MediaFile>& mediaFile)
   }
 }
 
-void Sequence::insertCameraKeyframe(CameraKeyframe& keyframe)
+void Sequence::insertCameraKeyframe(CameraKeyframe* keyframe)
 {
-  Q_ASSERT(keyframe.getRelativeFrame() >= 0 && keyframe.getRelativeFrame() < getLength()); // not terribble but should work
-  Q_ASSERT(cameraKeyframes.constFind(keyframe.getRelativeFrame()) != cameraKeyframes.constEnd()); // Error erase previous keyframe
+  Q_ASSERT(keyframe);
+  Q_ASSERT(keyframe->getRelativeFrame() >= 0 && keyframe->getRelativeFrame() < getLength()); // not terribble but should work
+  Q_ASSERT(cameraKeyframes.constFind(keyframe->getRelativeFrame()) != cameraKeyframes.constEnd()); // Error erase previous keyframe
 
-  keyframe.setParent(this);
-  keyframe.setParentItem(this);
+  keyframe->setParent(this);
+  keyframe->setParentItem(this);
 
-  connect(&keyframe, &Keyframe::propertyChanged, this, &Sequence::keyframePropertyChanged);
-  connect(&keyframe, &Keyframe::requestFramePosition, this, &Sequence::keyframeRequestFramePosition);
+  connect(keyframe, &Keyframe::propertyChanged, this, &Sequence::keyframePropertyChanged);
+  connect(keyframe, &Keyframe::requestFramePosition, this, &Sequence::keyframeRequestFramePosition);
 
-  cameraKeyframes.insert(keyframe.getRelativeFrame(), &keyframe);
+  cameraKeyframes.insert(keyframe->getRelativeFrame(), keyframe);
   
   QVariant oldValue;
   QVariant newValue = QVariant::fromValue(&keyframe);
   emit propertyChanged(this, "cameraKeyframes", oldValue, newValue);
 }
 
-void Sequence::removeCameraKeyframe(CameraKeyframe& keyframe)
+void Sequence::removeCameraKeyframe(CameraKeyframe* keyframe)
 {
-  Int64Map<CameraKeyframe*>::iterator it = cameraKeyframes.find(keyframe.getRelativeFrame());
+  Int64Map<CameraKeyframe*>::iterator it = cameraKeyframes.find(keyframe->getRelativeFrame());
   Q_ASSERT(it != cameraKeyframes.end());
-  Q_ASSERT(it.value() == &keyframe);
+  Q_ASSERT(it.value() == keyframe);
 
   cameraKeyframes.erase(it);
 
-  disconnect(&keyframe, &Keyframe::propertyChanged, this, &Sequence::keyframePropertyChanged);
-  disconnect(&keyframe, &Keyframe::requestFramePosition, this, &Sequence::keyframeRequestFramePosition);
+  disconnect(keyframe, &Keyframe::propertyChanged, this, &Sequence::keyframePropertyChanged);
+  disconnect(keyframe, &Keyframe::requestFramePosition, this, &Sequence::keyframeRequestFramePosition);
 
-  QVariant oldValue = QVariant::fromValue(&keyframe);
+  QVariant oldValue = QVariant::fromValue(keyframe);
   QVariant newValue; 
   emit propertyChanged(this, "cameraKeyframes", oldValue, newValue);
 }

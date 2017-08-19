@@ -32,10 +32,6 @@ public:
   // Time position 
   void setFramePosition(qint64 framePosition);
 
-  // Accessors
-  void insertCameraKeyframe(CameraKeyframe& keyframe);
-  void removeCameraKeyframe(CameraKeyframe& keyframe);
-
   // Graphics
   QBrush selectedBrush() { return QBrush(QColor(200, 200, 255)); }
   QBrush idleBrush() { return QBrush(QColor(200, 200, 200)); }
@@ -95,7 +91,7 @@ private:
   DECLARE_PROPERTY_REFERENCE(QPointer<MediaFile>, media, Media)
   DECLARE_PROPERTY(qint64, startFrame, StartFrame)
   DECLARE_PROPERTY(quint64, length, Length)
-  DECLARE_PROPERTY_REFERENCE(Int64Map<CameraKeyframe*>, cameraKeyframes, CameraKeyframes)
+  DECLARE_PROPERTY_CONTAINER(Int64Map<CameraKeyframe*>, CameraKeyframe*, cameraKeyframes, CameraKeyframes, CameraKeyframe)
 
   // Internal 
   QSharedPointer<Renderer> renderer;
