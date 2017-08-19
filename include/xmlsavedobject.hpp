@@ -6,6 +6,7 @@
 #include <QString>
 #include <QVariant>
 #include <QDomElement>
+#include <QMap>
 
 /*
 ** Ugly things
@@ -13,6 +14,9 @@
 
 template <class cl>
 using Int64Map = QMap<qint64, cl>; // Compiler bug with macros because of ',' ! 
+
+template <class cl>
+using StringMap = QMap<QString, cl>; // Compiler bug with macros because of ',' ! 
 
 /*
 ** Properties
@@ -62,7 +66,7 @@ using Int64Map = QMap<qint64, cl>; // Compiler bug with macros because of ',' !
 #define GENERATE_PROPERTY_SETTER_NOTIFY(Class, Type, variableName, VariableName) \
   void Class::set##VariableName(Type new##variableName) \
   { \
-    SET_PROPERTY_NOTIFY(Type, variableName, variableName##variableName) \
+    SET_PROPERTY_NOTIFY(Type, variableName) \
   }
 
 #define GENERATE_PROPERTY_SETTER_REFERENCE(Class, Type, variableName, VariableName) \
@@ -74,7 +78,7 @@ using Int64Map = QMap<qint64, cl>; // Compiler bug with macros because of ',' !
 #define GENERATE_PROPERTY_SETTER_REFERENCE_NOTIFY(Class, Type, variableName, VariableName) \
   void Class::set##VariableName(const Type& new##variableName) \
   { \
-    SET_PROPERTY_NOTIFY(Type, variableName, variableName##variableName) \
+    SET_PROPERTY_NOTIFY(Type, variableName) \
   }
 
 #define DECLARE_PROPERTY_GETTER_AND_SETTER(Type, variableName, VariableName) \
@@ -99,14 +103,14 @@ using Int64Map = QMap<qint64, cl>; // Compiler bug with macros because of ',' !
   Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName WRITE set##VariableName NOTIFY variableName##Changed) \
   DECLARE_PROPERTY_GETTER_AND_SETTER(Type, variableName, VariableName);
 
-#define DECLARE_PROPERTY_CONTAINER(Type, ValueType, variableName, VariableName, ValueName) \
-  Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName) \
+#define DECLARE_PROPERTY_CONTAINER(ContainerType, ValueType, variableName, VariableName, valueName, ValueName) \
+  Q_PROPERTY(ContainerType<ValueType> variableName MEMBER variableName READ get##VariableName) \
   public: \
-    GENERATE_PROPERTY_REFERENCE_GETTER(Type, variableName, get##VariableName) \
-    void insert##ValueName(ValueType ValueName); \
-    void remove##ValueName(ValueType ValueName); \
+    GENERATE_PROPERTY_REFERENCE_GETTER(ContainerType<ValueType>, variableName, get##VariableName) \
+    void insert##ValueName(ValueType valueName); \
+    void remove##ValueName(ValueType valueName); \
   private: \
-    Type variableName;
+    ContainerType<ValueType> variableName;
 
 #define DECLARE_PROPERTY_REFERENCE(Type, variableName, VariableName) \
   Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName WRITE set##VariableName) \

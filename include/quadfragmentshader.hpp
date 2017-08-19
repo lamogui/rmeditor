@@ -11,7 +11,7 @@ class QuadFragmentShaderCode : public GLSLShaderCode
   Q_OBJECT
 
 public:
-  QuadFragmentShaderCode();
+  QuadFragmentShaderCode(QObject* parent = nullptr);
 
   // MediaFile Renderer
   bool canBeRendered() const override { return true; }
@@ -42,7 +42,7 @@ protected:
 class ReferencedQuadFragmentShaderRenderer : public Renderer
 {
 public:
-  ReferencedQuadFragmentShaderRenderer() {}
+  ReferencedQuadFragmentShaderRenderer(QObject* parent = nullptr) : Renderer(parent) {}
   ~ReferencedQuadFragmentShaderRenderer() override {}
 
   // accesors

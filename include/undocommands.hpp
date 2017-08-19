@@ -32,26 +32,26 @@ template <class TargetClass, typename ValueClass>
 class InsertInContainerUndoCommand : public QUndoCommand
 {
 public:
-  typedef void (TargetClass::*Method)(ValueClass& target);
+  typedef void (TargetClass::*Method)(ValueClass* target);
 
   InsertInContainerUndoCommand(TargetClass& targetOwner, ValueClass& target, Method insertMethod, Method removeMethod, QUndoCommand *parent = nullptr) :
     QUndoCommand(parent),
-    targetOwner(&targetOwner), target(&target), insertMethod(insertMethod), removeMethod(removeMethod), ownTarget(true)
+    targetOwner(&targetOwner), target(target), insertMethod(insertMethod), removeMethod(removeMethod), ownTarget(true)
   {
     setText("Insert " + target.objectName() + " into " + targetOwner.objectName());
   }
 
   ~InsertInContainerUndoCommand() override
   {
-    if (ownTarget && target)
+    if (ownTarget && !target.isNull())
       delete target.data();
   }
 
   void redo() override
   {
-    if (targetOwner && target)
+    if (!targetOwner.isNull() && !target.isNull())
     {
-      targetOwner->*insertMethod(*target);
+      targetOwner->*insertMethod(target.data());
       ownTarget = false;
     }
     else
@@ -64,9 +64,9 @@ public:
   void undo() override
   {
     BaseClass::undo();
-    if (target && targetOwner)
+    if (!target.isNull() && !targetOwner.isNull())
     {
-      targetOwner->*removeMethod(*target);
+      targetOwner->*removeMethod(target.data());
       ownTarget = true;
     }
     else
@@ -90,7 +90,7 @@ template <class TargetClass, typename ValueClass>
 class RemoveFromContainerUndoCommand : public QUndoCommand
 {
 public:
-  typedef void(TargetClass::*Method)(ValueClass& target);
+  typedef void(TargetClass::*Method)(ValueClass* target);
 
   RemoveFromContainerUndoCommand(TargetClass& targetOwner, ValueClass& target, Method removeMethod, Method insertMethod, QUndoCommand *parent = nullptr) :
     QUndoCommand(parent),
@@ -101,15 +101,15 @@ public:
 
   ~RemoveFromContainerUndoCommand() override
   {
-    if (ownTarget && target)
+    if (!ownTarget.isNull() && !target.isNull())
       delete target.data();
   }
 
   void redo() override
   {
-    if (targetOwner && target)
+    if (!targetOwner.isNull() && !target.isNull())
     {
-      targetOwner->*removeMethod(*target);
+      targetOwner->*removeMethod(target.data());
       ownTarget = true;
     }
     else
@@ -122,9 +122,9 @@ public:
   void undo() override
   {
     BaseClass::undo();
-    if (target && targetOwner)
+    if (!target.isNull() && !targetOwner.isNull())
     {
-      targetOwner->*insertMethod(*target);
+      targetOwner->*insertMethod(target.data());
       ownTarget = false;
     }
     else

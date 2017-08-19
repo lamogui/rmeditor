@@ -6,12 +6,12 @@
 
 #include "xmlsavedobject.hpp"
 #include "undocommands.hpp"
+#include "renderfunctionscache.hpp"
 
 class CameraKeyframe;
 class MediaFile;
 class Renderer;
-class RenderFunctionsCache;
-
+class Camera;
 class Sequence : public QGraphicsObject 
 {
   Q_OBJECT
@@ -64,7 +64,7 @@ public:
   //qint64 nearestFrameAvailableForKeyframe(qint64 rel_frame) const;
 
 signals:
-  void requestFramePosition(qint64 position);
+  void requestFramePosition(const Sequence* source, qint64 position);
 
 protected:
   void renderImages();
@@ -91,7 +91,7 @@ private:
   DECLARE_PROPERTY_REFERENCE(QPointer<MediaFile>, media, Media)
   DECLARE_PROPERTY(qint64, startFrame, StartFrame)
   DECLARE_PROPERTY(quint64, length, Length)
-  DECLARE_PROPERTY_CONTAINER(Int64Map<CameraKeyframe*>, CameraKeyframe*, cameraKeyframes, CameraKeyframes, CameraKeyframe)
+  DECLARE_PROPERTY_CONTAINER(Int64Map, CameraKeyframe*, cameraKeyframes, CameraKeyframes, cameraKeyframe, CameraKeyframe)
 
   // Internal 
   QSharedPointer<Renderer> renderer;
@@ -113,6 +113,5 @@ private:
 private:
   typedef QGraphicsObject BaseClass;
 };
-
 
 #endif

@@ -51,7 +51,4 @@ private:
   DECLARE_PROPERTY_REFERENCE(QVector3D, position, Position)
 };
 
-Q_DECLARE_METATYPE(CameraKeyframe*)
-
-
 #endif // !CAMERA_HPP

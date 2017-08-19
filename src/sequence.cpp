@@ -13,40 +13,6 @@
 #include "timelinewidget.hpp" // fucking scale
 #include "undocommands.hpp"
 
-/*
-Sequence::Sequence(Project &project, DemoTimeline &timeline, QDomElement &node, qreal height):
-  QGraphicsObject(nullptr),
-  node(node),
-  project(&project),
-  timeline(&timeline),
-  scene(nullptr)
-{
-  setRect(QRectF(10,10,10,height)); //ugly
-  load();
-}
-
-Sequence::Sequence(Project& project, DemoTimeline &timeline, QDomElement node, Scene &scene, int start, int length, qreal height):
-  QGraphicsRectItem(nullptr),
-  node(node),
-  project(&project),
-  timeline(&timeline),
-  scene(&scene)
-{
-  setRect(QRectF(10,10,10,height)); //ugly
-  node.setTagName("sequence");
-  node.setAttribute("start",QString::number(start));
-  node.setAttribute("length",QString::number(length));
-  node.setAttribute("scene",scene.objectName());
-
-  cameraNode = this->project->getDocument().createElement("camera");
-  cameraNode = node.appendChild(cameraNode).toElement();
-
-  this->project->notifyDocumentChanged();
-
-  create(start,length);
-}
-*/
-
 Sequence::Sequence(QGraphicsObject* parent) :
   QGraphicsObject(parent),
   startFrame(-1), // invalid position
@@ -55,6 +21,8 @@ Sequence::Sequence(QGraphicsObject* parent) :
   height(60),
   renderCache(nullptr)
 {
+  CONNECT_XML_SAVED_OBJECT(Sequence);
+
   setFlags(QGraphicsItem::ItemIsSelectable);
   setAcceptHoverEvents(true);
 }
@@ -86,10 +54,9 @@ void Sequence::setMedia(const QPointer<MediaFile>& mediaFile)
 void Sequence::insertCameraKeyframe(CameraKeyframe* keyframe)
 {
   Q_ASSERT(keyframe);
-  Q_ASSERT(keyframe->getRelativeFrame() >= 0 && keyframe->getRelativeFrame() < getLength()); // not terribble but should work
+  Q_ASSERT(keyframe->getRelativeFrame() >= 0 && keyframe->getRelativeFrame() < (qint64)getLength()); // not terribble but should work
   Q_ASSERT(cameraKeyframes.constFind(keyframe->getRelativeFrame()) != cameraKeyframes.constEnd()); // Error erase previous keyframe
 
-  keyframe->setParent(this);
   keyframe->setParentItem(this);
 
   connect(keyframe, &Keyframe::propertyChanged, this, &Sequence::keyframePropertyChanged);
@@ -113,6 +80,8 @@ void Sequence::removeCameraKeyframe(CameraKeyframe* keyframe)
   disconnect(keyframe, &Keyframe::propertyChanged, this, &Sequence::keyframePropertyChanged);
   disconnect(keyframe, &Keyframe::requestFramePosition, this, &Sequence::keyframeRequestFramePosition);
 
+  setParentItem(nullptr);
+
   QVariant oldValue = QVariant::fromValue(keyframe);
   QVariant newValue; 
   emit propertyChanged(this, "cameraKeyframes", oldValue, newValue);
@@ -123,6 +92,8 @@ void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
   BaseClass::paint(painter,option,widget);
   QBrush fillBrush(isSelected() ? selectedBrush() : idleBrush());
   QRectF rect = boundingRect();
+  painter->fillRect(rect, fillBrush); 
+  painter->drawRect(rect);
 
   qreal scale = getScaleFromWidget(widget);
   QRectF previewRect(QPointF(5*scale,5),QSizeF(preview.size()));
@@ -172,7 +143,7 @@ void Sequence::renderImages()
   Q_ASSERT(renderCache);
   if (!renderer.isNull())
   {
-    size_t height = getHeight() - 10;
+    int height = getHeight() - 10;
     RenderTexture2D render;
     render.initializeGL(*renderCache, QSize(4 * height / 3, height));
     preview = render.getImage();
@@ -436,7 +407,7 @@ void Sequence::keyframePropertyChanged(QObject* owner, const QString& propertyNa
       while (cameraKeyframes.contains(newFrameRight))
         newFrameRight--;
 
-      if (newFrameLeft >= 0 && newFrameRight <= getLength())
+      if (newFrameLeft >= 0 && newFrameRight <= (qint64)getLength())
       {
         if (newFrame - newFrameLeft < newFrameRight - newFrame)
           newFrame = newFrameLeft;
@@ -445,7 +416,7 @@ void Sequence::keyframePropertyChanged(QObject* owner, const QString& propertyNa
       }
       else if (newFrameLeft >= 0)
         newFrame = newFrameLeft;
-      else if (newFrameRight <= getLength())
+      else if (newFrameRight <= (qint64)getLength())
         newFrame = newFrameRight;
       else
         Q_ASSERT(false);
@@ -459,5 +430,5 @@ void Sequence::keyframePropertyChanged(QObject* owner, const QString& propertyNa
 
 void Sequence::keyframeRequestFramePosition(qint64 position)
 {
-  emit requestFramePosition(position);
+  emit requestFramePosition(this, position);
 }

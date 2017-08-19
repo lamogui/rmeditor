@@ -21,7 +21,7 @@ class Timeline : public QGraphicsScene
   XML_SAVED_OBJECT
 
 public:
-  Timeline(Music& music); // The music is the parent of the timeline, if it's doesn't exists anymore the timeline should be destroyed ! 
+  Timeline(QObject* parentMusic); // The music is the parent of the timeline, if it's doesn't exists anymore the timeline should be destroyed ! 
 
   // For now this should never be null
   const Music& getMusic() const { return music; }
@@ -43,8 +43,7 @@ signals:
   // property 
   void framerateChanged(double); // meta compiler doesn't support signal declaration inside macros...
 
-public slots:
-  void requestFramePosition(qint64 frame); // shortcut
+  void requestPosition(double position);
 
 protected:
   // links

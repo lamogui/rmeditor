@@ -1,18 +1,39 @@
 ﻿
 
 #include "project.hpp"
+#include "music.hpp"
 
-#include <QTextStream>
+Project::Project(QObject* parent) :
+  TextEditable(parent),
+  music(nullptr)
+{
 
-#include "demotimeline.hpp"
-#include "scene.hpp"
-#include "shaderminifier.hpp"
-#include "logwidget.hpp" // EVil !!! 
+}
+
+void Project::setMusic(Music* newMusic)
+{
+  if (music != newMusic)
+  {
+    Music* oldMusic = music;
+    music = newMusic;
+    if (oldMusic)
+      oldMusic->setParent(nullptr);
+    if (music)
+      music->setParent(this);
+    
+    QVariant oldValue = QVariant::fromValue(oldMusic);
+    QVariant newValue = QVariant::fromValue(newMusic);
+
+    emit propertyChanged(this, "music", oldValue, newValue);
+  }
+}
+
+void Project::insertRmScene(RaymarchingScene)
 
 
 //#include "tunefish4music.hpp"
 //#include "4klangmusic.hpp"
-
+#if 0
 Project::Project(const QDir &dir, const QString &filename, LogWidget &log, QObject *parent):
   TextEditable(filename, QDomNode() ,log,parent),
   music(nullptr),
@@ -574,3 +595,4 @@ void Project::exportScenesSources(const QDir &dir) const
 }
 
 
+#endif 

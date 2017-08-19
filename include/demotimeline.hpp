@@ -2,23 +2,15 @@
 #ifndef DEMOTIMELINE_HPP
 #define DEMOTIMELINE_HPP
 
-#include <QAction>
-#include <QDir>
-#include <QDomElement>
-#include <QMap>
+#include <QVector>
 
-
-#include "camera.hpp"
-#include "quadfragmentshader.hpp"
 #include "timeline.hpp"
 
-class DemoTimeline;
-class Project;
-class Sequence;
 
 /*
 ** DemoTimelineRenderer : know how to render a DemoTimeline
 */
+/*
 class DemoTimelineRenderer : public Renderer
 {
 public:
@@ -32,19 +24,21 @@ public:
 protected:
   DemoTimeline& timeline; 
 };
+*/
 
-
+class TimelineTrack;
 class DemoTimeline : public Timeline
 {
-
   Q_OBJECT
+  PROPERTY_CALLBACK_OBJECT
+  XML_SAVED_OBJECT
 
 public:
-  DemoTimeline(QDomElement& node, Project& project, double fps, LogWidget& log);
+  DemoTimeline(QObject* parentMusic);
   ~DemoTimeline() override;
 
-  inline QDomElement getNode() const { return node; }
-
+  void initializeGL(RenderFunctionsCache& cache);
+  /*
   qint64 sequenceStartFrameChanged(qint64 previous_frame,  Sequence* seq); //return the correct start frame of the seq
   qint64 maxSequenceLengthBeforeOverlap(Sequence* seq) const;
 
@@ -55,7 +49,7 @@ public:
   inline Render* getRender() override { return render; }
 
   void updateTime() override;
-
+  
 public slots:
   void updateCamera(qint64 frame, Camera& cam);
   inline void updateCamera(Camera& cam) { updateCamera(currentFrame(),cam);}
@@ -73,11 +67,12 @@ public slots:
 
   void renderImage(const QSize& resolution, QImage* target);
 
-  void exportSources(const QDir& dir) const;
+  void exportSources(const QDir& dir) const;*/
 
 protected slots:
-  void addSequenceAction(QAction* action);
-
+  //void addSequenceAction(QAction* action);
+  void trackRequestFramePosition(qint64 position);
+  /*
 protected:
   void keyReleaseEvent(QKeyEvent *keyEvent) override;
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
@@ -90,15 +85,14 @@ protected:
 
   QDomElement node;
   QSharedPointer<Camera> camera;
-  double trackHeight;
-  Project* project;
-  DemoRender* render;
   QPointF mousePressPos;
-
+  */
 private:
-  DECLARE_PROPERTY_REFERENCE(QVector<TimelineTrack>, tracks, Tracks)
-};
+  // properties
+  DECLARE_PROPERTY_CONTAINER(QVector, TimelineTrack*, tracks, Tracks, track, Track)
 
-Q_DECLARE_METATYPE(QVector<TimelineTrack>)
+  // render
+  RenderFunctionsCache* renderCache;
+};
 
 #endif

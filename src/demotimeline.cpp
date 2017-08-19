@@ -1,24 +1,12 @@
-﻿#include "demotimeline.hpp"
-#include "fast2dquad.hpp"
-#include "music.hpp"
-#include "sequence.hpp"
-#include "scene.hpp"
-#include "shaderminifier.hpp"
-#include "project.hpp"
-
-
-#include <QAction>
-#include <QGraphicsSceneMouseEvent>
-#include <QGraphicsSceneContextMenuEvent>
-#include <QKeyEvent>
-#include <QMenu>
-#include <QTextStream>
-#include <QTimer>
+﻿
+#include "demotimeline.hpp"
+#include "timelinetrack.hpp"
 
 /*
 ** DemoTimelineRenderer
 */
 
+/*
 DemoTimelineRenderer::DemoTimelineRenderer(DemoTimeline&  timeline, const QSize& initialSize)
   : Renderer(),  timeline(timeline)
 {
@@ -36,67 +24,71 @@ DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogW
   render->getCamera() = camera;
   load();
 }
+*/
+
+DemoTimeline::DemoTimeline(QObject* parentMusic) :
+  Timeline(parentMusic),
+  renderCache(nullptr)
+{
+}
 
 DemoTimeline::~DemoTimeline()
 {
-  QMap<qint64, Sequence*>::iterator it;
-  for (it = sequences.begin(); it != sequences.end(); it++) //TODO use dichotomie
+}
+
+void DemoTimeline::initializeGL(RenderFunctionsCache& cache)
+{
+  renderCache = &cache;
+  for (int i = 0; i < tracks.size(); i++)
   {
-    delete it.value(); //Maybe useless because of QGraphicsScene parenting
+    tracks[i]->initializeGL(cache);
   }
 }
 
-void DemoTimeline::load()
+void DemoTimeline::insertTrack(TimelineTrack* track)
 {
-  QDomElement element = node.firstChildElement();
-  while (!element.isNull())
+  addItem(track); // parenting
+
+  connect(track, &TimelineTrack::requestFramePosition, this, &DemoTimeline::trackRequestFramePosition);
+
+  tracks.push_back(track);
+
+  if (renderCache)
+    track->initializeGL(*renderCache);
+
+  QVariant oldValue;
+  QVariant newValue = QVariant::fromValue(track);
+  emit propertyChanged(this, "tracks", oldValue, newValue);
+}
+
+void DemoTimeline::removeTrack(TimelineTrack* track)
+{
+  for (int i = 0; i < tracks.size(); ++i)
   {
-    if (element.tagName() == "track")
+    if (tracks[i] == track)
     {
-      if (!parseTrackNode(element))
-      {
-       // buildSuccess = false;
-      }
+      tracks.remove(i);
+      break;
     }
-    else
-    {
-      emit warning(QString("[") + project->fileName() + "]" + " <timeline> warning at line " + QString::number(element.lineNumber()) +
-                   + " unknown tag name '" + element.tagName() + "' ignoring the block");
-    }
-    element = element.nextSiblingElement();
+    Q_ASSERT(i != tracks.size() - 1); // track wasn't inside this timeline
   }
+
+  disconnect(track, &TimelineTrack::requestFramePosition, this, &DemoTimeline::trackRequestFramePosition);
+
+  removeItem(track); // parenting
+
+  QVariant oldValue = QVariant::fromValue(track);
+  QVariant newValue;
+  emit propertyChanged(this, "tracks", oldValue, newValue);
 }
 
-
-bool DemoTimeline::parseTrackNode(QDomElement& node)
+void DemoTimeline::trackRequestFramePosition(qint64 position)
 {
-  QDomElement element = node.firstChildElement();
-  while (!element.isNull())
-  {
-    if (element.tagName() == "sequence")
-    {
-      Sequence* seq = new Sequence(*project,*this,element,trackHeight);
-      addSequence(seq);
-
-    }
-    else
-    {
-        emit warning(QString(QString("[") + project->fileName() + "] <timeline> warning at line " + QString::number(element.lineNumber()) +
-                     + " unknown tag name '" + element.tagName() + "' ignoring the block"));
-    }
-    element = element.nextSiblingElement();
-  }
-  return true;
+  if (getFramerate())
+    emit requestPosition((double)position / (double)getFramerate());
 }
 
-qint64 DemoTimeline::addSequence(Sequence *seq)
-{
-  correctStartFrame(seq);
-  seq->setPos(seq->pos().x(),0);
-  this->addItem(seq);
-  return seq->startFrame();
-}
-
+/*
 void DemoTimeline::updateCamera(qint64 frame, Camera &cam)
 {
   Sequence* seq = isInsideSequence(frame);
@@ -110,70 +102,10 @@ void DemoTimeline::updateCamera(qint64 frame, Camera &cam)
   }
 }
 
-Sequence* DemoTimeline::isInsideSequence(qint64 frame) const
-{
-  QMap<qint64, Sequence*>::const_iterator it;
-  for (it = sequences.constBegin(); it != sequences.constEnd(); it++) //TODO use dichotomie
-  {
-    if (it.value()->isInside(frame))
-    {
-      return it.value();
-    }
-  }
-  return nullptr;
-}
-
-
-bool DemoTimeline::correctStartFrame(Sequence* seq)
-{
-  QMap<qint64, Sequence*>::iterator it;
-  bool corrected = false;
-  seq->setLength(seq->getOrginalLength());
-  for (it = sequences.begin(); it != sequences.end(); it++) //TODO use dichotomie
-  {
-    if (it.value()->isInside(seq->startFrame()))
-    {
-      corrected = true;
-      seq->forceSetStartFrame(it.value()->endFrame());
-      if ((it + 1) != sequences.end() && (it + 1).value()->overlap(*seq))
-      {
-        Sequence* overlap = (it+1).value();
-        if (overlap->startFrame() == seq->startFrame())
-        {
-          continue;
-        }
-        else
-        {
-          seq->setLength(overlap->startFrame() - seq->startFrame());
-        }
-      }
-      else
-      {
-        break;
-      }
-    }
-    else if (seq->isInside(it.value()->startFrame()))
-    {
-      corrected = true;
-      seq->setLength(it.value()->startFrame() - seq->startFrame());
-    }
-  }
-  sequences[seq->startFrame()] = seq;
-  return corrected;
-}
-
-qint64 DemoTimeline::sequenceStartFrameChanged(qint64 previous_frame, Sequence *seq)
-{
-  sequences.remove(previous_frame);
-  correctStartFrame(seq);
-  return seq->startFrame();
-}
-
 void DemoTimeline::updateTime()
 {
   updateCamera();
 }
-
 
 void DemoTimeline::insertCameraKeyframe(Camera *cam)
 {
@@ -211,6 +143,7 @@ void DemoTimeline::insertCameraKeyframe(qint64 frame, const QVector3D &pos, cons
 }
 
 
+
 void DemoTimeline::keyReleaseEvent(QKeyEvent *keyEvent)
 {
   if (keyEvent->key() == Qt::Key_Delete)
@@ -222,6 +155,7 @@ void DemoTimeline::keyReleaseEvent(QKeyEvent *keyEvent)
     return Timeline::keyReleaseEvent(keyEvent);
   }
 }
+
 
 void DemoTimeline::deleteSelectedItems()
 {
@@ -469,14 +403,14 @@ void DemoTimeline::exportSources(const QDir &dir) const
   sequences_source_code.flush();
 }
 
-
+*/
 
 
 /*
   RENDERER
 */
 
-
+/*
 DemoRender::DemoRender(DemoTimeline &timeline, const QSize& initialSize):
   Render(initialSize,&timeline),
   timeline(&timeline)
@@ -535,6 +469,7 @@ void DemoRender::glRender()
   fbo.disable();
 }
 
+*/
 
 
 

@@ -8,16 +8,10 @@
 ** GLSLShaderCode
 */
 
-GLSLShaderCode::GLSLShaderCode() :
-  TextEditable()
+GLSLShaderCode::GLSLShaderCode(QObject* parent) :
+  TextEditable(parent)
 {
 
-}
-
-GLSLShaderCode::GLSLShaderCode(const GLSLShaderCode&) :
-  TextEditable()
-{
-  Q_ASSERT(false); // Do not use this constructor (forbiden by QObject)
 }
 
 GENERATE_PROPERTY_SETTER_REFERENCE(GLSLShaderCode, QPointer<GLSLShaderCode>, framework, Framework)

@@ -3,24 +3,22 @@
 #ifndef PROJECT_HPP
 #define PROJECT_HPP
 
-#include <QDomDocument>
-#include <QMap>
-#include <QDir>
-#include <QTimer>
-
 #include "texteditable.hpp"
 
-class DemoTimeline;
 class Music;
-class Framework;
-class Scene;
-class Timeline;
-class LogWidget;
+class RaymarchingScene;
 class Project : public TextEditable
 {
   Q_OBJECT
 
-  public:
+public:
+  Project(QObject* parent = nullptr);
+  
+private:
+  DECLARE_PROPERTY(Music*, music, Music)
+  DECLARE_PROPERTY_CONTAINER(StringMap, RaymarchingScene*, rmScenes, RmScenes, rmScene, RmScene);
+
+    /*
     Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=nullptr);
     ~Project() override;
 
@@ -77,7 +75,7 @@ class Project : public TextEditable
     QDir dir;
     LogWidget* log; 
     QDomDocument document;
-    QTimer* textUpdateTimer;
+    QTimer* textUpdateTimer;*/
 };
 
 #endif // !PROJECT_HPP

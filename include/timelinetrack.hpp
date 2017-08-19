@@ -2,9 +2,10 @@
 #define TIMELINETRACK_HPP
 
 #include "xmlsavedobject.hpp"
+#include "undocommands.hpp"
 
 #include <QMap>
-#include <QObject>
+#include <QGraphicsObject>
 
 class Renderer;
 class Sequence; 
@@ -13,21 +14,50 @@ class DemoTimeline;
 /*
 ** TimelineTrack : a timeline track of a DemoTimeline
 */
-class TimelineTrack : public QObject
+class TimelineTrack : public QGraphicsObject
 {
   Q_OBJECT
   PROPERTY_CALLBACK_OBJECT
   XML_SAVED_OBJECT
+  UNDOCOMMANDS_SENDER_OBJECT
 
 public:
-  TimelineTrack(DemoTimeline& parent); 
+  TimelineTrack(QGraphicsObject* parent = nullptr); 
   
-  
+  // GL
+  void initializeGL(RenderFunctionsCache& cache);
+
+  // utils
+  Sequence* isInsideSequence(qint64 frame) const;
+  quint64 getLength() const;
+
+  // Graphics
+  float getHeight() const { return height; }
+
+  // GraphicsItem
+  QRectF boundingRect() const;
+
+signals:
+  void requestFramePosition(qint64 position);
+
+protected slots:
+  void sequencePropertyChanged(QObject* owner, const QString& propertyName, const QVariant& oldValue, const QVariant& newValue);
+  void sequenceRequestFramePosition(const Sequence* source, qint64 position);
+
+protected:
+  bool makeSequenceFit(Sequence& sequence);
 
 private:
-  DECLARE_PROPERTY_REFERENCE(Int64Map<Sequence*>, sequences, Sequences)
+  // Properties
+  DECLARE_PROPERTY_CONTAINER(Int64Map, Sequence*, sequences, Sequences, sequence, Sequence)
+
+  // Graphics
+  float height;
+
+  // Render
+  RenderFunctionsCache* renderCache;
 };
 
-Q_DECLARE_METATYPE(Int64Map<Sequence*>);
+
 
 #endif // !TIMELINETRACK_HPP

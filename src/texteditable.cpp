@@ -1,8 +1,8 @@
 #include "texteditable.hpp"
 #include <QTextStream>
 
-TextEditable::TextEditable() :
-  MediaFile()
+TextEditable::TextEditable(QObject* parent) :
+  MediaFile(parent)
 {
   connect(this, SIGNAL(pathChanged(QFileInfo)), this, SLOT(load()));
 }

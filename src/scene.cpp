@@ -4,8 +4,8 @@
 /*
 ** RaymarchingScene
 */
-RaymarchingScene::RaymarchingScene() :
-  QuadFragmentShaderCode()
+RaymarchingScene::RaymarchingScene(QObject* parent) :
+  QuadFragmentShaderCode(parent)
 {
 
 }

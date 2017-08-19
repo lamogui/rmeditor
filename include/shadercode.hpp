@@ -14,7 +14,7 @@ class GLSLShaderCode : public TextEditable
   Q_OBJECT
 
 public:
-  GLSLShaderCode();
+  GLSLShaderCode(QObject* parent = nullptr);
 
   // TextEditable
   const QString& getText() const override;

@@ -5,8 +5,8 @@
 ** QuadFragmentShaderCode
 */
 
-QuadFragmentShaderCode::QuadFragmentShaderCode() :
-  GLSLShaderCode()
+QuadFragmentShaderCode::QuadFragmentShaderCode(QObject* parent) :
+  GLSLShaderCode(parent)
 {
 
 }

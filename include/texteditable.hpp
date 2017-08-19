@@ -11,7 +11,7 @@ class TextEditable : public MediaFile /* Represent any text compilable text medi
   Q_OBJECT
 
 public:
-  TextEditable();
+  TextEditable(QObject* parent = nullptr);
 
   //The text to print in the editor and that will be saved in the file
   virtual const QString& getText() const = 0;

@@ -4,9 +4,9 @@
 #include "logwidget.hpp"
 
 
-Timeline::Timeline(Music& music):
-  QGraphicsScene(&music),
-  music(music),
+Timeline::Timeline(QObject* music):
+  QGraphicsScene(music),
+  music(*qobject_cast<Music*>(music)),
   framerate(0)
 {
   //setSceneRect(0,0,m->getLength()*framerate,height);
@@ -18,7 +18,7 @@ void Timeline::setFramerate(double newFramerate)
 {
   if (newFramerate <= 0)
   { 
-    emit error(objectName() + ": invalide framerate: " + newFramerate);
+    emit error(objectName() + ": invalid framerate: " + newFramerate);
     newFramerate = 0;
   }
   if (framerate != framerate)
@@ -38,9 +38,4 @@ qint64 Timeline::currentFrame() const
 qint64 Timeline::getLength() const
 {
   return (qint64)(getMusic().getLength()*framerate);
-}
-
-void Timeline::requestFramePosition(qint64 frame)
-{
-  getMusic().setPosition(((double)frame/framerate) + (0.5/framerate));
 }
