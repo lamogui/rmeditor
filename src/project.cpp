@@ -2,6 +2,8 @@
 
 #include "project.hpp"
 #include "music.hpp"
+#include "scene.hpp"
+#include "renderfunctionscache.hpp"
 
 Project::Project(QObject* parent) :
   TextEditable(parent),
@@ -28,8 +30,30 @@ void Project::setMusic(Music* newMusic)
   }
 }
 
-void Project::insertRmScene(RaymarchingScene)
+void Project::insertRmScene(RaymarchingScene* scene)
+{
+  Q_ASSERT(scene);
+  Q_ASSERT(rmScenes.constFind(scene->getPath().fileName()) == rmScenes.constEnd());
 
+  scene->setParent(this);
+  if (scene)
+  {
+    scene->initializeGL(*renderCache);
+  }
+  rmScenes.insert(scene->getPath().fileName(), scene);
+
+  QVariant oldValue;
+  QVariant newValue = QVariant::fromValue(scene);
+
+  emit propertyChanged(this, "rmScenes", oldValue, newValue);
+}
+
+void Project::removeRmScene(RaymarchingScene* scene)
+{
+  Q_ASSERT(scene);
+  Q_ASSERT(rmScenes.constFind(scene->getPath().fileName() != rmScenes.constEnd());
+
+}
 
 //#include "tunefish4music.hpp"
 //#include "4klangmusic.hpp"

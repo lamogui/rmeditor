@@ -73,7 +73,7 @@ SceneRender::SceneRender(Scene &scene, const QSize& initialSize, QObject* parent
   scene(&scene)
 {
 
-}
+} 
 
 void SceneRender::glRender()
 {

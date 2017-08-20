@@ -37,6 +37,9 @@ protected:
   QSharedPointer<Renderer> defaultRenderer; /* allow to see the media even without a timeline */
   QSharedPointer<Camera> defaultCamera;
 
+  // Graphics
+  RenderFunctionsCache* renderCache;
+
 private:
   DECLARE_PROPERTY_REFERENCE_NOTIFY(QFileInfo, path, Path)
 };
