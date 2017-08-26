@@ -39,6 +39,8 @@ protected:
 
 class CameraKeyframe : public Keyframe
 {
+  Q_OBJECT
+
 public:
   CameraKeyframe(QGraphicsObject* parent);
 
@@ -50,5 +52,6 @@ private:
   DECLARE_PROPERTY_REFERENCE(QQuaternion, rotation, Rotation)
   DECLARE_PROPERTY_REFERENCE(QVector3D, position, Position)
 };
+
 
 #endif // !CAMERA_HPP

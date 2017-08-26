@@ -3,6 +3,7 @@
 
 #include "xmlsavedobject.hpp"
 #include "undocommands.hpp"
+#include "renderfunctionscache.hpp"
 
 #include <QMap>
 #include <QGraphicsObject>
@@ -17,9 +18,12 @@ class DemoTimeline;
 class TimelineTrack : public QGraphicsObject
 {
   Q_OBJECT
-  PROPERTY_CALLBACK_OBJECT
   XML_SAVED_OBJECT
-  UNDOCOMMANDS_SENDER_OBJECT
+
+signals : // BUG : Qt doesn't support signals declarations inside macros 
+  void propertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue);
+  void xmlPropertyChanged(QDomNode node, QString propertyName, QVariant newValue);
+  void sendUndoCommand(QUndoCommand*);
 
 public:
   TimelineTrack(QGraphicsObject* parent = nullptr); 

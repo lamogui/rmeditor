@@ -1,10 +1,10 @@
 #ifndef RMEDITOR_RENDERFUNCTIONSCACHE_HPP
 #define RMEDITOR_RENDERFUNCTIONSCACHE_HPP
 
-#include <QOpenGLFunctions_4_5_Core>
+#include <QOpenGLFunctions_4_4_Core>
 #include <QOpenGLShaderProgram>
 
-typedef QOpenGLFunctions_4_5_Core RenderFunctionsCache;
+typedef QOpenGLFunctions_4_4_Core RenderFunctionsCache;
 typedef QOpenGLShaderProgram ShaderProgram;
 
 namespace VertexAttributesIndex
@@ -16,7 +16,7 @@ namespace VertexAttributesIndex
     normal = 3
   };
 
-  std::string&& toString(Enum e);
+  std::string toString(Enum e);
 
 };
 

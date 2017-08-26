@@ -49,19 +49,19 @@ void TimelineWidget::setTimeline(Timeline *timeline)
 
 void TimelineWidget::updateWithTime()
 {
-  double t = timeline->getMusic()->getTime();
+  double t = timeline->getMusic().getTime();
   if (t != lastTimeDraw)
   {
     timeline->updateTime();
 
-    if (t > timeline->getMusic()->getLength())
+    if (t > timeline->getMusic().getLength())
     {
       emit timePositionChanged(0);
     }
 
     QScrollBar* horizontal = this->horizontalScrollBar();
     qreal scroll_length = horizontal->maximum() - horizontal->minimum() + horizontal->pageStep();
-    qreal scroll_pos = t*scroll_length/timeline->getMusic()->getLength();
+    qreal scroll_pos = t*scroll_length/timeline->getMusic().getLength();
 
     if (scroll_pos > horizontal->value() + horizontal->pageStep())
     {
@@ -122,7 +122,7 @@ void TimelineWidget::drawForeground(QPainter* painter, const QRectF& rect)
     if (timeline)
     {
       framerate = timeline->getFramerate();
-      lastTimeForegroundDraw = timeline->getMusic()->getTime();
+      lastTimeForegroundDraw = timeline->getMusic().getTime();
     }
 
     //TODO condition for framerate
@@ -292,7 +292,7 @@ void TimelineWidget::startUpdateLoop()
   {
     connect(timeline,SIGNAL(destroyed()),this,SLOT(onTimelineDestroy()),Qt::DirectConnection);
     connect(updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
-    connect(this,SIGNAL(timePositionChanged(double)),timeline->getMusic(),SLOT(setPosition(double)));
+    connect(this,SIGNAL(timePositionChanged(double)),&timeline->getMusic(),SLOT(setPosition(double)));
     updateTimer->start();
     updateTimer->setInterval(10.0);
   }
@@ -303,7 +303,7 @@ void TimelineWidget::stopUpdateLoop()
   if (timeline)
   {
     disconnect(updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
-    disconnect(this,SIGNAL(timePositionChanged(double)),timeline->getMusic(),SLOT(setPosition(double)));
+    disconnect(this,SIGNAL(timePositionChanged(double)), &timeline->getMusic(),SLOT(setPosition(double)));
     disconnect(timeline,SIGNAL(destroyed()),this,SLOT(onTimelineDestroy()));
     updateTimer->stop();
   }

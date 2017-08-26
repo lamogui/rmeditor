@@ -224,6 +224,13 @@ if(MSVC)
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5OpenGLd.dll     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Widgetsd.dll    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Xmld.dll        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Cored.pdb       ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Guid.pdb        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Networkd.pdb    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5OpenGLd.pdb     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Widgetsd.pdb    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Xmld.pdb        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/
 			
 			# release version
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Qt5Core_DIR}/../../../bin/Qt5Core.dll       ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/

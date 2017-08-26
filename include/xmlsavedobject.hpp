@@ -22,17 +22,12 @@ using StringMap = QMap<QString, cl>; // Compiler bug with macros because of ',' 
 ** Properties
 */
 
-#define PROPERTY_CALLBACK_OBJECT \
-  signals: \
-    void propertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue); \
-  private: 
-
 #define SET_PROPERTY(Type, variableName) \
   if (new##variableName != variableName) \
   { \
     Type old##variableName = variableName; \
     variableName = new##variableName; \
-    emit propertyChanged(this, #variableName, QVariant::fromValue(old##variableName), QVariant::fromValue(new##variableName)); \
+    Q_EMIT propertyChanged(this, #variableName, QVariant::fromValue(old##variableName), QVariant::fromValue(new##variableName)); \
   }
 
 #define SET_PROPERTY_NOTIFY(Type, variableName) \
@@ -40,8 +35,8 @@ using StringMap = QMap<QString, cl>; // Compiler bug with macros because of ',' 
   { \
     Type old##variableName = variableName; \
     variableName = new##variableName; \
-    emit propertyChanged(this, #variableName, QVariant::fromValue(old##variableName), QVariant::fromValue(new##variableName)); \
-    emit variableName##Changed(new##variableName); \
+    Q_EMIT propertyChanged(this, #variableName, QVariant::fromValue(old##variableName), QVariant::fromValue(new##variableName)); \
+    Q_EMIT variableName##Changed(new##variableName); \
   } 
 
 #define GENERATE_PROPERTY_GETTER(Type, variableName, getterName) \
@@ -128,13 +123,11 @@ using StringMap = QMap<QString, cl>; // Compiler bug with macros because of ',' 
 #define XML_SAVED_OBJECT \
   public: \
     Q_INVOKABLE inline void setNode(const QDomNode& n) { node = n; } \
-  signals: \
-    void xmlPropertyChanged(QDomNode node, QString propertyName, QVariant newValue); \
   private slots: \
    void onPropertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue) \
    { \
      Q_ASSERT(owner == this); \
-     emit xmlPropertyChanged(node, propertyName, newValue); \
+     Q_EMIT xmlPropertyChanged(node, propertyName, newValue); \
    } \
   private: \
     QDomNode node; 

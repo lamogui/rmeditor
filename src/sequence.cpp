@@ -65,7 +65,7 @@ void Sequence::insertCameraKeyframe(CameraKeyframe* keyframe)
   cameraKeyframes.insert(keyframe->getRelativeFrame(), keyframe);
   
   QVariant oldValue;
-  QVariant newValue = QVariant::fromValue(&keyframe);
+  QVariant newValue = QVariant::fromValue(keyframe);
   emit propertyChanged(this, "cameraKeyframes", oldValue, newValue);
 }
 
@@ -89,7 +89,6 @@ void Sequence::removeCameraKeyframe(CameraKeyframe* keyframe)
 
 void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {  
-  BaseClass::paint(painter,option,widget);
   QBrush fillBrush(isSelected() ? selectedBrush() : idleBrush());
   QRectF rect = boundingRect();
   painter->fillRect(rect, fillBrush); 

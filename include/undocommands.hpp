@@ -144,11 +144,6 @@ private:
   typedef QUndoCommand BaseClass;
 };
 
-#define UNDOCOMMANDS_SENDER_OBJECT \
-  signals: \
-    void sendUndoCommand(QUndoCommand*); \
-  private:
-
 #define UNDOCOMMANDS_RECEIVER_OBJECT \
   public: \
     QUndoStack& getUndoStack() { return undoStack; } \

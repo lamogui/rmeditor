@@ -83,7 +83,7 @@ void TimelineTrack::insertSequence(Sequence* sequence)
   sequences.insert(sequence->getStartFrame(), sequence);
 
   QVariant oldValue;
-  QVariant newValue = QVariant::fromValue(&sequence);
+  QVariant newValue = QVariant::fromValue(sequence);
   emit propertyChanged(this, "sequences", oldValue, newValue);
 }
 

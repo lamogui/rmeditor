@@ -30,8 +30,6 @@ class TimelineTrack;
 class DemoTimeline : public Timeline
 {
   Q_OBJECT
-  PROPERTY_CALLBACK_OBJECT
-  XML_SAVED_OBJECT
 
 public:
   DemoTimeline(QObject* parentMusic);

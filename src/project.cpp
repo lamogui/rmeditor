@@ -51,7 +51,7 @@ void Project::insertRmScene(RaymarchingScene* scene)
 void Project::removeRmScene(RaymarchingScene* scene)
 {
   Q_ASSERT(scene);
-  Q_ASSERT(rmScenes.constFind(scene->getPath().fileName() != rmScenes.constEnd());
+  Q_ASSERT(rmScenes.constFind(scene->getPath().fileName()) != rmScenes.constEnd());
 
 }
 

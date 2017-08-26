@@ -1,7 +1,7 @@
 
 #include "renderfunctionscache.hpp"
 
-std::string&& VertexAttributesIndex::toString(Enum e)
+std::string VertexAttributesIndex::toString(Enum e)
 {
   switch (e)
   {

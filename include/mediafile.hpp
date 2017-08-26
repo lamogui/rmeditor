@@ -15,8 +15,11 @@
 class MediaFile : public QObject 
 {
   Q_OBJECT
-  PROPERTY_CALLBACK_OBJECT
   XML_SAVED_OBJECT // TODO : one day try to put PROPERTY_CALLBACK_OBJECT inside the XML_SAVED_OBJECT macro and see if Qt meta compiler is happy
+
+signals : // BUG : Qt doesn't support signals declarations inside macros 
+  void propertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue);
+  void xmlPropertyChanged(QDomNode node, QString propertyName, QVariant newValue);
 
 public:
   MediaFile(QObject* parent = nullptr);

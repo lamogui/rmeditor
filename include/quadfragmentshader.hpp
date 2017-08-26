@@ -42,7 +42,7 @@ protected:
 class ReferencedQuadFragmentShaderRenderer : public Renderer
 {
 public:
-  ReferencedQuadFragmentShaderRenderer(QObject* parent = nullptr) : Renderer(parent) {}
+  ReferencedQuadFragmentShaderRenderer() : Renderer() {}
   ~ReferencedQuadFragmentShaderRenderer() override {}
 
   // accesors
