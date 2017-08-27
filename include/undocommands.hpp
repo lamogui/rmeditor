@@ -101,7 +101,7 @@ public:
 
   ~RemoveFromContainerUndoCommand() override
   {
-    if (!ownTarget.isNull() && !target.isNull())
+    if (ownTarget && !target.isNull())
       delete target.data();
   }
 
