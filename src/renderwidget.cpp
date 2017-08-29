@@ -14,8 +14,11 @@
 
 RenderWidget::RenderWidget(QWidget *parent) :
   QOpenGLWidget(parent),
+  renderFunctions(nullptr),
   render(nullptr),
   quad(nullptr),
+  quadShader(nullptr),
+  openglDebugLogger(nullptr),
   captureMouse(false),
   onlyShowTexture(false)
 {
@@ -39,14 +42,7 @@ RenderWidget::RenderWidget(QWidget *parent) :
 
 RenderWidget::~RenderWidget()
 {
-  if (render)
-  {
-    delete render;
-  }
-  if (quad)
-  {
-    delete quad;
-  }
+
 }
 
 
@@ -73,52 +69,60 @@ const char* RenderWidget::getDisplayTextureFragmentShaderCode()
 //-----------------------------------------------------------------------------
 void RenderWidget::initializeGL()
 {
-  // Functions 
-  renderFunctions.initializeOpenGLFunctions();
-  renderFunctions.glDisable(GL_DEPTH_TEST);
-
   // Debugger 
   Q_ASSERT(logWidget);
   qDebug() << "Created context version: " << format().majorVersion() << "." << format().minorVersion();
-  openglDebugLogger.initialize();
-  connect(&openglDebugLogger, &QOpenGLDebugLogger::messageLogged, logWidget, &LogWidget::handleOpengGLLoggedMessage);
-  openglDebugLogger.startLogging();
+  Q_ASSERT(!openglDebugLogger);
+  openglDebugLogger = new QOpenGLDebugLogger(this);
+  openglDebugLogger->initialize();
+  connect(openglDebugLogger, &QOpenGLDebugLogger::messageLogged, logWidget, &LogWidget::handleOpengGLLoggedMessage);
+  openglDebugLogger->startLogging();
+
+  // Functions 
+  Q_ASSERT(!renderFunctions);
+  renderFunctions = new RenderFunctionsCache();
+  renderFunctions->initializeOpenGLFunctions();
+  renderFunctions->glDisable(GL_DEPTH_TEST);
 
   // Render
   Q_ASSERT(!render);
   render = new RenderTexture2D();
-  render->initializeGL(renderFunctions, size());
+  render->initializeGL(*renderFunctions, size());
 
   // Fast2DQuad
   Q_ASSERT(!quad);
   quad = new Fast2DQuad();
-  quad->initializeGL(renderFunctions);
+  quad->initializeGL(*renderFunctions);
 
   // Shader
-  if (quadShader.create())
+  Q_ASSERT(!quadShader);
+  quadShader = new QOpenGLShaderProgram(this);
+  if (quadShader->create())
   {
-    if (!quadShader.addShaderFromSourceCode(QOpenGLShader::Vertex, QuadFragmentShaderCode::getVertexShaderCode()))
-      logWidget->writeError("Fatal error! could not compile vertex shader: " + quadShader.log());
-    else if (quadShader.log().size() > 0)
-      logWidget->writeWarning("Fatal Warning ! while compiling vertex shader: " + quadShader.log());
+    if (!quadShader->addShaderFromSourceCode(QOpenGLShader::Vertex, QuadFragmentShaderCode::getVertexShaderCode()))
+      logWidget->writeError("Fatal error! could not compile vertex shader: " + quadShader->log());
+    else if (quadShader->log().size() > 0)
+      logWidget->writeWarning("Fatal Warning ! while compiling vertex shader: " + quadShader->log());
 
-    if (!quadShader.addShaderFromSourceCode(QOpenGLShader::Fragment, getDisplayTextureFragmentShaderCode()))
-      logWidget->writeError("Fatal error! could not compile fragment shader: " + quadShader.log());
-    else if (quadShader.log().size() > 0)
-      logWidget->writeWarning("Fatal Warning ! while compiling fragment shader: " + quadShader.log());
+    if (!quadShader->addShaderFromSourceCode(QOpenGLShader::Fragment, getDisplayTextureFragmentShaderCode()))
+      logWidget->writeError("Fatal error! could not compile fragment shader: " + quadShader->log());
+    else if (quadShader->log().size() > 0)
+      logWidget->writeWarning("Fatal Warning ! while compiling fragment shader: " + quadShader->log());
     {
       // link
-      quadShader.bindAttributeLocation("position", VertexAttributesIndex::position);
-      quadShader.bindAttributeLocation("texCoords", VertexAttributesIndex::texCoord);
+      quadShader->bindAttributeLocation("position", VertexAttributesIndex::position);
+      quadShader->bindAttributeLocation("texCoords", VertexAttributesIndex::texCoord);
 
-      if (!quadShader.link())
-        logWidget->writeError("Fatal error! could not link shader: " + quadShader.log());
-      else if (quadShader.log().size() > 0)
-        logWidget->writeWarning("Fatal Warning ! while linking shader: " + quadShader.log());
+      if (!quadShader->link())
+        logWidget->writeError("Fatal error! could not link shader: " + quadShader->log());
+      else if (quadShader->log().size() > 0)
+        logWidget->writeWarning("Fatal Warning ! while linking shader: " + quadShader->log());
     }
   }
   else
     logWidget->writeError("Fatal erreor! could not create shader program");
+
+  connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &RenderWidget::cleanup);
 }
 
 //-----------------------------------------------------------------------------
@@ -161,20 +165,20 @@ void RenderWidget::paintGL()
         }
         renderer->getCurrentCamera()->translateRelative(delta*0.02f);
       }
-      render->render(renderFunctions, *renderer);
+      render->render(*renderFunctions, *renderer);
     }
   }
 
   static int k = 0;
-  renderFunctions.glViewport(0, 0, width(), height());
-  renderFunctions.glClearColor(0, 0, 0, 0);
-  renderFunctions.glClear(GL_COLOR_BUFFER_BIT);
-  quadShader.bind();
-  quadShader.setUniformValue("textureColor", 0);
-  renderFunctions.glActiveTexture(GL_TEXTURE0);
-  renderFunctions.glBindTexture(GL_TEXTURE_2D, render->getFBO().texture());
-  quad->draw(renderFunctions);
-  quadShader.release();
+  renderFunctions->glViewport(0, 0, width(), height());
+  renderFunctions->glClearColor(0, 0, 0, 0);
+  renderFunctions->glClear(GL_COLOR_BUFFER_BIT);
+  quadShader->bind();
+  quadShader->setUniformValue("textureColor", 0);
+  renderFunctions->glActiveTexture(GL_TEXTURE0);
+  renderFunctions->glBindTexture(GL_TEXTURE_2D, render->getFBO().texture());
+  quad->draw(*renderFunctions);
+  quadShader->release();
 }
 
 void RenderWidget::mousePressEvent(QMouseEvent* event)
@@ -273,5 +277,38 @@ void RenderWidget::stopUpdateLoop()
 void RenderWidget::setCurrentRenderer(const QWeakPointer<Renderer>& renderer)
 {
   currentRenderer = renderer;
+}
+
+void RenderWidget::cleanup()
+{
+  if (render)
+  {
+    delete render;
+    render = nullptr;
+  }
+  if (quad)
+  {
+    delete quad;
+    quad = nullptr;
+  }
+  if (quadShader)
+  {
+    delete quadShader;
+    quadShader = nullptr;
+  }
+
+  Q_ASSERT(renderFunctions);
+  if (renderFunctions)
+  {
+    delete renderFunctions;
+    renderFunctions = nullptr;
+  }
+
+  Q_ASSERT(openglDebugLogger);
+  if (openglDebugLogger)
+  {
+    delete openglDebugLogger;
+    openglDebugLogger = nullptr;
+  }
 }
 

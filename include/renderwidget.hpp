@@ -25,7 +25,7 @@ public:
 
        void setLogWidget(LogWidget* log); // FIXME : remove this !
 
-       RenderFunctionsCache& getRenderFunctions() { return renderFunctions; }
+       RenderFunctionsCache& getRenderFunctions() { Q_ASSERT(renderFunctions); return *renderFunctions; }
 
        static const char* getDisplayTextureFragmentShaderCode();
 
@@ -37,6 +37,9 @@ public slots:
        void startUpdateLoop();
        void stopUpdateLoop();
        void setCurrentRenderer(const QWeakPointer<Renderer>& renderer);
+
+protected slots:
+       void cleanup();
 
 protected:
        // QWidget
@@ -55,12 +58,12 @@ protected:
        QTimer updateTimer;
 
        // Render objects 
-       RenderFunctionsCache renderFunctions;
+       RenderFunctionsCache* renderFunctions;
        RenderTexture2D* render;          // fbo
        Fast2DQuad* quad;                 // geometry
-       QOpenGLShaderProgram quadShader;  // shader
+       QOpenGLShaderProgram* quadShader;  // shader
        QWeakPointer<Renderer> currentRenderer;
-       QOpenGLDebugLogger openglDebugLogger;
+       QOpenGLDebugLogger* openglDebugLogger;
 
        // Control (mouse / keyboard)
        QPointF previousMousePos;
