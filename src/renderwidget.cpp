@@ -52,7 +52,7 @@ void RenderWidget::setLogWidget(LogWidget* log)
 const char* RenderWidget::getDisplayTextureFragmentShaderCode()
 {
   static const char* vertexShader =
-    "#version 450\n"
+    "#version 440\n"
     "uniform sampler2D colorTexture;"
     "smooth in vec2 coords;"
     "smooth in vec2 uv;"
@@ -100,23 +100,41 @@ void RenderWidget::initializeGL()
   if (quadShader->create())
   {
     if (!quadShader->addShaderFromSourceCode(QOpenGLShader::Vertex, QuadFragmentShaderCode::getVertexShaderCode()))
+    {
       logWidget->writeError("Fatal error! could not compile vertex shader: " + quadShader->log());
+      qDebug() << "Fatal error! could not compile vertex shader: " + quadShader->log();
+    }
     else if (quadShader->log().size() > 0)
-      logWidget->writeWarning("Fatal Warning ! while compiling vertex shader: " + quadShader->log());
+    {
+      logWidget->writeWarning("Warning ! while compiling vertex shader: " + quadShader->log());
+      qDebug() << "Warning ! while compiling vertex shader: " + quadShader->log();
+    }
 
     if (!quadShader->addShaderFromSourceCode(QOpenGLShader::Fragment, getDisplayTextureFragmentShaderCode()))
+    {
       logWidget->writeError("Fatal error! could not compile fragment shader: " + quadShader->log());
+      qDebug() << "Fatal error! could not compile fragment shader: " + quadShader->log();
+    }
     else if (quadShader->log().size() > 0)
-      logWidget->writeWarning("Fatal Warning ! while compiling fragment shader: " + quadShader->log());
+    {
+      logWidget->writeWarning("Warning ! while compiling fragment shader: " + quadShader->log());
+      qDebug() << "Warning ! while compiling fragment shader: " + quadShader->log();
+    }
     {
       // link
       quadShader->bindAttributeLocation("position", VertexAttributesIndex::position);
       quadShader->bindAttributeLocation("texCoords", VertexAttributesIndex::texCoord);
 
       if (!quadShader->link())
+      {
         logWidget->writeError("Fatal error! could not link shader: " + quadShader->log());
+        qDebug() << "Fatal error! could not link shader: " + quadShader->log();
+      }
       else if (quadShader->log().size() > 0)
-        logWidget->writeWarning("Fatal Warning ! while linking shader: " + quadShader->log());
+      {
+        logWidget->writeWarning("Warning ! while linking shader: " + quadShader->log());
+        qDebug() << "Warning ! while linking shader: " + quadShader->log();
+      }
     }
   }
   else

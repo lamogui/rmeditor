@@ -21,7 +21,7 @@ Renderer* QuadFragmentShaderCode::createRenderer() const
 const char* QuadFragmentShaderCode::getVertexShaderCode()
 {
   static const char* vertexShader =
-    "#version 450\n"
+    "#version 440\n"
     "in vec2 position;"
     "in vec2 texCoords;"
     "smooth out vec2 coords;"
