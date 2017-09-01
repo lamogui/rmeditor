@@ -37,6 +37,7 @@ protected:
 
   // to override
   virtual void createAttachements(const QSize& fboSize) = 0; // note that the default RGBA color attachement is always created !
+  virtual void configureDrawedBuffer(RenderFunctionsCache& renderFunctions) = 0;
 
   QSharedPointer<QOpenGLFramebufferObject> fbo;
 
@@ -55,6 +56,7 @@ public:
 
 protected:
   void createAttachements(const QSize& fboSize) final;
+  void configureDrawedBuffer(RenderFunctionsCache& renderFunctions) override;
 
 };
 

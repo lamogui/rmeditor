@@ -69,7 +69,7 @@
      <x>0</x>
      <y>0</y>
      <width>907</width>
-     <height>21</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -98,9 +98,16 @@
     <addaction name="actionInsert_camera_keyframe"/>
     <addaction name="actionReset_camera"/>
    </widget>
+   <widget class="QMenu" name="menuVisualizer">
+    <property name="title">
+     <string>Visualizer</string>
+    </property>
+    <addaction name="actionSwitch_displayed_texture"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuExport"/>
    <addaction name="menuCamera"/>
+   <addaction name="menuVisualizer"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <attribute name="toolBarArea">
@@ -210,6 +217,14 @@
    </property>
    <property name="text">
     <string>Export as Linux Demo</string>
+   </property>
+  </action>
+  <action name="actionSwitch_displayed_texture">
+   <property name="text">
+    <string>Switch displayed texture</string>
+   </property>
+   <property name="shortcut">
+    <string>X</string>
    </property>
   </action>
  </widget>

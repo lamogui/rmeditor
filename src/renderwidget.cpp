@@ -20,7 +20,8 @@ RenderWidget::RenderWidget(QWidget *parent) :
   quadShader(nullptr),
   openglDebugLogger(nullptr),
   captureMouse(false),
-  onlyShowTexture(false)
+  onlyShowTexture(false),
+  textureDisplayed(color)
 {
   // Widget config
   setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
@@ -54,12 +55,20 @@ const char* RenderWidget::getDisplayTextureFragmentShaderCode()
   static const char* vertexShader =
     "#version 440\n"
     "uniform sampler2D colorTexture;"
+    "uniform sampler2D normalTexture;"
+    "uniform sampler2D depthTexture;"
+    "uniform int textureDisplayed;"
     "smooth in vec2 coords;"
     "smooth in vec2 uv;"
     "layout(location = 0) out vec4 color;"
     "void main()"
     "{"
-    "color = texture(colorTexture, coords);"
+      "if (textureDisplayed == 0) "
+        "color = texture(colorTexture, coords);"
+      "else if (textureDisplayed == 1) "
+        "color = vec4(texture(normalTexture, coords).rgb, 1.0);"
+      "else "
+        "color = vec4(vec3(texture(depthTexture, coords).r), 1.0);"
     "}";
   return vertexShader;
 }
@@ -135,10 +144,13 @@ void RenderWidget::initializeGL()
         logWidget->writeWarning("Warning ! while linking shader: " + quadShader->log());
         qDebug() << "Warning ! while linking shader: " + quadShader->log();
       }
+
+      quadShader->bind();
+      quadShader->setUniformValue("textureDisplayed", (int)textureDisplayed);
     }
   }
   else
-    logWidget->writeError("Fatal erreor! could not create shader program");
+    logWidget->writeError("Fatal error! could not create shader program");
 
   connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &RenderWidget::cleanup);
 }
@@ -192,9 +204,25 @@ void RenderWidget::paintGL()
   renderFunctions->glClearColor(0, 0, 0, 0);
   renderFunctions->glClear(GL_COLOR_BUFFER_BIT);
   quadShader->bind();
-  quadShader->setUniformValue("textureColor", 0);
-  renderFunctions->glActiveTexture(GL_TEXTURE0);
-  renderFunctions->glBindTexture(GL_TEXTURE_2D, render->getFBO().texture());
+  QVector<uint> textures = render->getFBO().textures();
+  if (textures.size() > 0)
+  {
+    quadShader->setUniformValue("colorTexture", 0);
+    renderFunctions->glActiveTexture(GL_TEXTURE0);
+    renderFunctions->glBindTexture(GL_TEXTURE_2D, textures[0]);
+  }
+  if (textures.size() > 1)
+  {
+    quadShader->setUniformValue("normalTexture", 1);
+    renderFunctions->glActiveTexture(GL_TEXTURE1);
+    renderFunctions->glBindTexture(GL_TEXTURE_2D, textures[1]);
+  }
+  if (textures.size() > 2)
+  {
+    quadShader->setUniformValue("depthTexture", 2);
+    renderFunctions->glActiveTexture(GL_TEXTURE2);
+    renderFunctions->glBindTexture(GL_TEXTURE_2D, textures[2]);
+  }
   quad->draw(*renderFunctions);
   quadShader->release();
 }
@@ -295,6 +323,19 @@ void RenderWidget::stopUpdateLoop()
 void RenderWidget::setCurrentRenderer(const QWeakPointer<Renderer>& renderer)
 {
   currentRenderer = renderer;
+}
+
+void RenderWidget::switchDisplayedTexture()
+{
+  if (textureDisplayed < 2)
+    textureDisplayed = (TextureDisplayed)((int)textureDisplayed + 1);
+  else
+    textureDisplayed = TextureDisplayed::color;
+  if (quadShader)
+  {
+    quadShader->bind();
+    quadShader->setUniformValue("textureDisplayed", (int)textureDisplayed);
+  }
 }
 
 void RenderWidget::cleanup()

@@ -58,17 +58,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addAction(ui->actionReset_camera);
 
 
-    connect(ui->actionNew,SIGNAL(triggered()), this, SLOT(newProject()));
-    connect(ui->actionOpen,SIGNAL(triggered()), this, SLOT(open()));
-    connect(ui->actionSaveAllShaders, SIGNAL(triggered()), this, SLOT(saveAllShaders()));
-    connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(ui->actionReset_camera, SIGNAL(triggered()), ui->renderWidget, SLOT(resetCamera()));
-    connect(ui->actionTake_screenshot, SIGNAL(triggered()), ui->renderWidget, SLOT(takeScreenshot()));
-    connect(ui->actionExport_as_video,SIGNAL(triggered()),this,SLOT(exportAsVideo()));
-    connect(ui->actionExport_as_Linux_Demo, SIGNAL(triggered()), this, SLOT(exportAsLinuxDemo()));
-    connect(ui->actionInsert_camera_keyframe,SIGNAL(triggered()),this,SLOT(insertCameraKeyframe()));
-
-    
+    connect(ui->actionNew, &QAction::triggered, this, &MainWindow::newProject);
+    connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::open);
+    connect(ui->actionSaveAllShaders, &QAction::triggered, this, &MainWindow::saveAllShaders);
+    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
+    connect(ui->actionReset_camera, &QAction::triggered, ui->renderWidget, &RenderWidget::resetCamera);
+    connect(ui->actionTake_screenshot, &QAction::triggered, ui->renderWidget, &RenderWidget::takeScreenshot);
+    connect(ui->actionExport_as_video, &QAction::triggered, this, &MainWindow::exportAsVideo);
+    connect(ui->actionExport_as_Linux_Demo, &QAction::triggered, this, &MainWindow::exportAsLinuxDemo);
+    //connect(ui->actionInsert_camera_keyframe, &QAction::triggered, this, &MainWindow::insertCameraKeyframe);
+    connect(ui->actionSwitch_displayed_texture, &QAction::triggered, ui->renderWidget, &RenderWidget::switchDisplayedTexture);
 }
 
 MainWindow::~MainWindow()

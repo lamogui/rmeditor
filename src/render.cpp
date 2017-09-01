@@ -2,6 +2,7 @@
 #include "render.hpp"
 #include "renderer.hpp"
 #include <QDebug>
+#include <QOpenGLFunctions>
 
 /*
 ** Render
@@ -9,7 +10,6 @@
 Render::Render(Type type):
   type(type)
 {
-  //createAttachements(initialSize);
 }
 
 Render::~Render()
@@ -18,13 +18,20 @@ Render::~Render()
 
 void Render::initializeGL(RenderFunctionsCache& renderFunctions, const QSize& initialFBOSize)
 {
+  //QOpenGLFunctions functions;
+  //functions.initializeOpenGLFunctions();
+  //Q_ASSERT(functions.hasOpenGLFeature(QOpenGLFunctions::MultipleRenderTargets));
   fbo.reset(new QOpenGLFramebufferObject(initialFBOSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8));
+  createAttachements(initialFBOSize);
 }
 
 void Render::render(RenderFunctionsCache& renderFunctions, Renderer& renderer)
 {
   renderer.renderChildrens(renderFunctions);
   fbo->bind();
+  configureDrawedBuffer(renderFunctions);
+  //renderFunctions.glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+  //renderFunctions.glClampColor(GL_CLAMP_FRAGMENT_COLOR, GL_FALSE);
   renderFunctions.glClearColor(0, 0, 0, 1);
   renderFunctions.glClear(GL_COLOR_BUFFER_BIT);
   renderFunctions.glViewport(0, 0, (GLsizei)fbo->width(), (GLsizei)fbo->height());
@@ -40,7 +47,7 @@ void Render::resize(const QSize& newSize)
 
 void Render::resizeFBO(const QSize& newSize)
 {
-  fbo.reset(new QOpenGLFramebufferObject(newSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8));
+  fbo.reset(new QOpenGLFramebufferObject(newSize, QOpenGLFramebufferObject::Depth, GL_TEXTURE_2D, GL_RGBA8));
   createAttachements(newSize);
 }
 
@@ -56,9 +63,15 @@ RenderTexture2D::RenderTexture2D() :
 
 void RenderTexture2D::createAttachements(const QSize& fboSize)
 {
-  // fbo->addColorAttachment(fboSize, GL_RGBA8);           // color (always created by default by qt)
-  fbo->addColorAttachment(fboSize, GL_RGB8);               // normal
-  fbo->addColorAttachment(fboSize, GL_DEPTH_COMPONENT32F); // depth
+  // fbo->addColorAttachment(fboSize, GL_RGBA8);   // color (always created by default by qt)
+  fbo->addColorAttachment(fboSize, GL_RGB8);       // normal
+  fbo->addColorAttachment(fboSize, GL_RED);        // depth
+}
+
+void RenderTexture2D::configureDrawedBuffer(RenderFunctionsCache& renderFunctions)
+{
+  GLenum drawnBuffers[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+  renderFunctions.glDrawBuffers(3, drawnBuffers);
 }
 
 QImage RenderTexture2D::getImage()

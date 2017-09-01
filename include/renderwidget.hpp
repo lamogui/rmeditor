@@ -29,6 +29,15 @@ public:
 
        static const char* getDisplayTextureFragmentShaderCode();
 
+       enum TextureDisplayed
+       {
+         color = 0,
+         normal = 1,
+         depth = 2
+       };
+
+       TextureDisplayed getTextureDisplayed() const { return textureDisplayed; }
+
 public slots:
        void resetCamera();
        void takeScreenshot();
@@ -37,6 +46,7 @@ public slots:
        void startUpdateLoop();
        void stopUpdateLoop();
        void setCurrentRenderer(const QWeakPointer<Renderer>& renderer);
+       void switchDisplayedTexture();
 
 protected slots:
        void cleanup();
@@ -73,6 +83,9 @@ protected:
        LogWidget* logWidget;
        bool captureMouse;
        bool onlyShowTexture;
+
+       // Options 
+       TextureDisplayed textureDisplayed;
 
 };
 
