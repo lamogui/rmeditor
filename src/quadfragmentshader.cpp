@@ -6,7 +6,8 @@
 */
 
 QuadFragmentShaderCode::QuadFragmentShaderCode(QObject* parent) :
-  GLSLShaderCode(parent)
+  GLSLShaderCode(parent),
+  shaderProgram(nullptr)
 {
 
 }
@@ -48,7 +49,9 @@ bool QuadFragmentShaderCode::build(const QString &text)
   code += shaderCode;
 
   // Create the shader program
-  shaderProgram.reset(new ShaderProgram());
+  if (shaderProgram)
+    delete shaderProgram;
+  shaderProgram = new ShaderProgram(this);
   shaderProgram->create();
 
   if (!handleShaderCompileResult(getVertexShaderCode(), *shaderProgram, QOpenGLShader::Vertex) ||
@@ -73,7 +76,7 @@ void ReferencedQuadFragmentShaderRenderer::initializeGL(RenderFunctionsCache& gl
 
 void ReferencedQuadFragmentShaderRenderer::glRender(RenderFunctionsCache& gl, Render& render)
 {
-  QSharedPointer<ShaderProgram> shader = shaderCode ? shaderCode->getShaderProgram() : nullptr;
+  ShaderProgram* shader = shaderCode ? shaderCode->getShaderProgram() : nullptr;
   if (shader)
   {
     shader->bind();

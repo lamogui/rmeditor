@@ -3,8 +3,7 @@
 
 #include <QGraphicsView>
 
-class Render;
-
+class Renderer;
 class Timeline;
 
 class TimelineWidget : public QGraphicsView
@@ -28,7 +27,7 @@ public:
 
 signals:
   void timePositionChanged(double);
-  void rendererChanged(Render* renderer);
+  void currentRendererChanged(QWeakPointer<Renderer> renderer);
 
 
 protected:

@@ -23,12 +23,10 @@ public:
        RenderWidget(QWidget *parent = 0);
        ~RenderWidget();
 
-       void setLogWidget(LogWidget* log); // FIXME : remove this !
-
-       RenderFunctionsCache& getRenderFunctions() { Q_ASSERT(renderFunctions); return *renderFunctions; }
-
+       // Utils
        static const char* getDisplayTextureFragmentShaderCode();
 
+       // Enum
        enum TextureDisplayed
        {
          color = 0,
@@ -36,7 +34,11 @@ public:
          depth = 2
        };
 
+       // Accessors
+       QWeakPointer<Renderer> getCurrentRenderer() const { return currentRenderer; }
        TextureDisplayed getTextureDisplayed() const { return textureDisplayed; }
+       RenderFunctionsCache& getRenderFunctions() { Q_ASSERT(renderFunctions); return *renderFunctions; }
+       void setLogWidget(LogWidget* log); // FIXME : remove this !
 
 public slots:
        void resetCamera();

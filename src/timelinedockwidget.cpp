@@ -12,7 +12,7 @@ TimelineDockWidget::TimelineDockWidget(QWidget *parent):
   project(nullptr)
 {
     ui->setupUi(this);
-    connect(ui->timelineView,SIGNAL(rendererChanged(Render*)),this,SLOT(emitRenderChanged(Render*)));
+    connect(ui->timelineView, &TimelineWidget::currentRendererChanged,this, &TimelineDockWidget::emitCurrentRendererChanged);
     this->setEnabled(false);
 }
 
@@ -46,7 +46,7 @@ void TimelineDockWidget::on_playPauseButton_clicked(bool)
 {
   if (ui->timelineView->getTimeline())
   {
-    emitRenderChanged(ui->timelineView->getTimeline()->getRender());
+    emitCurrentRendererChanged(ui->timelineView->getTimeline()->getRenderer());
   }
   if (project->getMusic()->isPlaying())
   {
@@ -62,7 +62,7 @@ void TimelineDockWidget::on_rewindButton_clicked(bool)
 {
   if (ui->timelineView->getTimeline())
   {
-    emitRenderChanged(ui->timelineView->getTimeline()->getRender());
+    emitCurrentRendererChanged(ui->timelineView->getTimeline()->getRenderer());
   }
   project->getMusic()->setPosition(0);
 }
@@ -71,22 +71,22 @@ void TimelineDockWidget::on_stopButton_clicked(bool)
 {
   if (ui->timelineView->getTimeline())
   {
-    emitRenderChanged(ui->timelineView->getTimeline()->getRender());
+    emitCurrentRendererChanged(ui->timelineView->getTimeline()->getRenderer());
   }
   project->getMusic()->pause();
   project->getMusic()->setPosition(0);
 }
 
-void TimelineDockWidget::emitRenderChanged(Render *renderer)
+void TimelineDockWidget::emitCurrentRendererChanged(const QWeakPointer<Renderer>& renderer)
 {
-  emit rendererChanged(renderer);
+  emit currentRendererChanged(renderer);
 }
 
 void TimelineDockWidget::focusInEvent(QFocusEvent* event)
 {
   if (ui->timelineView->getTimeline())
   {
-    emitRenderChanged(ui->timelineView->getTimeline()->getRender());
+    emitCurrentRendererChanged(ui->timelineView->getTimeline()->getRenderer());
   }
 }
 

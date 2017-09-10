@@ -2,7 +2,7 @@
 
 #include "project.hpp"
 #include "music.hpp"
-#include "scene.hpp"
+#include "mediafile.hpp"
 #include "renderfunctionscache.hpp"
 
 Project::Project(QObject* parent) :
@@ -30,29 +30,80 @@ void Project::setMusic(Music* newMusic)
   }
 }
 
-void Project::insertRmScene(RaymarchingScene* scene)
+void Project::insertMediaFile(MediaFile* mediaFile)
 {
-  Q_ASSERT(scene);
-  Q_ASSERT(rmScenes.constFind(scene->getPath().fileName()) == rmScenes.constEnd());
+  Q_ASSERT(mediaFile);
+  Q_ASSERT(mediaFiles.constFind(mediaFile->getPath().fileName()) == mediaFiles.constEnd());
 
-  scene->setParent(this);
-  if (scene)
+  mediaFile->setParent(this);
+  if (mediaFile)
   {
-    scene->initializeGL(*renderCache);
+    mediaFile->initializeGL(*renderCache);
   }
-  rmScenes.insert(scene->getPath().fileName(), scene);
+  mediaFiles.insert(mediaFile->getPath().fileName(), mediaFile);
+  emit mediaFileInserted(mediaFile);
 
   QVariant oldValue;
-  QVariant newValue = QVariant::fromValue(scene);
-
-  emit propertyChanged(this, "rmScenes", oldValue, newValue);
+  QVariant newValue = QVariant::fromValue(mediaFile);
+  emit propertyChanged(this, "mediaFiles", oldValue, newValue);
 }
 
-void Project::removeRmScene(RaymarchingScene* scene)
+void Project::removeMediaFile(MediaFile* mediaFile)
 {
-  Q_ASSERT(scene);
-  Q_ASSERT(rmScenes.constFind(scene->getPath().fileName()) != rmScenes.constEnd());
+  Q_ASSERT(mediaFile);
+  Q_ASSERT(mediaFiles.constFind(mediaFile->getPath().fileName()) != mediaFiles.constEnd());
 
+  mediaFiles.remove(mediaFile->getPath().fileName());
+
+  QVariant oldValue = QVariant::fromValue(mediaFile);
+  QVariant newValue;
+  emit propertyChanged(this, "mediaFiles", oldValue, newValue);
+}
+
+QDir Project::getDir() const
+{
+  return getPath().absoluteDir();
+}
+
+void Project::reset()
+{
+  document.clear();
+  for (StringMap<MediaFile*>::iterator it = mediaFiles.begin(); it != mediaFiles.end(); ++it)
+  {
+    delete it.value();
+  }
+  mediaFiles.clear();
+}
+
+void Project::reload()
+{
+  reset();
+  bool buildSuccess = true;
+  QString errorMsg;
+  int errorLine, errCol;
+
+  if (!document.setContent(getText(), &errorMsg, &errorLine, &errCol))
+  {
+    emit error(QString("[") + getPath().fileName() + "]" + QString(" XML Error at line ") +
+      QString::number(errorLine) + " col " + QString::number(errCol) + ": " + errorMsg);
+    buildSuccess = false;
+  }
+  else
+  {
+    QDomNode node = document.documentElement().firstChild();
+    node = node;
+    while (!node.isNull())
+    {
+      QDomElement element = node.toElement();
+      if (element.isNull())
+      {
+        emit warning(QString("[") + getPath().fileName() + "]" + " warning at line " + QString::number(node.lineNumber()) +
+          "(" + node.nodeName() + ") excepted '" + Project::nodeTypeToString(QDomNode::ElementNode)
+          + "'' node but got '" + Project::nodeTypeToString(node.nodeType()) + "' ignoring the block");
+      }
+      else if (element.tagName())
+    }
+  }
 }
 
 //#include "tunefish4music.hpp"
@@ -130,43 +181,6 @@ void Project::resetProject()
   }
   music = nullptr;
 
-}
-
-QString Project::nodeTypeToString(QDomNode::NodeType type)
-{
-  switch (type)
-  {
-    case QDomNode::ElementNode:
-      return QString("Element");
-    case QDomNode::AttributeNode:
-      return QString("Attribute");
-    case QDomNode::TextNode:
-      return QString("Text");
-    case QDomNode::CDATASectionNode:
-      return QString("CDATA Section");
-    case QDomNode::EntityReferenceNode:
-      return QString("Entity Reference");
-    case QDomNode::EntityNode:
-      return QString("Entity");
-    case QDomNode::ProcessingInstructionNode:
-      return QString("Processing Instruction");
-    case QDomNode::CommentNode:
-      return QString("Comment");
-    case QDomNode::DocumentNode:
-      return QString("Document");
-    case QDomNode::DocumentTypeNode:
-      return QString("DocumentType");
-    case QDomNode::DocumentFragmentNode:
-      return QString("Document Fragment");
-    case QDomNode::NotationNode:
-      return QString("Notation");
-    case QDomNode::BaseNode:
-      return QString("Base");
-    case QDomNode::CharacterDataNode:
-      return QString("Character Data");
-    default:
-      return QString("Unknow");
-  }
 }
 
 bool Project::build(const QString &text)

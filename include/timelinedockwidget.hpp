@@ -5,7 +5,7 @@
 
 class Camera;
 class Project;
-class Render;
+class Renderer;
 class TimelineWidget;
 
 
@@ -29,13 +29,13 @@ public slots:
   void insertCameraKeyframe(Camera* cam);
 
 signals:
-  void rendererChanged(Render* renderer);
+  void currentRendererChanged(QWeakPointer<Renderer> renderer);
 
 protected:
   void focusInEvent(QFocusEvent* event);
 
 protected slots:
-  void emitRenderChanged(Render* renderer);
+  void emitCurrentRendererChanged(const QWeakPointer<Renderer>& renderer);
 
   void on_playPauseButton_clicked(bool);
   void on_rewindButton_clicked(bool);

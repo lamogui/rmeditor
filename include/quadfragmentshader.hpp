@@ -18,8 +18,7 @@ public:
   Renderer* createRenderer() const override;
 
   // Accessors
-  QSharedPointer<ShaderProgram>& getShaderProgram() { return shaderProgram; }
-  const QSharedPointer<ShaderProgram>& getShaderProgram() const { return shaderProgram; }
+  ShaderProgram* getShaderProgram() const { return shaderProgram; }
 
   // TextEditable
   bool buildable() const override { return true; }
@@ -32,7 +31,7 @@ public slots:
   bool build(const QString& text) override;
 
 protected:
-  QSharedPointer<ShaderProgram> shaderProgram;
+  ShaderProgram* shaderProgram;
 };
 
 

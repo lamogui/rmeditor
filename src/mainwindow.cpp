@@ -6,15 +6,17 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
-//#include "demotimeline.hpp"
 #include "editorwidget.hpp"
-#include "ffmpegencoder.hpp"
 #include "logdockwidget.hpp"
+#include "project.hpp"
 #include "render.hpp"   // for connect
 #include "renderer.hpp" // for connect
+#include "timelinewidget.hpp"
+#include "timelinedockwidget.hpp"
+
 /*
+#include "ffmpegencoder.hpp"
 #include "music.hpp"
-#include "project.hpp"
 #include "timelinewidget.hpp"
 #include "timelinedockwidget.hpp"
 */
@@ -22,11 +24,10 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-   // project(nullptr),
+    project(nullptr),
     ui(new Ui::MainWindow)
 
 {
-
     ui->setupUi(this);
     ui->progressBar->setVisible(false);
     ui->cancelButton->setVisible(false);
@@ -39,13 +40,13 @@ MainWindow::MainWindow(QWidget *parent) :
     info->getLogWidget()->findAndConnectLogSignalsRecursively(*editor); 
 
 
-    //timelineWidget = new TimelineDockWidget(this);
+    timelineWidget = new TimelineDockWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea, info);
-    //addDockWidget(Qt::BottomDockWidgetArea, timelineWidget);
+    addDockWidget(Qt::BottomDockWidgetArea, timelineWidget);
     addDockWidget(Qt::LeftDockWidgetArea, editor);
 
     connect(editor, &EditorWidget::rendererChanged, ui->renderWidget, &RenderWidget::setCurrentRenderer);
-    //connect(timelineWidget,SIGNAL(rendererChanged(Render*)),this->ui->renderWidget,SLOT(setRender(Render*)));
+    connect(timelineWidget, &TimelineDockWidget::currentRendererChanged, this->ui->renderWidget, &RenderWidget::setCurrentRenderer);
 
     //Main window actions
     ui->toolBar->addAction(ui->actionNew);
@@ -56,7 +57,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addSeparator();
     ui->toolBar->addAction(ui->actionInsert_camera_keyframe);
     ui->toolBar->addAction(ui->actionReset_camera);
-
 
     connect(ui->actionNew, &QAction::triggered, this, &MainWindow::newProject);
     connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::open);
@@ -72,10 +72,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
- /* if (project)
-  {
-    delete project;
-  }*/
   delete ui;
 }
 
@@ -120,14 +116,14 @@ void MainWindow::open()
     }
     else
     {
-      /*if (project)
+      if (project)
       {
         delete project;
       }
-      project = new Project(dir,QFileInfo(f).fileName(),*(info->getLogWidget()),this);
-      connectProject();
-      */
-
+      project = new Project(this);
+      //connectProject();
+      
+      /*
       ui->renderWidget->makeCurrent();
       RaymarchingScene* shader = new RaymarchingScene();
       info->getLogWidget()->findAndConnectLogSignalsRecursively(*shader);
@@ -135,6 +131,7 @@ void MainWindow::open()
       shader->setPath(QFileInfo(f));
       editor->appendTextEditable(shader);
       ui->renderWidget->doneCurrent();
+      */
     }
   }
   
@@ -153,24 +150,24 @@ void MainWindow::connectProject()
   connect(project,SIGNAL(demoTimelineChanged(Timeline*)),this,SLOT(setTimeline(Timeline*)));
   timelineWidget->setProject(project);
 }
-
+*/
 void MainWindow::setTimeline(Timeline *t)
 {
   (void)t; // oh !
-  Q_ASSERT(t == project->getDemoTimeline() || !t); // Don't support another case yet 
-  timelineWidget->setProject(project);
+  //Q_ASSERT(t == project->getDemoTimeline() || !t); // Don't support another case yet 
+  //timelineWidget->setProject(project);
 }
 
 void MainWindow::insertCameraKeyframe()
 {
-  Camera* cam = ui->renderWidget->camera();
+  Renderer* currentRenderer = ui->renderWidget->getCurrentRenderer().data();
+  Camera* cam = currentRenderer ? currentRenderer->getCurrentCamera() : nullptr;
   if (cam)
   {
     timelineWidget->insertCameraKeyframe(cam);
   }
 }
 
-*/
 
 void MainWindow::exportAsVideo()
 {/*
@@ -216,10 +213,10 @@ void MainWindow::freezeAll()
   ui->menuFile->setEnabled(false);
   ui->menuExport->setEnabled(false);
 
-  //timelineWidget->setEnabled(false);
+  timelineWidget->setEnabled(false);
   editor->setEnabled(false);
 
- // timeline->getTimelineWidget()->stopUpdateLoop();
+  //timeline->getTimelineWidget()->stopUpdateLoop();
 
 }
 

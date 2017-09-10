@@ -120,9 +120,11 @@ using StringMap = QMap<QString, cl>; // Compiler bug with macros because of ',' 
 ** Xml
 */
 
+bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failureReason, QStringList& warnings);
+
 #define XML_SAVED_OBJECT \
   public: \
-    Q_INVOKABLE inline void setNode(const QDomNode& n) { node = n; } \
+    Q_INVOKABLE bool loadFromXmlNode(const QDomNode& n); \
   private slots: \
    void onPropertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue) \
    { \

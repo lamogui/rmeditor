@@ -180,7 +180,7 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mouseEvent)
 {
   if (timeline)
   {
-    emit rendererChanged(timeline->getRender());
+    emit currentRendererChanged(timeline->getRenderer());
   }
 
   QPointF scenePos = mapToScene(mouseEvent->pos());
@@ -282,7 +282,7 @@ void TimelineWidget::focusInEvent(QFocusEvent* event)
 {
   if (timeline)
   {
-    emit rendererChanged(timeline->getRender());
+    emit currentRendererChanged(timeline->getRenderer());
   }
 }
 

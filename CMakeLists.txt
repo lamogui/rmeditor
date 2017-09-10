@@ -114,6 +114,7 @@ set(RMEDITOR_SRC
   ${RMEDITOR_SRC_DIR}/timelinewidget.cpp
 #  ${RMEDITOR_SRC_DIR}/tunefish4music.cpp
   ${RMEDITOR_SRC_DIR}/undocommands.cpp
+  ${RMEDITOR_SRC_DIR}/xmlsavedobject.cpp
 )
 
 #ui

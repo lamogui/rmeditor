@@ -10,7 +10,7 @@
 #include "music.hpp" // QPointer incomplete type is not allowed !
 
 class Music;
-class Render;
+class Renderer;
 /*
 ** Timeline : Any "frame precision" seekable timeline which is linked to the master = the music should inherit from this
 */
@@ -34,7 +34,7 @@ public:
   qint64 getLength() const; 
   qint64 currentFrame() const;
 
-  virtual Render* getRender() { return nullptr; }
+  virtual QWeakPointer<Renderer> getRenderer() { return QWeakPointer<Renderer>(); }
   virtual void updateTime() = 0;
 
 signals:

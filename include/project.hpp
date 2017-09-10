@@ -4,19 +4,36 @@
 #define PROJECT_HPP
 
 #include "texteditable.hpp"
+#include "undocommands.hpp"
+#include <QDir>
 
 class Music;
 class RaymarchingScene;
 class Project : public TextEditable
 {
+  UNDOCOMMANDS_RECEIVER_OBJECT
   Q_OBJECT
 
 public:
   Project(QObject* parent = nullptr);
   
+  //Accessors
+  QDir getDir() const;
+
+  //Utils
+  void reset(); // reset project without notify 
+  void reload();
+
+signals:
+  void mediaFileInserted(MediaFile* mediaFile); // attached target should connect to MediaFile destruction Qt style
+
+protected slots:
+  void onPathChanged(QFileInfo newPath);
+
 private:
   DECLARE_PROPERTY(Music*, music, Music)
-  DECLARE_PROPERTY_CONTAINER(StringMap, RaymarchingScene*, rmScenes, RmScenes, rmScene, RmScene);
+  DECLARE_PROPERTY_CONTAINER(StringMap, MediaFile*, mediaFiles, MediaFiles, mediaFile, MediaFile)
+  QDomDocument document;
 
     /*
     Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=nullptr);
