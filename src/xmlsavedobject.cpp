@@ -4,6 +4,7 @@
 #include <QMetaProperty>
 #include <QVector3D>
 #include <QQuaternion>
+#include <cassert>
 
 
 static QString NodeTypeToString(QDomNode::NodeType type)
@@ -103,9 +104,45 @@ static bool LoadQQuaternionFromXmlNode(QVariant& target, const QDomElement& node
   return success;
 }
 
-static QObject* InstantiateContainedQObjectFromXmlNode(const QMetaObject* targetClass, const QDomNode& node, QString& failureReason, QStringList& warnings)
+static QObject* InstantiateContainedQObjectFromXmlNode(const QMetaObject& targetClass, const QDomNode& node, QString& failureReason, QStringList& warnings)
 {
+  if (!node.isElement())
+  {
+    failureReason = "line " + QString::number(node.lineNumber()) +
+      " (" + node.nodeName() + ") excepted '" + NodeTypeToString(QDomNode::ElementNode)
+      + "'' node but got '" + NodeTypeToString(node.nodeType());
+    return nullptr;
+  }
 
+  QDomElement element = node.toElement();
+  ClassManager* manager = ClassManager::get();
+  const QMetaObject* realTargetClass = manager->getClass(element.tagName());
+  if (!realTargetClass)
+  {
+    failureReason = "line " + QString::number(element.lineNumber()) + " (" + node.nodeName() + ") the class " + element.tagName() + " doesn't exists !";
+    return nullptr;
+  }
+
+  if (!realTargetClass->inherits(&targetClass))
+  {
+    failureReason = "line " + QString::number(element.lineNumber()) + " (" + node.nodeName() + ") the class " + element.tagName() + " don't inherit from " + targetClass.className();
+    return nullptr;
+  }
+
+  QObject* newInstance = realTargetClass->newInstance();
+  if (!newInstance)
+  {
+    failureReason = "line " + QString::number(element.lineNumber()) + " (" + node.nodeName() + ") could not instantiate new object of class " + element.tagName();
+    assert(false);
+    return nullptr;
+  }
+
+  if (!LoadObjectFromXmlNode(*newInstance, element, failureReason, warnings))
+  {
+    delete newInstance;
+    return nullptr;
+  }
+  return newInstance;
 }
 
 bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failureReason, QStringList& warnings)
@@ -118,7 +155,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
     if (element.isNull())
     {
       warnings.append("line " + QString::number(node.lineNumber()) +
-                      "(" + node.nodeName() + ") excepted '" + NodeTypeToString(QDomNode::ElementNode)
+                      " (" + node.nodeName() + ") excepted '" + NodeTypeToString(QDomNode::ElementNode)
                       + "'' node but got '" + NodeTypeToString(node.nodeType()) + "' ignoring the block");
     }
     else
@@ -128,14 +165,14 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
       if (variableIndex == -1)
       {
         warnings.append("line " + QString::number(element.lineNumber()) +
-          "(" + element.nodeName() + ") " + cl->className() + " has not property named " + variableName + " it will be skiped");
+          " (" + element.nodeName() + ") " + cl->className() + " has not property named " + variableName + " it will be skiped");
         continue;
       }
       QMetaProperty variable = cl->property(variableIndex);
       if (variable.type() == QVariant::Invalid)
       {
-        failureReason = "line " + QString::number(element.lineNumber()) + "(" + element.nodeName() + ") the property type of " + variableName + " is unknown";
-        Q_ASSERT(false); // did you forget to declare QMetaType
+        failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the property type of " + variableName + " is unknown";
+        assert(false); // did you forget to declare QMetaType
         return false;
       }
 
@@ -150,34 +187,62 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
             const QMetaObject* targetClass = manager->getContainerTargetClass(variable.userType());
             if (!targetClass)
             {
-              failureReason = "line " + QString::number(element.lineNumber()) + "(" + element.nodeName() + ") the type id of container not registered in ClassManager";
-              Q_ASSERT(false); // did you forget to register your type in ClassManager ? 
+              failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the type id of container not registered in ClassManager";
+              assert(false); // did you forget to register your type in ClassManager ? 
               return false;
             }
 
-            variable.
+            QString containedName = variable.name();
+            if (containedName.length())
+            {
+              containedName[0] = containedName[0].toUpper(); // Camel Case
+              if (containedName.length() > 1 && containedName[containedName.length() - 1] == 's')
+                containedName.truncate(containedName.length() - 1); // remove plural
+            }
+            else
+              assert(false); // WTF !!!
+
+            const QString insertMethodName = "void insert" + containedName + "(" + targetClass->className() + "*)";
+            const int indexOfInsertMethod = cl->indexOfMethod(insertMethodName.toStdString().c_str());
+            if (indexOfInsertMethod == -1)
+            {
+              failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.tagName() + ") could not find required method " + insertMethodName;
+              assert(false); // check that the method is slot or Q_INVOKABLE
+              return false;
+            }
+
+            QMetaMethod insertMethod = cl->method(indexOfInsertMethod);
+            assert(insertMethod.isValid()); // wtf ???
 
             QDomElement childElement = element.firstChildElement();
             while (!childElement.isNull())
             {
-              QObject* newInstance = InstantiateContainedQObjectFromXmlNode(targetClass, childElement, failureReason, warnings);
+              QObject* newInstance = InstantiateContainedQObjectFromXmlNode(*targetClass, childElement, failureReason, warnings);
               if (!newInstance)
                 return false;
               
+              if (!insertMethod.invoke(&object, Q_ARG(QObject*, newInstance)))
+              {
+                failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.tagName() + ") invoking " + insertMethodName + " failed !";
+                assert(false);
+                delete newInstance;
+                return false;
+              }
 
               element = childElement.nextSiblingElement();
             }
           }
           else
           {
-            
+            assert(false);
           }
 
         }
         else 
         {
-          failureReason = "line " + QString::number(element.lineNumber()) + "(" + element.nodeName() + ") the class type of property is invalid";
-          Q_ASSERT(false); // did you forget to declare QMetaType
+          failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the class type of property is invalid";
+          qDebug() << failureReason;
+          assert(false); // did you forget to declare QMetaType
           return false;
         }
         //const QMetaObject* constructedClass = QMetaType::metaObjectForType(variable.userType());
@@ -196,8 +261,8 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
             success = LoadQQuaternionFromXmlNode(value, element, failureReason);
             break;
           default:
-            failureReason = "line " + QString::number(element.lineNumber()) + "(" + element.nodeName() + ") the property type of " + variableName + " is unsupported yet";
-            Q_ASSERT(false); // TODO 
+            failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the property type of " + variableName + " is unsupported yet";
+            assert(false); // TODO 
             return false;
         }
         if (success)
@@ -208,5 +273,5 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
     }
     variableNode.nextSibling();
   }
-
+  return true;
 }

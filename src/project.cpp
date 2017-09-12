@@ -4,6 +4,7 @@
 #include "music.hpp"
 #include "mediafile.hpp"
 #include "renderfunctionscache.hpp"
+#include <cassert>
 
 Project::Project(QObject* parent) :
   TextEditable(parent),
@@ -32,8 +33,8 @@ void Project::setMusic(Music* newMusic)
 
 void Project::insertMediaFile(MediaFile* mediaFile)
 {
-  Q_ASSERT(mediaFile);
-  Q_ASSERT(mediaFiles.constFind(mediaFile->getPath().fileName()) == mediaFiles.constEnd());
+  assert(mediaFile);
+  assert(mediaFiles.constFind(mediaFile->getPath().fileName()) == mediaFiles.constEnd());
 
   mediaFile->setParent(this);
   if (mediaFile)
@@ -50,8 +51,8 @@ void Project::insertMediaFile(MediaFile* mediaFile)
 
 void Project::removeMediaFile(MediaFile* mediaFile)
 {
-  Q_ASSERT(mediaFile);
-  Q_ASSERT(mediaFiles.constFind(mediaFile->getPath().fileName()) != mediaFiles.constEnd());
+  assert(mediaFile);
+  assert(mediaFiles.constFind(mediaFile->getPath().fileName()) != mediaFiles.constEnd());
 
   mediaFiles.remove(mediaFile->getPath().fileName());
 
@@ -75,14 +76,15 @@ void Project::reset()
   mediaFiles.clear();
 }
 
-void Project::reload()
+bool Project::build(const QString& text)
 {
   reset();
+  xmlContent = text;
   bool buildSuccess = true;
   QString errorMsg;
   int errorLine, errCol;
 
-  if (!document.setContent(getText(), &errorMsg, &errorLine, &errCol))
+  if (!document.setContent(xmlContent, &errorMsg, &errorLine, &errCol))
   {
     emit error(QString("[") + getPath().fileName() + "]" + QString(" XML Error at line ") +
       QString::number(errorLine) + " col " + QString::number(errCol) + ": " + errorMsg);
@@ -91,19 +93,29 @@ void Project::reload()
   else
   {
     QDomNode node = document.documentElement().firstChild();
-    node = node;
-    while (!node.isNull())
+    QString failureReason;
+    QStringList warnings;
+    buildSuccess = LoadObjectFromXmlNode(*this, node, failureReason, warnings);
+    foreach(QString w, warnings)
     {
-      QDomElement element = node.toElement();
-      if (element.isNull())
-      {
-        emit warning(QString("[") + getPath().fileName() + "]" + " warning at line " + QString::number(node.lineNumber()) +
-          "(" + node.nodeName() + ") excepted '" + Project::nodeTypeToString(QDomNode::ElementNode)
-          + "'' node but got '" + Project::nodeTypeToString(node.nodeType()) + "' ignoring the block");
-      }
-      else if (element.tagName())
+      emit warning(w);
+    }
+    if (!buildSuccess)
+    {
+      emit error(failureReason);
     }
   }
+  return buildSuccess;
+}
+
+void Project::onPathChanged(QFileInfo newPath)
+{
+  load();
+}
+
+const QString& Project::getText() const
+{
+  return xmlContent;
 }
 
 //#include "tunefish4music.hpp"

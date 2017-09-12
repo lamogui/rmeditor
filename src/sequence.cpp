@@ -35,7 +35,7 @@ void Sequence::setMedia(const QPointer<MediaFile>& mediaFile)
     media = mediaFile;
     if (!media.isNull())
     {
-      Q_ASSERT(media->canBeRendered());
+      assert(media->canBeRendered());
       renderer.reset(media->createRenderer());
       if (renderer->hasDynamicCamera() && cameraKeyframes.size())
       {
@@ -53,9 +53,9 @@ void Sequence::setMedia(const QPointer<MediaFile>& mediaFile)
 
 void Sequence::insertCameraKeyframe(CameraKeyframe* keyframe)
 {
-  Q_ASSERT(keyframe);
-  Q_ASSERT(keyframe->getRelativeFrame() >= 0 && keyframe->getRelativeFrame() < (qint64)getLength()); // not terribble but should work
-  Q_ASSERT(cameraKeyframes.constFind(keyframe->getRelativeFrame()) != cameraKeyframes.constEnd()); // Error erase previous keyframe
+  assert(keyframe);
+  assert(keyframe->getRelativeFrame() >= 0 && keyframe->getRelativeFrame() < (qint64)getLength()); // not terribble but should work
+  assert(cameraKeyframes.constFind(keyframe->getRelativeFrame()) != cameraKeyframes.constEnd()); // Error erase previous keyframe
 
   keyframe->setParentItem(this);
 
@@ -72,8 +72,8 @@ void Sequence::insertCameraKeyframe(CameraKeyframe* keyframe)
 void Sequence::removeCameraKeyframe(CameraKeyframe* keyframe)
 {
   Int64Map<CameraKeyframe*>::iterator it = cameraKeyframes.find(keyframe->getRelativeFrame());
-  Q_ASSERT(it != cameraKeyframes.end());
-  Q_ASSERT(it.value() == keyframe);
+  assert(it != cameraKeyframes.end());
+  assert(it.value() == keyframe);
 
   cameraKeyframes.erase(it);
 
@@ -139,7 +139,7 @@ void Sequence::initializeGL(RenderFunctionsCache& renderCache)
 
 void Sequence::renderImages()
 {
-  Q_ASSERT(renderCache);
+  assert(renderCache);
   if (!renderer.isNull())
   {
     int height = getHeight() - 10;
@@ -418,7 +418,7 @@ void Sequence::keyframePropertyChanged(QObject* owner, const QString& propertyNa
       else if (newFrameRight <= (qint64)getLength())
         newFrame = newFrameRight;
       else
-        Q_ASSERT(false);
+        assert(false);
 
       keyframe->setRelativeFrame(newFrame);
     }

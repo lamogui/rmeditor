@@ -17,12 +17,19 @@ class Project : public TextEditable
 public:
   Project(QObject* parent = nullptr);
   
+  // TextEditable 
+  const QString& getText() const override;
+  bool buildable() const { return true; }
+
   //Accessors
   QDir getDir() const;
 
   //Utils
   void reset(); // reset project without notify 
-  void reload();
+
+public slots:
+  // TextEditable
+  bool build(const QString& text) override;
 
 signals:
   void mediaFileInserted(MediaFile* mediaFile); // attached target should connect to MediaFile destruction Qt style
@@ -35,11 +42,13 @@ private:
   DECLARE_PROPERTY_CONTAINER(StringMap, MediaFile*, mediaFiles, MediaFiles, mediaFile, MediaFile)
   QDomDocument document;
 
+  QString xmlContent;
+
     /*
     Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=nullptr);
     ~Project() override;
 
-    const QString& getText() const override;
+    
     void connectLog(LogWidget& log) override;
 
     Scene *getRayMarchScene(const QString& name) const;

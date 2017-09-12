@@ -65,6 +65,3 @@ bool TextEditable::save()
   return save(getText());
 }
 
-
-
-

@@ -32,7 +32,7 @@ void TimelineDockWidget::setProject(Project *project)
   if (this->project)
   {
     //getTimelineWidget()->setTimeline(this->project->getDemoTimeline());
-    Q_ASSERT(false);
+    assert(false);
     this->setEnabled(true);
   }
   else
@@ -96,6 +96,6 @@ void TimelineDockWidget::insertCameraKeyframe(Camera *cam)
   if (t)
   {
 //    t->insertCameraKeyframe(cam);
-    Q_ASSERT(false);
+    assert(false);
   }
 }

@@ -6,6 +6,7 @@
 #include <QOpenGLDebugLogger>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
+#include <cassert>
 
 #include "renderfunctionscache.hpp"
 
@@ -37,7 +38,7 @@ public:
        // Accessors
        QWeakPointer<Renderer> getCurrentRenderer() const { return currentRenderer; }
        TextureDisplayed getTextureDisplayed() const { return textureDisplayed; }
-       RenderFunctionsCache& getRenderFunctions() { Q_ASSERT(renderFunctions); return *renderFunctions; }
+       RenderFunctionsCache& getRenderFunctions() { assert(renderFunctions); return *renderFunctions; }
        void setLogWidget(LogWidget* log); // FIXME : remove this !
 
 public slots:

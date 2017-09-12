@@ -6,6 +6,7 @@
 #include <QPointer>
 #include <QObject>
 #include <QMetaMethod>
+#include <cassert>
 
 class ModifyPropertyCommand : public QUndoCommand
 {
@@ -56,7 +57,7 @@ public:
     }
     else
     {
-      Q_ASSERT(false && "target or target owner has been destroyed !");
+      assert(false && "target or target owner has been destroyed !");
     }
     BaseClass::redo();
   }
@@ -71,7 +72,7 @@ public:
     }
     else
     {
-      Q_ASSERT(false && "target or target owner has been destroyed !");
+      assert(false && "target or target owner has been destroyed !");
     }
   }
 
@@ -114,7 +115,7 @@ public:
     }
     else
     {
-      Q_ASSERT(false && "target or target owner has been destroyed !");
+      assert(false && "target or target owner has been destroyed !");
     }
     BaseClass::redo();
   }
@@ -129,7 +130,7 @@ public:
     }
     else
     {
-      Q_ASSERT(false && "target or target owner has been destroyed !");
+      assert(false && "target or target owner has been destroyed !");
     }
   }
 
@@ -150,14 +151,14 @@ private:
   public slots: \
     void receiveUndoCommand(QUndoCommand* cmd) \
     { \
-      undoStack->push(cmd); \
+      undoStack.push(cmd); \
     } \
   protected: \
     QUndoStack undoStack; \
   private:
 
 #define ASSERT_IF_UNIQUE_RECEIVER(S) \
-  Q_ASSERT(receivers(SIGNAL(S)) == 1); \
+  assert(receivers(SIGNAL(S)) == 1); \
   if (receivers(SIGNAL(S)) == 1)
 
 // Utils

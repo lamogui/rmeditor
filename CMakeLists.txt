@@ -50,6 +50,7 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/fast2dquad.hpp
 #  ${RMEDITOR_INCLUDE_DIR}/ffmpegencoder.hpp
   ${RMEDITOR_INCLUDE_DIR}/highlighter.hpp
+  ${RMEDITOR_INCLUDE_DIR}/jassert.hpp
   ${RMEDITOR_INCLUDE_DIR}/keyframe.hpp
   ${RMEDITOR_INCLUDE_DIR}/logdockwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/logwidget.hpp

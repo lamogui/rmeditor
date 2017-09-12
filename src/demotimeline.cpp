@@ -1,6 +1,7 @@
 ﻿
 #include "demotimeline.hpp"
 #include "timelinetrack.hpp"
+#include <cassert>
 
 /*
 ** DemoTimelineRenderer
@@ -70,7 +71,7 @@ void DemoTimeline::removeTrack(TimelineTrack* track)
       tracks.remove(i);
       break;
     }
-    Q_ASSERT(i != tracks.size() - 1); // track wasn't inside this timeline
+    assert(i != tracks.size() - 1); // track wasn't inside this timeline
   }
 
   disconnect(track, &TimelineTrack::requestFramePosition, this, &DemoTimeline::trackRequestFramePosition);
@@ -244,7 +245,7 @@ qint64 DemoTimeline::maxSequenceLengthBeforeOverlap(Sequence* seq) const
 
 void DemoTimeline::renderImage(const QSize& resolution, QImage* target)
 {
-  Q_ASSERT(target);
+  assert(target);
 
   updateTime();
   //Cast because of compiler bug in debug...

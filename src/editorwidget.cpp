@@ -3,6 +3,7 @@
 #include "ui_editorwidget.h"
 
 #include <iostream>
+#include <cassert>
 
 #include "logwidget.hpp"
 //#include "project.hpp"
@@ -79,7 +80,7 @@ void EditorWidget::on_tab_currentChanged(int index)
   }
 
   TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->widget(index));
-  Q_ASSERT(te != nullptr);
+  assert(te != nullptr);
   //te->refresh();
   ui->buildButton->setEnabled(te->textObject()->buildable());
   emit rendererChanged(te->textObject()->getDefaultRenderer());
@@ -88,7 +89,7 @@ void EditorWidget::on_tab_currentChanged(int index)
 
 void EditorWidget::appendTextEditable(TextEditable *te)
 {
-  Q_ASSERT(te);
+  assert(te);
   bool newWidget = true;
   for (int i = 0; i < ui->tab->count(); i++)
   {

@@ -18,10 +18,10 @@ int main(int argc, char *argv[])
   ClassManager::get()->initalizeClasses();
 
   QApplication a(argc, argv);
-  QFile f(":qdarkstyle/style.qss");
-  f.open(QFile::ReadOnly | QFile::Text);
-  QTextStream ts(&f);
-  a.setStyleSheet(ts.readAll());
+  //QFile f(":qdarkstyle/style.qss");
+  //f.open(QFile::ReadOnly | QFile::Text);
+  //QTextStream ts(&f);
+  //a.setStyleSheet(ts.readAll());
 
   MainWindow w;
   w.showMaximized();

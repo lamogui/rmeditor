@@ -106,7 +106,7 @@ void MainWindow::newProject()
 void MainWindow::open()
 {
   
-  QString f = QFileDialog::getOpenFileName(this, tr("Open project file"), QString(), "*.glsl");// "*.xml");
+  QString f = QFileDialog::getOpenFileName(this, tr("Open project file"), QString(), "*.xml");
   if (!f.isEmpty())
   {
     QDir dir = QFileInfo(f).dir();
@@ -121,6 +121,7 @@ void MainWindow::open()
         delete project;
       }
       project = new Project(this);
+      project->setPath(QFileInfo(f));
       //connectProject();
       
       /*
@@ -154,7 +155,7 @@ void MainWindow::connectProject()
 void MainWindow::setTimeline(Timeline *t)
 {
   (void)t; // oh !
-  //Q_ASSERT(t == project->getDemoTimeline() || !t); // Don't support another case yet 
+  //assert(t == project->getDemoTimeline() || !t); // Don't support another case yet 
   //timelineWidget->setProject(project);
 }
 

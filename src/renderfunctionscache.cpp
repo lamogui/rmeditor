@@ -1,5 +1,6 @@
 
 #include "renderfunctionscache.hpp"
+#include <cassert>
 
 std::string VertexAttributesIndex::toString(Enum e)
 {
@@ -12,7 +13,7 @@ std::string VertexAttributesIndex::toString(Enum e)
   case normal:
     return "normal";
   default:
-    Q_ASSERT(false);
+    assert(false);
     return "";
   }
 }
