@@ -26,6 +26,7 @@ protected:
 };
 */
 
+
 class TimelineTrack;
 class DemoTimeline : public Timeline
 {
@@ -87,7 +88,7 @@ protected:
   */
 private:
   // properties
-  DECLARE_PROPERTY_CONTAINER(QVector, TimelineTrack*, tracks, Tracks, track, Track)
+  DECLARE_PROPERTY_CONTAINER(QVector, TimelineTrack*, track, Track)
 
   // render
   RenderFunctionsCache* renderCache;

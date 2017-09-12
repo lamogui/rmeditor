@@ -99,14 +99,14 @@ using StringMap = QMap<QString, cl>; // Compiler bug with macros because of ',' 
   Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName WRITE set##VariableName NOTIFY variableName##Changed) \
   DECLARE_PROPERTY_GETTER_AND_SETTER(Type, variableName, VariableName);
 
-#define DECLARE_PROPERTY_CONTAINER(ContainerType, ValueType, variableName, VariableName, valueName, ValueName) \
-  Q_PROPERTY(ContainerType<ValueType> variableName MEMBER variableName READ get##VariableName) \
+#define DECLARE_PROPERTY_CONTAINER(ContainerType, ValueType, valueName, ValueName) \
+  Q_PROPERTY(ContainerType<ValueType> valueName##s MEMBER valueName##s READ get##ValueName##s) \
   public: \
-    GENERATE_PROPERTY_REFERENCE_GETTER(ContainerType<ValueType>, variableName, get##VariableName) \
-    void insert##ValueName(ValueType valueName); \
+    GENERATE_PROPERTY_REFERENCE_GETTER(ContainerType<ValueType>, valueName##s, get##ValueName##s) \
+    Q_INVOKABLE void insert##ValueName(ValueType valueName); \
     void remove##ValueName(ValueType valueName); \
   private: \
-    ContainerType<ValueType> variableName;
+    ContainerType<ValueType> valueName##s;
 
 #define DECLARE_PROPERTY_REFERENCE(Type, variableName, VariableName) \
   Q_PROPERTY(Type variableName MEMBER variableName READ get##VariableName WRITE set##VariableName) \

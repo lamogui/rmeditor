@@ -8,6 +8,7 @@
 #include "undocommands.hpp"
 #include "renderfunctionscache.hpp"
 
+
 class CameraKeyframe;
 class MediaFile;
 class Renderer;
@@ -94,7 +95,7 @@ private:
   DECLARE_PROPERTY_REFERENCE(QPointer<MediaFile>, media, Media)
   DECLARE_PROPERTY(qint64, startFrame, StartFrame)
   DECLARE_PROPERTY(quint64, length, Length)
-  DECLARE_PROPERTY_CONTAINER(Int64Map, CameraKeyframe*, cameraKeyframes, CameraKeyframes, cameraKeyframe, CameraKeyframe)
+  DECLARE_PROPERTY_CONTAINER(Int64Map, CameraKeyframe*, cameraKeyframe, CameraKeyframe)
 
   // Internal 
   QSharedPointer<Renderer> renderer;

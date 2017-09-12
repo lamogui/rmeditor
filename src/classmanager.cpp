@@ -8,14 +8,24 @@
 
 // declared classes 
 #include "camera.hpp"  // for CameraKeyframe
+#include "mediafile.hpp"
+#include "scene.hpp"   // for RaymarchingScene
 #include "sequence.hpp"
 #include "timelinetrack.hpp"
-#include "mediafile.hpp"
 
 
-#define DECLARE_QOBJECT_CLASS(CLASSNAME) classes.insert(#CLASSNAME, &CLASSNAME::staticMetaObject) 
-#define DECLARE_QOBJECT_INT64MAP_TYPE(CLASSNAME) int64MapTypes.insert(qRegisterMetaType<QMap<qint64, CLASSNAME*> >(), &CLASSNAME::staticMetaObject)
-#define DECLARE_QOBJECT_STRINGMAP_TYPE(CLASSNAME) stringMapTypes.insert(qRegisterMetaType<StringMap<CLASSNAME*> >(), &CLASSNAME::staticMetaObject)
+#define REGISTER_QOBJECT_CLASS(CLASSNAME) classes.insert(#CLASSNAME, &CLASSNAME::staticMetaObject) 
+#define REGISTER_QOBJECT_INT64MAP_TYPE(CLASSNAME) int64MapTypes.insert(qRegisterMetaType<QMap<qint64, CLASSNAME*> >(), &CLASSNAME::staticMetaObject)
+#define REGISTER_QOBJECT_STRINGMAP_TYPE(CLASSNAME) stringMapTypes.insert(qRegisterMetaType<StringMap<CLASSNAME*> >(), &CLASSNAME::staticMetaObject)
+
+/*
+** Declare MetaTypes
+*/
+
+Q_DECLARE_METATYPE(QVector<TimelineTrack*>)
+Q_DECLARE_METATYPE(StringMap<MediaFile*>)
+Q_DECLARE_METATYPE(Int64Map<CameraKeyframe*>)
+Q_DECLARE_METATYPE(Int64Map<Sequence*>)
 
 /*
 ** Class manager
@@ -88,8 +98,9 @@ void ClassManager::initalizeClasses()
 
 void ClassManager::initializeQObjectClasses()
 {
-  DECLARE_QOBJECT_CLASS(TimelineTrack);
-  DECLARE_QOBJECT_CLASS(Sequence);
+  REGISTER_QOBJECT_CLASS(TimelineTrack);
+  REGISTER_QOBJECT_CLASS(Sequence);
+  REGISTER_QOBJECT_CLASS(RaymarchingScene);
 }
 
 void ClassManager::initializeQVectorTypes()
@@ -99,15 +110,15 @@ void ClassManager::initializeQVectorTypes()
 
 void ClassManager::initializeQMapInt64Types()
 {
-  DECLARE_QOBJECT_INT64MAP_TYPE(Keyframe);
-  DECLARE_QOBJECT_INT64MAP_TYPE(Sequence);
+  REGISTER_QOBJECT_INT64MAP_TYPE(Keyframe);
+  REGISTER_QOBJECT_INT64MAP_TYPE(Sequence);
 }
 
 void ClassManager::initializeQMapStringTypes()
 {
-  DECLARE_QOBJECT_STRINGMAP_TYPE(MediaFile);
+  REGISTER_QOBJECT_STRINGMAP_TYPE(MediaFile);
 
-  qDebug() << "registered StringMap :";
+  qDebug() << "Registered StringMap :";
   QMap<int, const QMetaObject*>::const_iterator it;
   for (it = stringMapTypes.constBegin(); it != stringMapTypes.constEnd(); it++)
   {

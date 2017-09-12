@@ -39,7 +39,7 @@ protected slots:
 
 private:
   DECLARE_PROPERTY(Music*, music, Music)
-  DECLARE_PROPERTY_CONTAINER(StringMap, MediaFile*, mediaFiles, MediaFiles, mediaFile, MediaFile)
+  DECLARE_PROPERTY_CONTAINER(StringMap, MediaFile*, mediaFile, MediaFile)
   QDomDocument document;
 
   QString xmlContent;

@@ -11,7 +11,7 @@ class RaymarchingScene : public QuadFragmentShaderCode
   Q_OBJECT
 
 public:
-  RaymarchingScene(QObject* parent = nullptr);
+  Q_INVOKABLE RaymarchingScene(QObject* parent = nullptr);
 
   void initializeGL(RenderFunctionsCache& gl) override;
 

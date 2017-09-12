@@ -37,7 +37,7 @@ void Project::insertMediaFile(MediaFile* mediaFile)
   jassert(mediaFiles.constFind(mediaFile->getPath().fileName()) == mediaFiles.constEnd());
 
   mediaFile->setParent(this);
-  if (mediaFile)
+  if (renderCache)
   {
     mediaFile->initializeGL(*renderCache);
   }

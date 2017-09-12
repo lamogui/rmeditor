@@ -8,6 +8,8 @@
 #include <QMap>
 #include <QGraphicsObject>
 
+
+
 class Renderer;
 class Sequence; 
 class DemoTimeline;
@@ -53,7 +55,7 @@ protected:
 
 private:
   // Properties
-  DECLARE_PROPERTY_CONTAINER(Int64Map, Sequence*, sequences, Sequences, sequence, Sequence)
+  DECLARE_PROPERTY_CONTAINER(Int64Map, Sequence*, sequence, Sequence)
 
   // Graphics
   float height;

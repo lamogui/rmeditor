@@ -133,7 +133,7 @@ static QObject* InstantiateContainedQObjectFromXmlNode(const QMetaObject& target
   if (!newInstance)
   {
     failureReason = "line " + QString::number(element.lineNumber()) + " (" + node.nodeName() + ") could not instantiate new object of class " + element.tagName();
-    jassertfalse;
+    jassertfalse; // make sure your constructor is Q_INVOKABLE
     return nullptr;
   }
 
@@ -166,6 +166,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
       {
         warnings.append("line " + QString::number(element.lineNumber()) +
           " (" + element.nodeName() + ") " + cl->className() + " has not property named " + variableName + " it will be skiped");
+        variableNode = variableNode.nextSibling();
         continue;
       }
       QMetaProperty variable = cl->property(variableIndex);
@@ -202,11 +203,14 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
             else
               jassertfalse; // WTF !!!
 
-            const QString insertMethodName = "void insert" + containedName + "(" + targetClass->className() + "*)";
-            const int indexOfInsertMethod = cl->indexOfMethod(insertMethodName.toStdString().c_str());
+            // /!\ Qt method signature doesn't contains the return type !!!! 
+            const QString insertMethodName = "insert" + containedName +"(" + targetClass->className() + "*)";
+            const std::string normalizedMethodName = QMetaObject::normalizedSignature(insertMethodName.toStdString().c_str());
+            const int indexOfInsertMethod = cl->indexOfMethod(normalizedMethodName.c_str());
             if (indexOfInsertMethod == -1)
             {
               failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.tagName() + ") could not find required method " + insertMethodName;
+              qDebug() << failureReason;
               jassertfalse; // check that the method is slot or Q_INVOKABLE
               return false;
             }
@@ -229,7 +233,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
                 return false;
               }
 
-              element = childElement.nextSiblingElement();
+              childElement = childElement.nextSiblingElement();
             }
           }
           else
@@ -242,7 +246,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
         {
           failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the class type (" + QString::number(variable.userType()) + ") of property is invalid";
           qDebug() << failureReason << " variable.type() " << variable.type() << QString::number(variable.type());
-          jassertfalse; // did you forget to declare QMetaType
+          jassertfalse; // did you forget to declare QMetaType check you called the correct register in ClassManager and you correctly declared the class using Q_DECLARE_METATYPE
           return false;
         }
         //const QMetaObject* constructedClass = QMetaType::metaObjectForType(variable.userType());
@@ -271,7 +275,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
           return false;
       }
     }
-    variableNode.nextSibling();
+    variableNode = variableNode.nextSibling();
   }
   return true;
 }
