@@ -15,7 +15,7 @@
 
 #define DECLARE_QOBJECT_CLASS(CLASSNAME) classes.insert(#CLASSNAME, &CLASSNAME::staticMetaObject) 
 #define DECLARE_QOBJECT_INT64MAP_TYPE(CLASSNAME) int64MapTypes.insert(qRegisterMetaType<QMap<qint64, CLASSNAME*> >(), &CLASSNAME::staticMetaObject)
-#define DECLARE_QOBJECT_STRINGMAP_TYPE(CLASSNAME) stringMapTypes.insert(qRegisterMetaType<QMap<QString, CLASSNAME*> >(), &CLASSNAME::staticMetaObject)
+#define DECLARE_QOBJECT_STRINGMAP_TYPE(CLASSNAME) stringMapTypes.insert(qRegisterMetaType<StringMap<CLASSNAME*> >(), &CLASSNAME::staticMetaObject)
 
 /*
 ** Class manager
@@ -106,4 +106,11 @@ void ClassManager::initializeQMapInt64Types()
 void ClassManager::initializeQMapStringTypes()
 {
   DECLARE_QOBJECT_STRINGMAP_TYPE(MediaFile);
-}
+
+  qDebug() << "registered StringMap :";
+  QMap<int, const QMetaObject*>::const_iterator it;
+  for (it = stringMapTypes.constBegin(); it != stringMapTypes.constEnd(); it++)
+  {
+    qDebug() << it.key() << it.value()->className();
+  }
+} 

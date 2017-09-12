@@ -240,8 +240,8 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
         }
         else 
         {
-          failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the class type of property is invalid";
-          qDebug() << failureReason;
+          failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the class type (" + QString::number(variable.userType()) + ") of property is invalid";
+          qDebug() << failureReason << " variable.type() " << variable.type() << QString::number(variable.type());
           jassertfalse; // did you forget to declare QMetaType
           return false;
         }
