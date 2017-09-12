@@ -265,7 +265,7 @@ template<class T> T eCubic(T x)
 
 template<class T> T eAlign(const T &val, eU32 alignment)
 {
-    static_assert(sizeof(val) <= sizeof(alignment), "doesn't work correctly if sizeof(alignment) < sizeof(val)");
+    static_jassert(sizeof(val) <= sizeof(alignment), "doesn't work correctly if sizeof(alignment) < sizeof(val)");
     return (T)((((eU32)val)+alignment-1)&(~(alignment-1)));
 }
 

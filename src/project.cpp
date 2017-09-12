@@ -4,7 +4,7 @@
 #include "music.hpp"
 #include "mediafile.hpp"
 #include "renderfunctionscache.hpp"
-#include <cassert>
+#include "jassert.hpp"
 
 Project::Project(QObject* parent) :
   TextEditable(parent),
@@ -33,8 +33,8 @@ void Project::setMusic(Music* newMusic)
 
 void Project::insertMediaFile(MediaFile* mediaFile)
 {
-  assert(mediaFile);
-  assert(mediaFiles.constFind(mediaFile->getPath().fileName()) == mediaFiles.constEnd());
+  jassert(mediaFile);
+  jassert(mediaFiles.constFind(mediaFile->getPath().fileName()) == mediaFiles.constEnd());
 
   mediaFile->setParent(this);
   if (mediaFile)
@@ -51,8 +51,8 @@ void Project::insertMediaFile(MediaFile* mediaFile)
 
 void Project::removeMediaFile(MediaFile* mediaFile)
 {
-  assert(mediaFile);
-  assert(mediaFiles.constFind(mediaFile->getPath().fileName()) != mediaFiles.constEnd());
+  jassert(mediaFile);
+  jassert(mediaFiles.constFind(mediaFile->getPath().fileName()) != mediaFiles.constEnd());
 
   mediaFiles.remove(mediaFile->getPath().fileName());
 

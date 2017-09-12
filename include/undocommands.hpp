@@ -6,7 +6,7 @@
 #include <QPointer>
 #include <QObject>
 #include <QMetaMethod>
-#include <cassert>
+#include "jassert.hpp"
 
 class ModifyPropertyCommand : public QUndoCommand
 {
@@ -57,7 +57,7 @@ public:
     }
     else
     {
-      assert(false && "target or target owner has been destroyed !");
+      jassert(false && "target or target owner has been destroyed !");
     }
     BaseClass::redo();
   }
@@ -72,7 +72,7 @@ public:
     }
     else
     {
-      assert(false && "target or target owner has been destroyed !");
+      jassert(false && "target or target owner has been destroyed !");
     }
   }
 
@@ -115,7 +115,7 @@ public:
     }
     else
     {
-      assert(false && "target or target owner has been destroyed !");
+      jassert(false && "target or target owner has been destroyed !");
     }
     BaseClass::redo();
   }
@@ -130,7 +130,7 @@ public:
     }
     else
     {
-      assert(false && "target or target owner has been destroyed !");
+      jassert(false && "target or target owner has been destroyed !");
     }
   }
 
@@ -158,7 +158,7 @@ private:
   private:
 
 #define ASSERT_IF_UNIQUE_RECEIVER(S) \
-  assert(receivers(SIGNAL(S)) == 1); \
+  jassert(receivers(SIGNAL(S)) == 1); \
   if (receivers(SIGNAL(S)) == 1)
 
 // Utils

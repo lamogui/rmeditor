@@ -7,7 +7,7 @@
 #include <QVariant>
 #include <QDomElement>
 #include <QMap>
-#include <cassert>
+#include "jassert.hpp"
 
 /*
 ** Ugly things
@@ -129,7 +129,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
   private slots: \
    void onPropertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue) \
    { \
-     assert(owner == this); \
+     jassert(owner == this); \
      Q_EMIT xmlPropertyChanged(node, propertyName, newValue); \
    } \
   private: \

@@ -155,7 +155,7 @@ void MainWindow::connectProject()
 void MainWindow::setTimeline(Timeline *t)
 {
   (void)t; // oh !
-  //assert(t == project->getDemoTimeline() || !t); // Don't support another case yet 
+  //jassert(t == project->getDemoTimeline() || !t); // Don't support another case yet 
   //timelineWidget->setProject(project);
 }
 

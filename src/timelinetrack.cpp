@@ -36,7 +36,7 @@ Sequence* TimelineTrack::isInsideSequence(qint64 frame) const
 quint64 TimelineTrack::getLength() const
 {
   Timeline* timeline = dynamic_cast<Timeline*>(scene());
-  assert(timeline);
+  jassert(timeline);
   return timeline->getLength();
 }
 
@@ -68,8 +68,8 @@ bool TimelineTrack::makeSequenceFit(Sequence& sequence)
 
 void TimelineTrack::insertSequence(Sequence* sequence)
 {
-  assert(sequence);
-  assert(sequence->getStartFrame() >= 0); // not terrible but should work
+  jassert(sequence);
+  jassert(sequence->getStartFrame() >= 0); // not terrible but should work
   
   makeSequenceFit(*sequence); // be sure not erasing anything
 
@@ -89,11 +89,11 @@ void TimelineTrack::insertSequence(Sequence* sequence)
 
 void TimelineTrack::removeSequence(Sequence* sequence)
 {
-  assert(sequence);
+  jassert(sequence);
 
   Int64Map<Sequence*>::iterator it = sequences.find(sequence->getStartFrame());
-  assert(it != sequences.end());
-  assert(it.value() == sequence);
+  jassert(it != sequences.end());
+  jassert(it.value() == sequence);
 
   sequences.erase(it);
 

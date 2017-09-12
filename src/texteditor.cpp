@@ -174,7 +174,7 @@ void TextEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 
 void TextEditor::onDestroyObject(QObject *obj)
 {
-  //assert(dynamic_cast<TextEditable*>(obj)!=nullptr);
+  //jassert(dynamic_cast<TextEditable*>(obj)!=nullptr);
   delete this;
 }
 

@@ -2,7 +2,7 @@
 // Dependencies
 #include <QMetaType>
 #include <QVector>
-#include <cassert>
+#include "jassert.hpp"
 #include "classmanager.hpp"
 #include "singleton.h"
 
@@ -46,7 +46,7 @@ const QMetaObject* ClassManager::getClass(const QString& className) const
   {
     return it.value();
   }
-  assert(false);
+  jassertfalse;
   return nullptr;
 }
 
@@ -62,7 +62,7 @@ const QMetaObject* ClassManager::getContainerTargetClass(int type) const
   it = stringMapTypes.constFind(type);
   if (it != stringMapTypes.constEnd())
     return it.value();
-  assert(false);
+  jassertfalse;
   return nullptr;
 }
 

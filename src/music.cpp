@@ -6,7 +6,7 @@
 #include <QThread>
 #include <QMessageBox>
 #include <QDebug>
-#include <cassert>
+#include "jassert.hpp"
 
 #include "timeline.hpp"
 #include "renderer.hpp"
@@ -37,7 +37,7 @@ int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int n
 {
   (void) inputBuffer;
 
-  assert(userData && outputBuffer);
+  jassert(userData && outputBuffer);
   Music* music = (Music*) userData;
   if (music->playing)
   {

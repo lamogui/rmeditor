@@ -79,32 +79,32 @@ const char* RenderWidget::getDisplayTextureFragmentShaderCode()
 void RenderWidget::initializeGL()
 {
   // Debugger 
-  assert(logWidget);
+  jassert(logWidget);
   qDebug() << "Created context version: " << format().majorVersion() << "." << format().minorVersion();
-  assert(!openglDebugLogger);
+  jassert(!openglDebugLogger);
   openglDebugLogger = new QOpenGLDebugLogger(this);
   openglDebugLogger->initialize();
   connect(openglDebugLogger, &QOpenGLDebugLogger::messageLogged, logWidget, &LogWidget::handleOpengGLLoggedMessage);
   openglDebugLogger->startLogging();
 
   // Functions 
-  assert(!renderFunctions);
+  jassert(!renderFunctions);
   renderFunctions = new RenderFunctionsCache();
   renderFunctions->initializeOpenGLFunctions();
   renderFunctions->glDisable(GL_DEPTH_TEST);
 
   // Render
-  assert(!render);
+  jassert(!render);
   render = new RenderTexture2D();
   render->initializeGL(*renderFunctions, size());
 
   // Fast2DQuad
-  assert(!quad);
+  jassert(!quad);
   quad = new Fast2DQuad();
   quad->initializeGL(*renderFunctions);
 
   // Shader
-  assert(!quadShader);
+  jassert(!quadShader);
   quadShader = new QOpenGLShaderProgram(this);
   if (quadShader->create())
   {
@@ -167,7 +167,7 @@ void RenderWidget::paintGL()
     {
       if (renderer->hasDynamicCamera() && !keysPressed.empty())
       {
-        assert(renderer->getCurrentCamera());
+        jassert(renderer->getCurrentCamera());
         QVector3D delta;
         if (keysPressed.contains(Qt::Key_Up))
         {
@@ -356,14 +356,14 @@ void RenderWidget::cleanup()
     quadShader = nullptr;
   }
 
-  assert(renderFunctions);
+  jassert(renderFunctions);
   if (renderFunctions)
   {
     delete renderFunctions;
     renderFunctions = nullptr;
   }
 
-  assert(openglDebugLogger);
+  jassert(openglDebugLogger);
   if (openglDebugLogger)
   {
     delete openglDebugLogger;

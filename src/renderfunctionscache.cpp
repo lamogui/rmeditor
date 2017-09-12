@@ -1,6 +1,6 @@
 
 #include "renderfunctionscache.hpp"
-#include <cassert>
+#include "jassert.hpp"
 
 std::string VertexAttributesIndex::toString(Enum e)
 {
@@ -13,7 +13,7 @@ std::string VertexAttributesIndex::toString(Enum e)
   case normal:
     return "normal";
   default:
-    assert(false);
+    jassertfalse;
     return "";
   }
 }

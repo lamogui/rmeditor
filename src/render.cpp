@@ -3,7 +3,7 @@
 #include "renderer.hpp"
 #include <QDebug>
 #include <QOpenGLFunctions>
-#include <cassert>
+#include "jassert.hpp"
 
 /*
 ** Render
@@ -21,7 +21,7 @@ void Render::initializeGL(RenderFunctionsCache& renderFunctions, const QSize& in
 {
   //QOpenGLFunctions functions;
   //functions.initializeOpenGLFunctions();
-  //assert(functions.hasOpenGLFeature(QOpenGLFunctions::MultipleRenderTargets));
+  //jassert(functions.hasOpenGLFeature(QOpenGLFunctions::MultipleRenderTargets));
   fbo.reset(new QOpenGLFramebufferObject(initialFBOSize, QOpenGLFramebufferObject::NoAttachment, GL_TEXTURE_2D, GL_RGBA8));
   createAttachements(initialFBOSize);
 }
@@ -77,7 +77,7 @@ void RenderTexture2D::configureDrawedBuffer(RenderFunctionsCache& renderFunction
 
 QImage RenderTexture2D::getImage()
 {
-  assert(fbo);
+  jassert(fbo);
   return fbo->toImage(true, 0);
 }
 

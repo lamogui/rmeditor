@@ -4,7 +4,7 @@
 #include <QMetaProperty>
 #include <QVector3D>
 #include <QQuaternion>
-#include <cassert>
+#include "jassert.hpp"
 
 
 static QString NodeTypeToString(QDomNode::NodeType type)
@@ -133,7 +133,7 @@ static QObject* InstantiateContainedQObjectFromXmlNode(const QMetaObject& target
   if (!newInstance)
   {
     failureReason = "line " + QString::number(element.lineNumber()) + " (" + node.nodeName() + ") could not instantiate new object of class " + element.tagName();
-    assert(false);
+    jassertfalse;
     return nullptr;
   }
 
@@ -172,7 +172,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
       if (variable.type() == QVariant::Invalid)
       {
         failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the property type of " + variableName + " is unknown";
-        assert(false); // did you forget to declare QMetaType
+        jassertfalse; // did you forget to declare QMetaType
         return false;
       }
 
@@ -188,7 +188,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
             if (!targetClass)
             {
               failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the type id of container not registered in ClassManager";
-              assert(false); // did you forget to register your type in ClassManager ? 
+              jassertfalse; // did you forget to register your type in ClassManager ? 
               return false;
             }
 
@@ -200,19 +200,19 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
                 containedName.truncate(containedName.length() - 1); // remove plural
             }
             else
-              assert(false); // WTF !!!
+              jassertfalse; // WTF !!!
 
             const QString insertMethodName = "void insert" + containedName + "(" + targetClass->className() + "*)";
             const int indexOfInsertMethod = cl->indexOfMethod(insertMethodName.toStdString().c_str());
             if (indexOfInsertMethod == -1)
             {
               failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.tagName() + ") could not find required method " + insertMethodName;
-              assert(false); // check that the method is slot or Q_INVOKABLE
+              jassertfalse; // check that the method is slot or Q_INVOKABLE
               return false;
             }
 
             QMetaMethod insertMethod = cl->method(indexOfInsertMethod);
-            assert(insertMethod.isValid()); // wtf ???
+            jassert(insertMethod.isValid()); // wtf ???
 
             QDomElement childElement = element.firstChildElement();
             while (!childElement.isNull())
@@ -224,7 +224,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
               if (!insertMethod.invoke(&object, Q_ARG(QObject*, newInstance)))
               {
                 failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.tagName() + ") invoking " + insertMethodName + " failed !";
-                assert(false);
+                jassertfalse;
                 delete newInstance;
                 return false;
               }
@@ -234,7 +234,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
           }
           else
           {
-            assert(false);
+            jassertfalse;
           }
 
         }
@@ -242,7 +242,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
         {
           failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the class type of property is invalid";
           qDebug() << failureReason;
-          assert(false); // did you forget to declare QMetaType
+          jassertfalse; // did you forget to declare QMetaType
           return false;
         }
         //const QMetaObject* constructedClass = QMetaType::metaObjectForType(variable.userType());
@@ -262,7 +262,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
             break;
           default:
             failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the property type of " + variableName + " is unsupported yet";
-            assert(false); // TODO 
+            jassertfalse; // TODO 
             return false;
         }
         if (success)

@@ -29,11 +29,11 @@ void ModifyPropertyCommand::internalDo(const QVariant& value)
   if (target)
   {
     if (!target->setProperty(propertyName.toStdString().c_str(), value))
-      assert(false && "invalid property for target");
+      jassert(false && "invalid property for target");
   }
   else
   {
-    assert(false && "target has be destroyed !");
+    jassert(false && "target has be destroyed !");
   }
 }
 

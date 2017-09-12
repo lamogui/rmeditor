@@ -2,7 +2,7 @@
 #include <QString>
 #include <QMetaMethod>
 #include "logwidget.hpp"
-#include <cassert>
+#include "jassert.hpp"
 
 
 LogWidget::LogWidget(QWidget *parent):
@@ -27,7 +27,7 @@ LogWidget* LogWidget::getLogWidget(const QObject& context)
       return log;
     parent = parent->parent();
   }
-  assert(false && "could not find LogWidget in parents");
+  jassert(false && "could not find LogWidget in parents");
   return nullptr;
 }
 

@@ -35,7 +35,7 @@ void Sequence::setMedia(const QPointer<MediaFile>& mediaFile)
     media = mediaFile;
     if (!media.isNull())
     {
-      assert(media->canBeRendered());
+      jassert(media->canBeRendered());
       renderer.reset(media->createRenderer());
       if (renderer->hasDynamicCamera() && cameraKeyframes.size())
       {
@@ -53,9 +53,9 @@ void Sequence::setMedia(const QPointer<MediaFile>& mediaFile)
 
 void Sequence::insertCameraKeyframe(CameraKeyframe* keyframe)
 {
-  assert(keyframe);
-  assert(keyframe->getRelativeFrame() >= 0 && keyframe->getRelativeFrame() < (qint64)getLength()); // not terribble but should work
-  assert(cameraKeyframes.constFind(keyframe->getRelativeFrame()) != cameraKeyframes.constEnd()); // Error erase previous keyframe
+  jassert(keyframe);
+  jassert(keyframe->getRelativeFrame() >= 0 && keyframe->getRelativeFrame() < (qint64)getLength()); // not terribble but should work
+  jassert(cameraKeyframes.constFind(keyframe->getRelativeFrame()) != cameraKeyframes.constEnd()); // Error erase previous keyframe
 
   keyframe->setParentItem(this);
 
@@ -72,8 +72,8 @@ void Sequence::insertCameraKeyframe(CameraKeyframe* keyframe)
 void Sequence::removeCameraKeyframe(CameraKeyframe* keyframe)
 {
   Int64Map<CameraKeyframe*>::iterator it = cameraKeyframes.find(keyframe->getRelativeFrame());
-  assert(it != cameraKeyframes.end());
-  assert(it.value() == keyframe);
+  jassert(it != cameraKeyframes.end());
+  jassert(it.value() == keyframe);
 
   cameraKeyframes.erase(it);
 
@@ -139,7 +139,7 @@ void Sequence::initializeGL(RenderFunctionsCache& renderCache)
 
 void Sequence::renderImages()
 {
-  assert(renderCache);
+  jassert(renderCache);
   if (!renderer.isNull())
   {
     int height = getHeight() - 10;
@@ -418,7 +418,7 @@ void Sequence::keyframePropertyChanged(QObject* owner, const QString& propertyNa
       else if (newFrameRight <= (qint64)getLength())
         newFrame = newFrameRight;
       else
-        assert(false);
+        jassertfalse;
 
       keyframe->setRelativeFrame(newFrame);
     }
