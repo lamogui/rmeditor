@@ -46,7 +46,6 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/camera.hpp
   ${RMEDITOR_INCLUDE_DIR}/classmanager.hpp
   ${RMEDITOR_INCLUDE_DIR}/demotimeline.hpp
-  ${RMEDITOR_INCLUDE_DIR}/editorwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/fast2dquad.hpp
 #  ${RMEDITOR_INCLUDE_DIR}/ffmpegencoder.hpp
   ${RMEDITOR_INCLUDE_DIR}/highlighter.hpp
@@ -56,6 +55,7 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/logwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/mainwindow.hpp
   ${RMEDITOR_INCLUDE_DIR}/mediafile.hpp
+  ${RMEDITOR_INCLUDE_DIR}/mediafileseditorwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/music.hpp
   ${RMEDITOR_INCLUDE_DIR}/project.hpp
   ${RMEDITOR_INCLUDE_DIR}/quadfragmentshader.hpp
@@ -86,7 +86,6 @@ set(RMEDITOR_SRC
   ${RMEDITOR_SRC_DIR}/camera.cpp
   ${RMEDITOR_SRC_DIR}/classmanager.cpp
   ${RMEDITOR_SRC_DIR}/demotimeline.cpp
-  ${RMEDITOR_SRC_DIR}/editorwidget.cpp
   ${RMEDITOR_SRC_DIR}/fast2dquad.cpp
 #  ${RMEDITOR_SRC_DIR}/ffmpegencoder.cpp
   ${RMEDITOR_SRC_DIR}/highlighter.cpp
@@ -96,6 +95,7 @@ set(RMEDITOR_SRC
   ${RMEDITOR_SRC_DIR}/main.cpp
   ${RMEDITOR_SRC_DIR}/mainwindow.cpp
   ${RMEDITOR_SRC_DIR}/mediafile.cpp
+  ${RMEDITOR_SRC_DIR}/mediafileseditorwidget.cpp
   ${RMEDITOR_SRC_DIR}/music.cpp
   ${RMEDITOR_SRC_DIR}/project.cpp
   ${RMEDITOR_SRC_DIR}/quadfragmentshader.cpp
@@ -120,10 +120,10 @@ set(RMEDITOR_SRC
 
 #ui
 set(RMEDITOR_FORMS_DIR src)
-set(RMEDITOR_FORMS 
-    ${RMEDITOR_FORMS_DIR}/editorwidget.ui 
+set(RMEDITOR_FORMS  
     ${RMEDITOR_FORMS_DIR}/logdockwidget.ui 
     ${RMEDITOR_FORMS_DIR}/mainwindow.ui 
+    ${RMEDITOR_FORMS_DIR}/mediafileseditorwidget.ui
     ${RMEDITOR_FORMS_DIR}/timelinedockwidget.ui
 )
 

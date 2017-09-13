@@ -1,29 +1,31 @@
-#ifndef EDITORWIDGET_H
-#define EDITORWIDGET_H
+#ifndef MEDIAFILESWIDGET_H
+#define MEDIAFILESWIDGET_H
 
 #include <QDockWidget>
 
 
 namespace Ui {
-class EditorWidget;
+class MediaFilesEditorWidget;
 }
 
 //class Project;
 class Renderer;
-class TextEditable;
+class MediaFile;
 class TextEditor;
-class EditorWidget : public QDockWidget
+class MediaFilesEditorWidget : public QDockWidget
 {
     Q_OBJECT
     
 public:
-    explicit EditorWidget(QWidget *parent = 0);
-    ~EditorWidget();
+    explicit MediaFilesEditorWidget(QWidget *parent = 0);
+    ~MediaFilesEditorWidget();
 
 public slots:
     //void loadProject(Project& project);
-    void appendTextEditable(TextEditable* te);
-
+    //void appendTextEditable(TextEditable* te);
+    
+    void appendMediaFile(MediaFile* newMediaFile);
+    void onMediaFileDestroyed(MediaFile*);
     void saveAllShaders();
 
 
@@ -43,7 +45,7 @@ private slots:
 
 
 private:
-    Ui::EditorWidget *ui;
+    Ui::MediaFilesEditorWidget *ui;
 };
 
-#endif // EDITORWIDGET_H
+#endif // MEDIAFILESWIDGET_H

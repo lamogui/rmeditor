@@ -1,6 +1,6 @@
-#include "editorwidget.hpp"
+#include "mediafileseditorwidget.hpp"
 
-#include "ui_editorwidget.h"
+#include "ui_mediafileseditorwidget.h"
 
 #include <iostream>
 #include "jassert.hpp"
@@ -11,20 +11,20 @@
 #include "texteditor.hpp"
 #include "texteditable.hpp"
 
-EditorWidget::EditorWidget(QWidget *parent) :
+MediaFilesEditorWidget::MediaFilesEditorWidget(QWidget *parent) :
     QDockWidget(parent),
-    ui(new Ui::EditorWidget)
+    ui(new Ui::MediaFilesEditorWidget)
 {
   ui->setupUi(this);
 }
 
-EditorWidget::~EditorWidget()
+MediaFilesEditorWidget::~MediaFilesEditorWidget()
 {
   delete ui;
 }
 
 /*
-void EditorWidget::loadProject(Project &project)
+void MediaFilesEditorWidget::loadProject(Project &project)
 {
   appendTextEditable(&project);
   foreach (QString key, project.rayMarchScenes().keys())
@@ -40,7 +40,14 @@ void EditorWidget::loadProject(Project &project)
 }
 */
 
-void EditorWidget::on_saveButton_clicked(bool)
+void MediaFilesEditorWidget::appendMediaFile(MediaFile* newMediaFile)
+{
+  jassert(newMediaFile);
+  connect(newMediaFile, &QObject::destroyed, this, &MediaFilesEditorWidget::onMediaFileDestroyed);
+
+}
+
+void MediaFilesEditorWidget::on_saveButton_clicked(bool)
 {
   TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->currentWidget());
   if (te != nullptr)
@@ -56,7 +63,7 @@ void EditorWidget::on_saveButton_clicked(bool)
   }
 }
 
-void EditorWidget::on_buildButton_clicked(bool)
+void MediaFilesEditorWidget::on_buildButton_clicked(bool)
 {
   TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->currentWidget());
   if (te != nullptr)
@@ -72,7 +79,7 @@ void EditorWidget::on_buildButton_clicked(bool)
   }
 }
 
-void EditorWidget::on_tab_currentChanged(int index)
+void MediaFilesEditorWidget::on_tab_currentChanged(int index)
 {
   if (index < 0)
   {
@@ -87,9 +94,9 @@ void EditorWidget::on_tab_currentChanged(int index)
 
 }
 
-void EditorWidget::appendTextEditable(TextEditable *te)
+void MediaFilesEditorWidget::appendMediaFile(MediaFile* newMediaFile)
 {
-  jassert(te);
+  jassert(newMediaFile);
   bool newWidget = true;
   for (int i = 0; i < ui->tab->count(); i++)
   {
@@ -111,11 +118,11 @@ void EditorWidget::appendTextEditable(TextEditable *te)
     TextEditor* editor = new TextEditor(*te,ui->tab);
     ui->tab->addTab(editor,te->getPath().fileName());
     //editor->refresh();
-    connect(editor, &TextEditor::saved, this, &EditorWidget::onTextEditorSaved);
+    connect(editor, &TextEditor::saved, this, &MediaFilesEditorWidget::onTextEditorSaved);
   }
 }
 
-void EditorWidget::saveAllShaders()
+void MediaFilesEditorWidget::saveAllShaders()
 {
   QList<TextEditor*> frameworks;
   QList<TextEditor*> scenes;
@@ -154,7 +161,7 @@ void EditorWidget::saveAllShaders()
 }
 
 
-void EditorWidget::onTextEditorSaved(TextEditor* e, bool saved)
+void MediaFilesEditorWidget::onTextEditorSaved(TextEditor* e, bool saved)
 {
   for (int i = 0; i < ui->tab->count(); i++)
   {

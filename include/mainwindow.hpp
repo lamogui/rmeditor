@@ -9,7 +9,7 @@ namespace Ui {
 class MainWindow;
 }
 
-class EditorWidget;
+class MediaFilesEditorWidget;
 class LogDockWidget;
 class TimelineDockWidget;
 class Timeline;
@@ -39,13 +39,13 @@ public slots:
     void unfreezeAll();
 
 private:
-    //void connectProject();
+    void connectProject();
 
     Project* project;
 
     Ui::MainWindow *ui;
     LogDockWidget *info;
-    EditorWidget *editor;
+    MediaFilesEditorWidget *editor;
     TimelineDockWidget *timelineWidget;
 };
 

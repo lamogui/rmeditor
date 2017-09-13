@@ -6,7 +6,7 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
-#include "editorwidget.hpp"
+#include "mediafileseditorwidget.hpp"
 #include "logdockwidget.hpp"
 #include "project.hpp"
 #include "render.hpp"   // for connect
@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     info->getLogWidget()->setPrintTime(false);
     ui->renderWidget->setLogWidget((info->getLogWidget()));
 
-    editor = new EditorWidget(this);
+    editor = new MediaFilesEditorWidget(this);
     info->getLogWidget()->findAndConnectLogSignalsRecursively(*editor); 
 
 
@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     addDockWidget(Qt::BottomDockWidgetArea, timelineWidget);
     addDockWidget(Qt::LeftDockWidgetArea, editor);
 
-    connect(editor, &EditorWidget::rendererChanged, ui->renderWidget, &RenderWidget::setCurrentRenderer);
+    connect(editor, &MediaFilesEditorWidget::rendererChanged, ui->renderWidget, &RenderWidget::setCurrentRenderer);
     connect(timelineWidget, &TimelineDockWidget::currentRendererChanged, this->ui->renderWidget, &RenderWidget::setCurrentRenderer);
 
     //Main window actions
@@ -121,8 +121,8 @@ void MainWindow::open()
         delete project;
       }
       project = new Project(this);
+      
       project->setPath(QFileInfo(f));
-      //connectProject();
       
       /*
       ui->renderWidget->makeCurrent();
@@ -143,15 +143,16 @@ void MainWindow::saveAllShaders()
   editor->saveAllShaders();
 }
 
-/*
+
 void MainWindow::connectProject()
 {
-  editor->loadProject(*project);
+  info->getLogWidget()->findAndConnectLogSignalsRecursively(*project);
+  //editor->loadProject(*project);
   connect(project,SIGNAL(appendTextEditable(TextEditable*)),editor,SLOT(appendTextEditable(TextEditable*)));
   connect(project,SIGNAL(demoTimelineChanged(Timeline*)),this,SLOT(setTimeline(Timeline*)));
   timelineWidget->setProject(project);
 }
-*/
+
 void MainWindow::setTimeline(Timeline *t)
 {
   (void)t; // oh !

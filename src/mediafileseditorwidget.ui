@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>EditorWidget</class>
- <widget class="QDockWidget" name="EditorWidget">
+ <class>MediaFilesEditorWidget</class>
+ <widget class="QDockWidget" name="MediaFilesEditorWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
