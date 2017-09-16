@@ -13,7 +13,8 @@ class QWidget;
 
 class LineNumberArea;
 class Highlighter;
-
+// TextEditor is a MediaFileEditor for TextEditable
+// Note: editors depends on their target heavily so there are destroyed when target is destroyed 
 class TextEditor : public QPlainTextEdit
 {
      Q_OBJECT
@@ -24,7 +25,9 @@ class TextEditor : public QPlainTextEdit
      void lineNumberAreaPaintEvent(QPaintEvent *event);
      int lineNumberAreaWidth();
 
-     inline TextEditable* textObject() const { return object; }
+     TextEditable& getTextObject() const
+       {return textObject;}
+
 
 public slots:
      bool build();
@@ -46,11 +49,12 @@ private slots:
      void setStartLineNumber(int n);
 
      void onTextEdited();
-     void onDestroyObject(QObject* obj);
+     void onDestroyTextEditable(QObject* obj);
 
 private:
-     TextEditable* object;
      QString colorSyntax(QString in);
+
+     TextEditable& textObject;
      QWidget *lineNumberArea;
      QString filename;
      Highlighter *highlighter;

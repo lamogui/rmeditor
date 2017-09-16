@@ -5,9 +5,9 @@
 //#include "project.hpp"
 #include "shadercode.hpp"
 
-TextEditor::TextEditor(TextEditable &textObject, QWidget *parent) :
+TextEditor::TextEditor(TextEditable& te, QWidget *parent) :
   QPlainTextEdit(parent),
-  object(&textObject),
+  textObject(te),
   timer(new QTimer(this)),
   startLineNumber(0),
   isSaved(true)
@@ -19,8 +19,8 @@ TextEditor::TextEditor(TextEditable &textObject, QWidget *parent) :
     connect(&textObject, SIGNAL(startLineNumberChanged(int)), this, SLOT(setStartLineNumber(int)));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-    connect(object,SIGNAL(destroyed(QObject*)),this,SLOT(onDestroyObject(QObject*)),Qt::DirectConnection);
-    connect(object,SIGNAL(objectTextChanged(QString)),SLOT(setPlainText(QString)));
+    connect(&textObject,SIGNAL(destroyed(QObject*)),this,SLOT(onDestroyTextEditable(QObject*)),Qt::DirectConnection);
+    connect(&textObject,SIGNAL(objectTextChanged(QString)),SLOT(setPlainText(QString)));
 
     updateLineNumberAreaWidth(0);
     highlightCurrentLine();
@@ -37,7 +37,7 @@ TextEditor::TextEditor(TextEditable &textObject, QWidget *parent) :
 
 
     timer->setSingleShot(true);
-    if (dynamic_cast<GLSLShaderCode*>(object) != nullptr)
+    if (dynamic_cast<GLSLShaderCode*>(&textObject) != nullptr)
     {
       highlighter->defineGLSLFragmentShaderRules();
       timer->setInterval(1000);  //1 second because we want see our result as fast as possible
@@ -49,7 +49,7 @@ TextEditor::TextEditor(TextEditable &textObject, QWidget *parent) :
       highlighter->defineXMLRule();
     }*/
 
-    this->setPlainText(object->getText());
+    this->setPlainText(textObject.getText());
 
     setUndoRedoEnabled(true);
 }
@@ -66,7 +66,7 @@ void TextEditor::refresh()
 bool TextEditor::save()
 {
   build();
-  isSaved = object->save();
+  isSaved = textObject.save();
   if (isSaved)
   {
     emit saved(this,isSaved);
@@ -76,7 +76,7 @@ bool TextEditor::save()
 
 bool TextEditor::build()
 {
-  return object->build(this->toPlainText());
+  return textObject.build(this->toPlainText());
 }
 
 int TextEditor::lineNumberAreaWidth()
@@ -172,12 +172,6 @@ void TextEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     }
 }
 
-void TextEditor::onDestroyObject(QObject *obj)
-{
-  //jassert(dynamic_cast<TextEditable*>(obj)!=nullptr);
-  delete this;
-}
-
 void TextEditor::resetTimer()
 {
   if (timer)
@@ -193,6 +187,12 @@ void TextEditor::onTextEdited()
     isSaved = false;
   }
   emit saved(this,isSaved);
+}
+
+void TextEditor::onDestroyTextEditable(QObject* obj)
+{
+  jassert(obj == &textObject);
+  delete this;
 }
 
 void TextEditor::setStartLineNumber(int n)

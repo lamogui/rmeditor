@@ -43,8 +43,16 @@ void MediaFilesEditorWidget::loadProject(Project &project)
 void MediaFilesEditorWidget::appendMediaFile(MediaFile* newMediaFile)
 {
   jassert(newMediaFile);
-  connect(newMediaFile, &QObject::destroyed, this, &MediaFilesEditorWidget::onMediaFileDestroyed);
-
+  //TODO : support all kind of editors
+  TextEditable* te = qobject_cast<TextEditable*>(newMediaFile);
+  if (te)
+  {
+    //connect(newMediaFile, &QObject::destroyed, this, &MediaFilesEditorWidget::onMediaFileDestroyed);
+    TextEditor* editor = new TextEditor(*te, this);
+    ui->tab->addTab(editor, te->getPath().fileName());
+  }
+  else
+    jassertfalse; // todo
 }
 
 void MediaFilesEditorWidget::on_saveButton_clicked(bool)
@@ -54,11 +62,11 @@ void MediaFilesEditorWidget::on_saveButton_clicked(bool)
   {
     if (te->save())
     {
-      emit info(tr("saved ") + te->textObject()->getPath().fileName());
+      emit info(tr("saved ") + te->getTextObject().getPath().fileName());
     }
     else
     {
-      emit error(tr("unable to save the file ") + te->textObject()->getPath().fileName());
+      emit error(tr("unable to save the file ") + te->getTextObject().getPath().fileName());
     }
   }
 }
@@ -70,11 +78,11 @@ void MediaFilesEditorWidget::on_buildButton_clicked(bool)
   {
     if (te->build())
     {
-      emit info(QString("[") + te->textObject()->getPath().fileName() + tr("] build success !"));
+      emit info(QString("[") + te->getTextObject().getPath().fileName() + tr("] build success !"));
     }
     else
     {
-      emit error(QString("[") + te->textObject()->getPath().fileName() + tr("] build failure !"));
+      emit error(QString("[") + te->getTextObject().getPath().fileName() + tr("] build failure !"));
     }
   }
 }
@@ -89,37 +97,9 @@ void MediaFilesEditorWidget::on_tab_currentChanged(int index)
   TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->widget(index));
   jassert(te != nullptr);
   //te->refresh();
-  ui->buildButton->setEnabled(te->textObject()->buildable());
-  emit rendererChanged(te->textObject()->getDefaultRenderer());
+  ui->buildButton->setEnabled(te->getTextObject().buildable());
+  emit rendererChanged(te->getTextObject().getDefaultRenderer());
 
-}
-
-void MediaFilesEditorWidget::appendMediaFile(MediaFile* newMediaFile)
-{
-  jassert(newMediaFile);
-  bool newWidget = true;
-  for (int i = 0; i < ui->tab->count(); i++)
-  {
-    QWidget* widget = ui->tab->widget(i);
-    TextEditor* editor = dynamic_cast<TextEditor*>(widget);
-    if (editor)
-    {
-      if (editor->textObject() == te)
-      {
-        ui->tab->setTabText(i,te->getPath().fileName());
-        //editor->refresh();
-        newWidget = false;
-        break;
-      }
-    }
-  }
-  if (newWidget)
-  {
-    TextEditor* editor = new TextEditor(*te,ui->tab);
-    ui->tab->addTab(editor,te->getPath().fileName());
-    //editor->refresh();
-    connect(editor, &TextEditor::saved, this, &MediaFilesEditorWidget::onTextEditorSaved);
-  }
 }
 
 void MediaFilesEditorWidget::saveAllShaders()
@@ -133,7 +113,7 @@ void MediaFilesEditorWidget::saveAllShaders()
     TextEditor* editor = dynamic_cast<TextEditor*>(widget);
     if (editor)
     {
-      GLSLShaderCode* shaderCode = dynamic_cast<GLSLShaderCode*>(editor->textObject());
+      GLSLShaderCode* shaderCode = dynamic_cast<GLSLShaderCode*>(&editor->getTextObject());
 
       if (shaderCode)
       {
@@ -171,11 +151,11 @@ void MediaFilesEditorWidget::onTextEditorSaved(TextEditor* e, bool saved)
     {
       if (saved)
       {
-        ui->tab->setTabText(i,editor->textObject()->getPath().fileName());
+        ui->tab->setTabText(i, editor->getTextObject().getPath().fileName());
       }
       else
       {
-        ui->tab->setTabText(i,editor->textObject()->getPath().fileName() + "*");
+        ui->tab->setTabText(i, editor->getTextObject().getPath().fileName() + "*");
       }
       break;
     }

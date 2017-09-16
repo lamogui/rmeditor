@@ -25,7 +25,7 @@ public slots:
     //void appendTextEditable(TextEditable* te);
     
     void appendMediaFile(MediaFile* newMediaFile);
-    void onMediaFileDestroyed(MediaFile*);
+    //void onMediaFileDestroyed(MediaFile*);
     void saveAllShaders();
 
 

@@ -121,9 +121,9 @@ void MainWindow::open()
         delete project;
       }
       project = new Project(this);
-      
+      connect(project, &Project::mediaFileInserted, editor, &MediaFilesEditorWidget::appendMediaFile);
       project->setPath(QFileInfo(f));
-      
+      editor->appendMediaFile(project);
       /*
       ui->renderWidget->makeCurrent();
       RaymarchingScene* shader = new RaymarchingScene();
