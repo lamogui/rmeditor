@@ -117,11 +117,4 @@ void ClassManager::initializeQMapInt64Types()
 void ClassManager::initializeQMapStringTypes()
 {
   REGISTER_QOBJECT_STRINGMAP_TYPE(MediaFile);
-
-  qDebug() << "Registered StringMap :";
-  QMap<int, const QMetaObject*>::const_iterator it;
-  for (it = stringMapTypes.constBegin(); it != stringMapTypes.constEnd(); it++)
-  {
-    qDebug() << it.key() << it.value()->className();
-  }
 } 

@@ -6,6 +6,7 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
+#include "logmanager.hpp"
 #include "mediafileseditorwidget.hpp"
 #include "logdockwidget.hpp"
 #include "project.hpp"
@@ -32,14 +33,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->progressBar->setVisible(false);
     ui->cancelButton->setVisible(false);
 
+    // log
     info = new LogDockWidget(this);
     info->getLogWidget()->setPrintTime(false);
-    ui->renderWidget->setLogWidget((info->getLogWidget()));
+    connect(LogManager::get(), &LogManager::assertion, info->getLogWidget(), &LogWidget::writeError);
+    connect(LogManager::get(), &LogManager::error, info->getLogWidget(), &LogWidget::writeError);
+    connect(LogManager::get(), &LogManager::warning, info->getLogWidget(), &LogWidget::writeWarning);
+    connect(LogManager::get(), &LogManager::info, info->getLogWidget(), &LogWidget::writeInfo);
 
+    // Editor
     editor = new MediaFilesEditorWidget(this);
-    info->getLogWidget()->findAndConnectLogSignalsRecursively(*editor); 
-
-
+    
     timelineWidget = new TimelineDockWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea, info);
     addDockWidget(Qt::BottomDockWidgetArea, timelineWidget);
@@ -124,6 +128,7 @@ void MainWindow::open()
       connect(project, &Project::mediaFileInserted, editor, &MediaFilesEditorWidget::appendMediaFile);
       project->setPath(QFileInfo(f));
       editor->appendMediaFile(project);
+
       /*
       ui->renderWidget->makeCurrent();
       RaymarchingScene* shader = new RaymarchingScene();
@@ -146,8 +151,6 @@ void MainWindow::saveAllShaders()
 
 void MainWindow::connectProject()
 {
-  info->getLogWidget()->findAndConnectLogSignalsRecursively(*project);
-  //editor->loadProject(*project);
   connect(project,SIGNAL(appendTextEditable(TextEditable*)),editor,SLOT(appendTextEditable(TextEditable*)));
   connect(project,SIGNAL(demoTimelineChanged(Timeline*)),this,SLOT(setTimeline(Timeline*)));
   timelineWidget->setProject(project);

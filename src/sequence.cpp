@@ -1,7 +1,5 @@
 ﻿#include "sequence.hpp"
 
-#include <QDebug>
-
 #include <QApplication>
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>

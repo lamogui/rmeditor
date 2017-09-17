@@ -14,10 +14,10 @@ bool TextEditable::load()
   bool readSuccess = false;
   if (!file.exists())
   {
-    emit warning(QString("File ") + getPath().fileName() + QString(" doesn't exists create it"));
+    Log::Warning(QString("File ") + getPath().fileName() + QString(" doesn't exists create it"));
     if (!file.open(QIODevice::WriteOnly))
     {
-      emit error(QString("Can't create file ") + getPath().absoluteFilePath());
+      Log::Error(QString("Can't create file ") + getPath().absoluteFilePath());
     }
     else
     {
@@ -28,7 +28,7 @@ bool TextEditable::load()
   {
     if (!file.open(QIODevice::ReadOnly))
     {
-      emit error(QString("Can't open file ") + getPath().absoluteFilePath());
+      Log::Error(QString("Can't open file ") + getPath().absoluteFilePath());
     }
     else
     {
@@ -47,7 +47,7 @@ bool TextEditable::save(const QString& text)
   QFile file(getPath().absoluteFilePath());
   if (!file.open(QIODevice::WriteOnly))
   {
-    emit error(QString("Can't open file ") + getPath().absoluteFilePath() + QString(" for wrinting"));
+    Log::Error(QString("Can't open file ") + getPath().absoluteFilePath() + QString(" for wrinting"));
     return false;
   }
 

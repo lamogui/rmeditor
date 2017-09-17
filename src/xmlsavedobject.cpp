@@ -44,7 +44,7 @@ static QString NodeTypeToString(QDomNode::NodeType type)
   }
 }
 
-static bool LoadDoubleFromXmlNode(double& target, const QDomElement& node, QString& failureReason)
+static bool LoadQStringFromXmlNode(QString& target, const QDomElement& node, QString& failureReason)
 {
   QDomNodeList childs = node.childNodes();
   if (childs.size() != 1 || !childs.at(0).isText())
@@ -52,11 +52,21 @@ static bool LoadDoubleFromXmlNode(double& target, const QDomElement& node, QStri
     failureReason = "line " + QString::number(node.lineNumber()) + "(" + node.nodeName() + ") has an invalid value";
     return false;
   }
+  target = childs.at(0).nodeValue();
+  return true;
+}
+
+static bool LoadDoubleFromXmlNode(double& target, const QDomElement& node, QString& failureReason)
+{
+  QString str;
+  if (!LoadQStringFromXmlNode(str, node, failureReason))
+    return false;
+
   bool ok = false;
-  target = childs.at(0).nodeValue().toDouble(&ok);
+  target = str.toDouble(&ok);
   if (!ok)
   {
-    failureReason = "line " + QString::number(node.lineNumber()) + "(" + node.nodeName() + ") is not a number (got " + childs.at(0).nodeValue() + ")";
+    failureReason = "line " + QString::number(node.lineNumber()) + "(" + node.nodeName() + ") is not a number (got " + str + ")";
     return false;
   }
   return true;
@@ -151,12 +161,12 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
   QDomNode variableNode = node.firstChild();
   while (!variableNode.isNull())
   {
-    QDomElement element = node.toElement();
+    QDomElement element = variableNode.toElement();
     if (element.isNull())
     {
-      warnings.append("line " + QString::number(node.lineNumber()) +
-                      " (" + node.nodeName() + ") excepted '" + NodeTypeToString(QDomNode::ElementNode)
-                      + "'' node but got '" + NodeTypeToString(node.nodeType()) + "' ignoring the block");
+      warnings.append("line " + QString::number(variableNode.lineNumber()) +
+                      " (" + variableNode.nodeName() + ") excepted '" + NodeTypeToString(QDomNode::ElementNode)
+                      + "'' node but got '" + NodeTypeToString(variableNode.nodeType()) + "' ignoring the block");
     }
     else
     {
@@ -210,7 +220,6 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
             if (indexOfInsertMethod == -1)
             {
               failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.tagName() + ") could not find required method " + insertMethodName;
-              qDebug() << failureReason;
               jassertfalse; // check that the method is slot or Q_INVOKABLE
               return false;
             }
@@ -245,7 +254,6 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
         else 
         {
           failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the class type (" + QString::number(variable.userType()) + ") of property is invalid";
-          qDebug() << failureReason << " variable.type() " << variable.type() << QString::number(variable.type());
           jassertfalse; // did you forget to declare QMetaType check you called the correct register in ClassManager and you correctly declared the class using Q_DECLARE_METATYPE
           return false;
         }

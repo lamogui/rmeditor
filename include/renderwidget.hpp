@@ -15,7 +15,6 @@ class RenderTexture2D;
 class Fast2DQuad;
 class Render;
 class Renderer;
-class LogWidget; // FIXME : remove this !
 class RenderWidget : public QOpenGLWidget
 {
     Q_OBJECT
@@ -39,7 +38,6 @@ public:
        QWeakPointer<Renderer> getCurrentRenderer() const { return currentRenderer; }
        TextureDisplayed getTextureDisplayed() const { return textureDisplayed; }
        RenderFunctionsCache& getRenderFunctions() { jassert(renderFunctions); return *renderFunctions; }
-       void setLogWidget(LogWidget* log); // FIXME : remove this !
 
 public slots:
        void resetCamera();
@@ -83,7 +81,6 @@ protected:
        QSet<Qt::Key> keysPressed;
 
        // Hum let's clean this one day 
-       LogWidget* logWidget;
        bool captureMouse;
        bool onlyShowTexture;
 

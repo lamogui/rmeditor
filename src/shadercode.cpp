@@ -45,11 +45,11 @@ bool GLSLShaderCode::handleShaderCompileResult(const QString& shaderCode, Shader
 {
   if (!program.addShaderFromSourceCode(type, shaderCode))
   {
-    emit error(getPath().fileName() + " (at compile): " + program.log());
+    Log::Error(getPath().fileName() + " (at compile): " + program.log());
     return false;
   }
   else if (!program.log().isEmpty())
-   emit warning(getPath().fileName() + " (at compile): " + program.log());
+   Log::Warning(getPath().fileName() + " (at compile): " + program.log());
   return true;
 }
 
@@ -57,11 +57,11 @@ bool GLSLShaderCode::handleShaderLinkResult(ShaderProgram& program)
 {
   if (!program.link())
   {
-    emit error(getPath().fileName() + " (at link): " + program.log());
+    Log::Error(getPath().fileName() + " (at link): " + program.log());
     return false;
   }
   else if (!program.log().isEmpty())
-    emit warning(getPath().fileName() + " (at link): " + program.log());
+    Log::Warning(getPath().fileName() + " (at link): " + program.log());
   return true;
 }
 

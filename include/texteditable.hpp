@@ -31,10 +31,6 @@ signals:
   void startLineNumberChanged(int line);
   void objectTextChanged(QString text); // for project (probably)
 
-  // Log
-  void error(QString);
-  void warning(QString);
-
 protected:
   bool save(const QString& text);
 };

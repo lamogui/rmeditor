@@ -1,7 +1,7 @@
 #ifndef JASSERT_HPP
 #define JASSERT_HPP
 
-#include <QDebug>
+#include "logmanager.hpp"
 
 #define JUCE_BLOCK_WITH_FORCED_SEMICOLON(x) do { x } while (false)
 
@@ -15,7 +15,7 @@
 #pragma intrinsic (__debugbreak)
 #endif
 
-#define jassertfalse JUCE_BLOCK_WITH_FORCED_SEMICOLON(if (IsDebuggerPresent()) __debugbreak(); )
+#define jassertfalse JUCE_BLOCK_WITH_FORCED_SEMICOLON(Log::Assertion(QString("[") + __FILE__ + "] line " + QString::number(__LINE__) + " assertion failed !"); if (IsDebuggerPresent()) __debugbreak(); )
 #define jassert(expression) JUCE_BLOCK_WITH_FORCED_SEMICOLON(if (! (expression)) jassertfalse;)
 
 #else 

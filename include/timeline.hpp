@@ -37,15 +37,10 @@ public:
   virtual QWeakPointer<Renderer> getRenderer() { return QWeakPointer<Renderer>(); }
   virtual void updateTime() = 0;
 
-signals:
-  // Log
-  void error(QString);
-  void warning(QString);
-  void info(QString);
 
+signals:
   // property 
   void framerateChanged(double); // meta compiler doesn't support signal declaration inside macros...
-
   void requestPosition(double position);
 
 protected:

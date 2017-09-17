@@ -18,7 +18,7 @@ void Timeline::setFramerate(double newFramerate)
 {
   if (newFramerate <= 0)
   { 
-    emit error(objectName() + ": invalid framerate: " + newFramerate);
+    Log::Error(objectName() + ": invalid framerate: " + newFramerate);
     newFramerate = 0;
   }
   if (framerate != framerate)

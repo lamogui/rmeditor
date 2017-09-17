@@ -5,7 +5,8 @@
 
 #include <QThread>
 #include <QMessageBox>
-#include <QDebug>
+
+#include "logmanager.hpp"
 #include "jassert.hpp"
 
 #include "timeline.hpp"
@@ -53,7 +54,7 @@ int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int n
 void Music::rtAudioError(RtAudioError::Type type, const std::string &errorText)
 {
   (void) type;
-  qDebug() << tr("rtAudio error: ") + QString::fromStdString(errorText);
+  Log::Error(tr("[RtAudio] ") + QString::fromStdString(errorText));
 }
 
 /*
@@ -71,7 +72,7 @@ void ExternalLengthMusic::setLength(double newlength)
   if (newlength <= 0)
   {
     newlength = 0;
-    emit error("[" + getPath().fileName() + "] error: invalid length " + newlength);
+    Log::Error("[" + getPath().fileName() + "] error: invalid length " + newlength);
   }
   SET_PROPERTY(double, length)
 }

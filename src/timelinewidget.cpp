@@ -102,9 +102,6 @@ void TimelineWidget::drawForeground(QPainter* painter, const QRectF& rect)
   QPointF delta(x,y-getBorderHeight()-2.0);
   qreal visibleWidth = sceneRect().width()  * (qreal)horizontal->pageStep()/(qreal)(horizontal->maximum() - horizontal->minimum() + horizontal->pageStep());
 
-
-  //qDebug() << delta << visibleWidth << sceneRect();
-
   QRectF border = QRectF(delta,QSizeF(visibleWidth,sceneBorderHeight()));
   if (rect.intersects(border))
   {

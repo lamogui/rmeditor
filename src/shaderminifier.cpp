@@ -1,5 +1,6 @@
 
 #include "shaderminifier.hpp"
+#include "logmanager.hpp"
 
 ShaderMinifier::ShaderMinifier()
 {
@@ -19,7 +20,7 @@ QString ShaderMinifier::minifiedShaderCode(const QString &filename, const QStrin
     int endComment = minified.indexOf("\n",startComment);
     if (endComment == -1)
     {
-      emit warning(QString("[" + filename + "] warning: ") + tr("Missing new line after '//' comment !"));
+      Log::Warning(QString("[" + filename + "] : ") + tr("Missing new line after '//' comment !"));
       break;
     }
     else
@@ -32,7 +33,7 @@ QString ShaderMinifier::minifiedShaderCode(const QString &filename, const QStrin
     int endComment = minified.indexOf("*/",startComment);
     if (endComment == -1)
     {
-      emit error(QString("[" + filename + "] error: ") + tr("Unterminated multiline comment cannot minifie properly !"));
+      Log::Error(QString("[" + filename + "] : ") + tr("Unterminated multiline comment cannot minifie properly !"));
       break;
     }
     else
@@ -55,7 +56,7 @@ QString ShaderMinifier::minifiedShaderCode(const QString &filename, const QStrin
     minified.replace(QString("\n "),QString("\n"));
   }
 
-  emit info(QString("[" + filename + "] ") + tr("Minified shadercode size: ") + QString::number(minified.length() + 1) + tr(" bytes"));
+  Log::Info(QString("[" + filename + "] ") + tr("Minified shadercode size: ") + QString::number(minified.length() + 1) + tr(" bytes"));
 
   return minified;
 }
@@ -102,7 +103,7 @@ QString ShaderMinifier::cFormatedShaderCode(const QString &filename, const QStri
   cCode = QString("const char* const ") + variable_name + " = ";
   cCode += sCode;
   //cCode += QString("const unsigned int ") + variable_name + "_len = " + QString::number(size + 1) + ";\n";
-  emit info(QString("[" + filename + "] ") + tr("C formated shadercode size: ") + QString::number(size + 1) + tr(" bytes"));
+  Log::Info(QString("[" + filename + "] ") + tr("C formated shadercode size: ") + QString::number(size + 1) + tr(" bytes"));
   return cCode;
 }
 

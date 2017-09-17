@@ -69,10 +69,6 @@ class ExternalLengthMusic : public Music
 public:
   ExternalLengthMusic();
 
-signals:
-  // Log 
-  void error(QString);
-
 private:
   DECLARE_PROPERTY(double, length, Length)
 };

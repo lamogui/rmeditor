@@ -32,10 +32,6 @@ public slots:
 signals:
     void rendererChanged(QWeakPointer<Renderer> renderer);
 
-    // Logs 
-    void error(QString);
-    void info(QString);
-
 private slots:
     void on_buildButton_clicked(bool);
     void on_saveButton_clicked(bool);

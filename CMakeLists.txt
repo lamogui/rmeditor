@@ -52,6 +52,7 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/jassert.hpp
   ${RMEDITOR_INCLUDE_DIR}/keyframe.hpp
   ${RMEDITOR_INCLUDE_DIR}/logdockwidget.hpp
+  ${RMEDITOR_INCLUDE_DIR}/logmanager.hpp
   ${RMEDITOR_INCLUDE_DIR}/logwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/mainwindow.hpp
   ${RMEDITOR_INCLUDE_DIR}/mediafile.hpp
@@ -91,6 +92,7 @@ set(RMEDITOR_SRC
   ${RMEDITOR_SRC_DIR}/highlighter.cpp
   ${RMEDITOR_SRC_DIR}/keyframe.cpp
   ${RMEDITOR_SRC_DIR}/logdockwidget.cpp
+  ${RMEDITOR_SRC_DIR}/logmanager.cpp
   ${RMEDITOR_SRC_DIR}/logwidget.cpp
   ${RMEDITOR_SRC_DIR}/main.cpp
   ${RMEDITOR_SRC_DIR}/mainwindow.cpp

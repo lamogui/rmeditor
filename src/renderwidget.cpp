@@ -1,10 +1,12 @@
 ﻿
 #include "renderwidget.hpp" 
-#include "logwidget.hpp" // FIXME : remove this !
 
 #include <QFileDialog> // for take screen shots 
 #include <QMouseEvent>  
 #include <QVector3D>   // for camera control
+
+#include "logwidget.hpp"
+#include "jassert.hpp"
 
 #include "camera.hpp"
 #include "render.hpp"
@@ -46,10 +48,6 @@ RenderWidget::~RenderWidget()
 
 }
 
-
-void RenderWidget::setLogWidget(LogWidget* log)
-  {logWidget = log;}
-
 const char* RenderWidget::getDisplayTextureFragmentShaderCode()
 {
   static const char* vertexShader =
@@ -77,14 +75,13 @@ const char* RenderWidget::getDisplayTextureFragmentShaderCode()
 // initializeGL
 //-----------------------------------------------------------------------------
 void RenderWidget::initializeGL()
-{
-  // Debugger 
-  jassert(logWidget);
-  qDebug() << "Created context version: " << format().majorVersion() << "." << format().minorVersion();
+{;
+  // Debugger
+  Log::Info("Created context version: " + QString::number(format().majorVersion()) + "." + QString::number(format().minorVersion()));
   jassert(!openglDebugLogger);
   openglDebugLogger = new QOpenGLDebugLogger(this);
   openglDebugLogger->initialize();
-  connect(openglDebugLogger, &QOpenGLDebugLogger::messageLogged, logWidget, &LogWidget::handleOpengGLLoggedMessage);
+  connect(openglDebugLogger, &QOpenGLDebugLogger::messageLogged, LogManager::get(), &LogManager::handleOpengGLLoggedMessage);
   openglDebugLogger->startLogging();
 
   // Functions 
@@ -110,24 +107,20 @@ void RenderWidget::initializeGL()
   {
     if (!quadShader->addShaderFromSourceCode(QOpenGLShader::Vertex, QuadFragmentShaderCode::getVertexShaderCode()))
     {
-      logWidget->writeError("Fatal error! could not compile vertex shader: " + quadShader->log());
-      qDebug() << "Fatal error! could not compile vertex shader: " + quadShader->log();
+      Log::Error("could not compile QuadFragmentShaderCode vertex shader: " + quadShader->log());
     }
     else if (quadShader->log().size() > 0)
     {
-      logWidget->writeWarning("Warning ! while compiling vertex shader: " + quadShader->log());
-      qDebug() << "Warning ! while compiling vertex shader: " + quadShader->log();
+      Log::Warning("while compiling QuadFragmentShaderCode vertex shader: " + quadShader->log());
     }
 
     if (!quadShader->addShaderFromSourceCode(QOpenGLShader::Fragment, getDisplayTextureFragmentShaderCode()))
     {
-      logWidget->writeError("Fatal error! could not compile fragment shader: " + quadShader->log());
-      qDebug() << "Fatal error! could not compile fragment shader: " + quadShader->log();
+      Log::Error("could not compile DisplayTextureFragmentShaderCode fragment shader: " + quadShader->log());
     }
     else if (quadShader->log().size() > 0)
     {
-      logWidget->writeWarning("Warning ! while compiling fragment shader: " + quadShader->log());
-      qDebug() << "Warning ! while compiling fragment shader: " + quadShader->log();
+      Log::Warning("while compiling DisplayTextureFragmentShaderCode fragment shader: " + quadShader->log());
     }
     {
       // link
@@ -136,13 +129,11 @@ void RenderWidget::initializeGL()
 
       if (!quadShader->link())
       {
-        logWidget->writeError("Fatal error! could not link shader: " + quadShader->log());
-        qDebug() << "Fatal error! could not link shader: " + quadShader->log();
+        Log::Error("could not link QuadFragmentShaderCode with DisplayTextureFragmentShaderCode: " + quadShader->log());
       }
       else if (quadShader->log().size() > 0)
       {
-        logWidget->writeWarning("Warning ! while linking shader: " + quadShader->log());
-        qDebug() << "Warning ! while linking shader: " + quadShader->log();
+        Log::Warning("Warning ! while linking QuadFragmentShaderCode with DisplayTextureFragmentShaderCode: " + quadShader->log());
       }
 
       quadShader->bind();
@@ -150,7 +141,7 @@ void RenderWidget::initializeGL()
     }
   }
   else
-    logWidget->writeError("Fatal error! could not create shader program");
+    Log::Error("could not create QuadFragmentShaderCode/DisplayTextureFragmentShaderCode shader program");
 
   connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &RenderWidget::cleanup);
 }

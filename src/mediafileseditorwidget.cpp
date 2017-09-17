@@ -1,15 +1,15 @@
 #include "mediafileseditorwidget.hpp"
-
 #include "ui_mediafileseditorwidget.h"
 
 #include <iostream>
-#include "jassert.hpp"
 
-#include "logwidget.hpp"
-//#include "project.hpp"
-#include "scene.hpp"
-#include "texteditor.hpp"
-#include "texteditable.hpp"
+// essentials 
+#include "jassert.hpp"
+#include "logmanager.hpp"
+
+#include "scene.hpp" // Should be temp 
+#include "texteditor.hpp"  // temp
+#include "texteditable.hpp" // temp
 
 MediaFilesEditorWidget::MediaFilesEditorWidget(QWidget *parent) :
     QDockWidget(parent),
@@ -62,11 +62,11 @@ void MediaFilesEditorWidget::on_saveButton_clicked(bool)
   {
     if (te->save())
     {
-      emit info(tr("saved ") + te->getTextObject().getPath().fileName());
+      Log::Info(tr("saved ") + te->getTextObject().getPath().fileName());
     }
     else
     {
-      emit error(tr("unable to save the file ") + te->getTextObject().getPath().fileName());
+      Log::Error(tr("unable to save the file ") + te->getTextObject().getPath().fileName());
     }
   }
 }
@@ -78,11 +78,11 @@ void MediaFilesEditorWidget::on_buildButton_clicked(bool)
   {
     if (te->build())
     {
-      emit info(QString("[") + te->getTextObject().getPath().fileName() + tr("] build success !"));
+      Log::Info(QString("[") + te->getTextObject().getPath().fileName() + tr("] build success !"));
     }
     else
     {
-      emit error(QString("[") + te->getTextObject().getPath().fileName() + tr("] build failure !"));
+      Log::Error(QString("[") + te->getTextObject().getPath().fileName() + tr("] build failure !"));
     }
   }
 }

@@ -12,8 +12,6 @@ public:
 
   //Utils
   static QString getFormattedDate();
-  static LogWidget* getLogWidget(const QObject& context);
-  void findAndConnectLogSignalsRecursively(const QObject& object);
 
 public slots:
   //Log
@@ -22,8 +20,6 @@ public slots:
   void writeError(QString txt);
 
   inline void setPrintTime(bool e) { printTime = e; }
-
-  void handleOpengGLLoggedMessage(const QOpenGLDebugMessage& debugMessage);
 
 private:
   bool printTime;

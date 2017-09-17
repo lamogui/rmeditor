@@ -1,6 +1,8 @@
 #include <QTime>
 #include <QString>
 #include <QMetaMethod>
+#include <QGraphicsObject>
+#include <QGraphicsScene>
 #include "logwidget.hpp"
 #include "jassert.hpp"
 
@@ -15,20 +17,6 @@ LogWidget::LogWidget(QWidget *parent):
 QString LogWidget::getFormattedDate()
 {
   return QString("[")+QString::number(QTime::currentTime().hour())+":"+QString::number(QTime::currentTime().minute())+":"+QString::number(QTime::currentTime().second())+QString("] ");
-}
-
-LogWidget* LogWidget::getLogWidget(const QObject& context)
-{
-  QObject* parent = context.parent();
-  while (parent)
-  {
-    LogWidget* log = qobject_cast<LogWidget*>(parent);
-    if (log)
-      return log;
-    parent = parent->parent();
-  }
-  jassert(false && "could not find LogWidget in parents");
-  return nullptr;
 }
 
 //Log
@@ -69,33 +57,58 @@ void LogWidget::writeError(QString txt)
   this->insertPlainText(txt+"\n");
 }
 
-void LogWidget::handleOpengGLLoggedMessage(const QOpenGLDebugMessage &debugMessage)
-{
-  if (debugMessage.type() & (QOpenGLDebugMessage::ErrorType))
-    writeError(debugMessage.message());
-  else if (debugMessage.type() &
-    (QOpenGLDebugMessage::DeprecatedBehaviorType | QOpenGLDebugMessage::UndefinedBehaviorType |
-      QOpenGLDebugMessage::PortabilityType | QOpenGLDebugMessage::PerformanceType | QOpenGLDebugMessage::InvalidType))
-    writeWarning(debugMessage.message());
-  else 
-    writeInfo(debugMessage.message());
-}
 
+/*
 void LogWidget::findAndConnectLogSignalsRecursively(const QObject& object)
 {
   const QMetaObject* meta = object.metaObject();
   if (meta)
   {
     if (meta->indexOfSignal("error(QString)") != -1)
+    {
+      disconnect(&object, SIGNAL(error(QString)), this, SLOT(writeError(QString))); 
       connect(&object, SIGNAL(error(QString)), this, SLOT(writeError(QString)));
+    }
     if (meta->indexOfSignal("warning(QString)") != -1)
+    {
+      disconnect(&object, SIGNAL(warning(QString)), this, SLOT(writeWarning(QString)));
       connect(&object, SIGNAL(warning(QString)), this, SLOT(writeWarning(QString)));
+    }
     if (meta->indexOfSignal("info(QString)") != -1)
+    {
+      disconnect(&object, SIGNAL(info(QString)), this, SLOT(writeInfo(QString)));
       connect(&object, SIGNAL(info(QString)), this, SLOT(writeInfo(QString)));
+    }
 
+
+    // TODO : Make a ConnectObjectRecurssively or DoSomethingRecurssively function helper 
+    if (object.metaObject()->inherits(&QGraphicsObject::staticMetaObject))
+    {
+      const QGraphicsObject* graphicsObject = qobject_cast<const QGraphicsObject*>(&object);
+      foreach(const QGraphicsItem* child, graphicsObject->childItems())
+      {
+        const QGraphicsObject* childGraphicsObject = dynamic_cast<const QGraphicsObject*>(child);
+        if (childGraphicsObject)
+          findAndConnectLogSignalsRecursively(*childGraphicsObject);
+      }
+    }
+    else if (object.metaObject()->inherits(&QGraphicsScene::staticMetaObject))
+    {
+      const QGraphicsScene* graphicsScene = qobject_cast<const QGraphicsScene*>(&object);
+      foreach(const QGraphicsItem* child, graphicsScene->items())
+      {
+        const QGraphicsObject* childGraphicsObject = dynamic_cast<const QGraphicsObject*>(child);
+        if (childGraphicsObject)
+          findAndConnectLogSignalsRecursively(*childGraphicsObject);
+      }
+    }
     foreach(const QObject* child, object.children())
     {
       findAndConnectLogSignalsRecursively(*child);
     }
   }
+  else
+    jassertfalse;
 }
+
+*/

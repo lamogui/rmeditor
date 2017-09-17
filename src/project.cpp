@@ -86,23 +86,23 @@ bool Project::build(const QString& text)
 
   if (!document.setContent(xmlContent, &errorMsg, &errorLine, &errCol))
   {
-    emit error(QString("[") + getPath().fileName() + "]" + QString(" XML Error at line ") +
+    Log::Error(QString("[") + getPath().fileName() + "]" + QString(" XML Error at line ") +
       QString::number(errorLine) + " col " + QString::number(errCol) + ": " + errorMsg);
     buildSuccess = false;
   }
   else
   {
-    QDomNode node = document.documentElement().firstChild();
+    QDomNode node = document.documentElement();
     QString failureReason;
     QStringList warnings;
     buildSuccess = LoadObjectFromXmlNode(*this, node, failureReason, warnings);
     foreach(QString w, warnings)
     {
-      emit warning(w);
+      Log::Warning("[" + getPath().fileName() + "] " + w);
     }
     if (!buildSuccess)
     {
-      emit error(failureReason);
+      Log::Error("[" + getPath().fileName() + "] " + failureReason);
     }
   }
   return buildSuccess;
