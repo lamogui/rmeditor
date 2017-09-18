@@ -21,7 +21,7 @@ class Timeline : public QGraphicsScene
 
 signals : // BUG : Qt doesn't support signals declarations inside macros 
   void propertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue);
-  void xmlPropertyChanged(QDomNode node, QString propertyName, QVariant newValue); 
+  void xmlPropertyChanged(QDomElement node, QString propertyName, QVariant newValue); 
 
 public:
   Timeline(QObject* parentMusic); // The music is the parent of the timeline, if it's doesn't exists anymore the timeline should be destroyed ! 

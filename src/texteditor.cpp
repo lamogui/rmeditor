@@ -2,7 +2,7 @@
 #include <iostream>
 #include "texteditor.hpp"
 #include "highlighter.hpp"
-//#include "project.hpp"
+#include "project.hpp"
 #include "shadercode.hpp"
 
 TextEditor::TextEditor(TextEditable& te, QWidget *parent) :
@@ -44,10 +44,10 @@ TextEditor::TextEditor(TextEditable& te, QWidget *parent) :
       connect(timer, SIGNAL(timeout()), this, SLOT(build()));
       connect(this, SIGNAL(textChanged()), this, SLOT(resetTimer()));
     }
-    /*else if (dynamic_cast<Project*>(object) != nullptr)
+    else if (dynamic_cast<Project*>(&textObject) != nullptr)
     {
       highlighter->defineXMLRule();
-    }*/
+    }
 
     this->setPlainText(textObject.getText());
 

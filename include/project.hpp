@@ -16,7 +16,10 @@ class Project : public TextEditable
 
 public:
   Project(QObject* parent = nullptr);
-  
+
+  // GL 
+  void initializeGL(RenderFunctionsCache& gl) override;
+
   // TextEditable 
   const QString& getText() const override;
   bool buildable() const { return true; }
@@ -43,6 +46,9 @@ private:
   QDomDocument document;
 
   QString xmlContent;
+
+private:
+  typedef TextEditable BaseClass;
 
     /*
     Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=nullptr);

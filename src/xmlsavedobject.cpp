@@ -4,6 +4,7 @@
 #include <QMetaProperty>
 #include <QVector3D>
 #include <QQuaternion>
+#include <QFileInfo>
 #include "jassert.hpp"
 
 
@@ -242,12 +243,28 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
                 return false;
               }
 
+              const int indexOfSetNodeMethod = newInstance->metaObject()->indexOfMethod("setNode(QDomElement)");
+              jassert(indexOfSetNodeMethod != -1);
+              QMetaMethod setNodeMethod = newInstance->metaObject()->method(indexOfSetNodeMethod);
+              jassert(setNodeMethod.isValid());
+
               childElement = childElement.nextSiblingElement();
             }
           }
           else
           {
-            jassertfalse;
+            QString value;
+            if (!LoadQStringFromXmlNode(value, element, failureReason))
+              return false;
+            
+            if (variable.userType() == qMetaTypeId<QFileInfo>())
+            {
+              QFileInfo file(value);
+              if (!variable.write(&object, QVariant::fromValue(file)))
+                jassertfalse;
+            }
+            else
+              jassertfalse; // todo
           }
 
         }

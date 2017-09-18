@@ -13,6 +13,16 @@ Project::Project(QObject* parent) :
 
 }
 
+void Project::initializeGL(RenderFunctionsCache& gl)
+{
+  StringMap<MediaFile*>::iterator it;
+  for (it = mediaFiles.begin(); it != mediaFiles.end(); ++it)
+  {
+    it.value()->initializeGL(gl);
+  }
+  BaseClass::initializeGL(gl);
+}
+
 void Project::setMusic(Music* newMusic)
 {
   if (music != newMusic)
