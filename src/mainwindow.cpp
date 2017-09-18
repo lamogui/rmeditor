@@ -125,19 +125,20 @@ void MainWindow::open()
         delete project;
       }
       project = new Project(this);
-      connect(project, &Project::mediaFileInserted, editor, &MediaFilesEditorWidget::appendMediaFile);
       project->setPath(QFileInfo(f));
-      editor->appendMediaFile(project);
-
-      /*
       ui->renderWidget->makeCurrent();
-      RaymarchingScene* shader = new RaymarchingScene();
-      info->getLogWidget()->findAndConnectLogSignalsRecursively(*shader);
-      shader->initializeGL(ui->renderWidget->getRenderFunctions());
-      shader->setPath(QFileInfo(f));
-      editor->appendTextEditable(shader);
+      project->initializeGL(ui->renderWidget->getRenderFunctions());
       ui->renderWidget->doneCurrent();
-      */
+
+      editor->appendMediaFile(project);
+      StringMap<MediaFile*>::const_iterator it; 
+      for (it = project->getMediaFiles().constBegin(); it != project->getMediaFiles().constEnd(); ++it)
+      {
+        editor->appendMediaFile(it.value());
+      }
+
+      connect(project, &Project::mediaFileInserted, editor, &MediaFilesEditorWidget::appendMediaFile);
+
     }
   }
   

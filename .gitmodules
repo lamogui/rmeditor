@@ -1,6 +1,12 @@
 [submodule "dependencies/rtaudio"]
 	path = dependencies/rtaudio
 	url = https://github.com/thestk/rtaudio
+[submodule "dependencies/ogg"]
+	path = dependencies/ogg
+	url = https://github.com/xiph/ogg
+[submodule "dependencies/vorbis"]
+	path = dependencies/vorbis
+	url = https://github.com/xiph/vorbis
 [submodule "tools/python-midi"]
 	path = tools/python-midi
 	url = https://github.com/vishnubob/python-midi
