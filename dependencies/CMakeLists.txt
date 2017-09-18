@@ -65,5 +65,11 @@ endif()
 
 add_subdirectory(rtaudio)
 add_subdirectory(tunefish4)
+add_subdirectory(ogg)
+
+set(OGG_LIBRARIES ogg)
+set(OGG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/ogg/include)
+add_subdirectory(vorbis)
+
 
 

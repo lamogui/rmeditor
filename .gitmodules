@@ -6,7 +6,7 @@
 	url = https://github.com/xiph/ogg
 [submodule "dependencies/vorbis"]
 	path = dependencies/vorbis
-	url = https://github.com/xiph/vorbis
+	url = https://github.com/lamogui/vorbis
 [submodule "tools/python-midi"]
 	path = tools/python-midi
 	url = https://github.com/vishnubob/python-midi
