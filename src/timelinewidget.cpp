@@ -49,7 +49,7 @@ void TimelineWidget::setTimeline(Timeline *timeline)
 
 void TimelineWidget::updateWithTime()
 {
-  double t = timeline->getMusic().getTime();
+  double t = timeline->getMusic().getPosition();
   if (t != lastTimeDraw)
   {
     timeline->updateTime();
@@ -119,7 +119,7 @@ void TimelineWidget::drawForeground(QPainter* painter, const QRectF& rect)
     if (timeline)
     {
       framerate = timeline->getFramerate();
-      lastTimeForegroundDraw = timeline->getMusic().getTime();
+      lastTimeForegroundDraw = timeline->getMusic().getPosition();
     }
 
     //TODO condition for framerate

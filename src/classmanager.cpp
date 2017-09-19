@@ -9,6 +9,7 @@
 // declared classes 
 #include "camera.hpp"  // for CameraKeyframe
 #include "mediafile.hpp"
+#include "music.hpp"
 #include "scene.hpp"   // for RaymarchingScene
 #include "sequence.hpp"
 #include "timelinetrack.hpp"
@@ -101,6 +102,7 @@ void ClassManager::initializeQObjectClasses()
   REGISTER_QOBJECT_CLASS(TimelineTrack);
   REGISTER_QOBJECT_CLASS(Sequence);
   REGISTER_QOBJECT_CLASS(RaymarchingScene);
+  REGISTER_QOBJECT_CLASS(Music);
 }
 
 void ClassManager::initializeQVectorTypes()

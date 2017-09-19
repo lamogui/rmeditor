@@ -454,8 +454,8 @@ void DemoRender::glRender()
     }
 
     scene->getShader().sendf("xy_scale_factor",(float)fbo.getSizeX()/(float)fbo.getSizeY());
-    scene->getShader().sendf("sequence_time",(float)timeline->getMusic()->getTime() - (float)current_sequence->startFrame()/timeline->getFramerate());
-    scene->getShader().sendf("track_time",(float) timeline->getMusic()->getTime());
+    scene->getShader().sendf("sequence_time",(float)timeline->getMusic()->getPosition() - (float)current_sequence->startFrame()/timeline->getFramerate());
+    scene->getShader().sendf("track_time",(float) timeline->getMusic()->getPosition());
     Fast2DQuadDraw();
 
     glActiveTexture(GL_TEXTURE0+0);

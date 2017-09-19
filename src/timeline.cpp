@@ -32,7 +32,7 @@ void Timeline::setFramerate(double newFramerate)
 
 qint64 Timeline::currentFrame() const
 {
-  return (qint64)(getMusic().getTime()*framerate);
+  return (qint64)(getMusic().getPosition()*framerate);
 }
 
 qint64 Timeline::getLength() const

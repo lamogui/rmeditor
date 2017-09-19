@@ -33,6 +33,9 @@ public:
   QWeakPointer<Renderer> getDefaultRenderer() { return defaultRenderer; }
   QWeakPointer<Camera> getDefaultCamera() { return defaultCamera; }
 
+public slots:
+  virtual bool load() = 0; // FIXME : one day make a reload slot which should call "reset" before load and put this as protected load virtual 
+
 signals: 
   void pathChanged(QFileInfo); // Meta compiler doesn't support signals declared inside macros !
 

@@ -38,8 +38,7 @@ bool TextEditable::load()
     }
   }
   file.close();
-  build(text);
-  return readSuccess;
+  return readSuccess && build(text);
 }
 
 bool TextEditable::save(const QString& text)

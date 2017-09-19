@@ -58,6 +58,7 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/mediafile.hpp
   ${RMEDITOR_INCLUDE_DIR}/mediafileseditorwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/music.hpp
+  ${RMEDITOR_INCLUDE_DIR}/oggvorbismusic.hpp
   ${RMEDITOR_INCLUDE_DIR}/project.hpp
   ${RMEDITOR_INCLUDE_DIR}/quadfragmentshader.hpp
   ${RMEDITOR_INCLUDE_DIR}/render.hpp
@@ -99,6 +100,7 @@ set(RMEDITOR_SRC
   ${RMEDITOR_SRC_DIR}/mediafile.cpp
   ${RMEDITOR_SRC_DIR}/mediafileseditorwidget.cpp
   ${RMEDITOR_SRC_DIR}/music.cpp
+  ${RMEDITOR_SRC_DIR}/oggvorbismusic.cpp
   ${RMEDITOR_SRC_DIR}/project.cpp
   ${RMEDITOR_SRC_DIR}/quadfragmentshader.cpp
   ${RMEDITOR_SRC_DIR}/render.cpp
@@ -151,6 +153,8 @@ set(RMEDITOR_LIBS
   Qt5::Core
   rtaudio_static
   tunefish4
+  ogg
+  vorbis
   )
 
 if(UNIX)
@@ -208,6 +212,8 @@ target_include_directories(rmeditor PRIVATE
     ${RMEDITOR_INCLUDE_DIR} 
     dependencies #FIXME : RtAudio
     dependencies/tunefish4/include #FIXME : tunefish4
+    dependencies/ogg/include 
+    dependencies/vorbis/include
     ${CMAKE_CURRENT_BINARY_DIR})
 
 if (MSVC_STATIC) # temp until there is at least one definition 

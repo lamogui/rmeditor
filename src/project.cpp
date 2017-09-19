@@ -118,11 +118,6 @@ bool Project::build(const QString& text)
   return buildSuccess;
 }
 
-void Project::onPathChanged(QFileInfo newPath)
-{
-  load();
-}
-
 const QString& Project::getText() const
 {
   return xmlContent;

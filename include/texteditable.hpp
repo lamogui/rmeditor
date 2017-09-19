@@ -21,7 +21,7 @@ public:
 
 public slots:
   //Return true is the file is loaded or created (not if it build correctly)
-  bool load();
+  bool load() final;
   virtual bool save();
   virtual bool build(const QString& text) { return false; }
 

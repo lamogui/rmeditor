@@ -19,7 +19,7 @@ public:
   Music();
   ~Music() override;
 
-  virtual double getTime() const = 0;
+  virtual double getPosition() const = 0;
   virtual double getLength() const = 0;
 
   inline QWeakPointer<QOpenGLTexture> getNoteVelocityTexture() { return noteVelocityTexture; }

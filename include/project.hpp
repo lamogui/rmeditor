@@ -37,9 +37,6 @@ public slots:
 signals:
   void mediaFileInserted(MediaFile* mediaFile); // attached target should connect to MediaFile destruction Qt style
 
-protected slots:
-  void onPathChanged(QFileInfo newPath);
-
 private:
   DECLARE_PROPERTY(Music*, music, Music)
   DECLARE_PROPERTY_CONTAINER(StringMap, MediaFile*, mediaFile, MediaFile)
