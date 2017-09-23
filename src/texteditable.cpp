@@ -4,7 +4,6 @@
 TextEditable::TextEditable(QObject* parent) :
   MediaFile(parent)
 {
-  connect(this, SIGNAL(pathChanged(QFileInfo)), this, SLOT(load()));
 }
 
 bool TextEditable::load()

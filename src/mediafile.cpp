@@ -6,6 +6,7 @@
 MediaFile::MediaFile(QObject* parent) : QObject(parent), renderCache(nullptr)
 {
   CONNECT_XML_SAVED_OBJECT(MediaFile);
+  connect(this, SIGNAL(pathChanged(QFileInfo)), this, SLOT(load()));
 }
 
 void MediaFile::initializeGL(RenderFunctionsCache& gl)
