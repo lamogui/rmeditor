@@ -20,16 +20,27 @@ public:
   double getPosition() const final;
   double getLength() const final;
 
+  void exportMusicCData(const QFile& source, const QFile& header) const override;
+
 public slots:
   //MediaFile
   bool load() override;
-  
+
+  //Music
+  void setPosition(double time) override;
+  void updateTextures() override;
+
+  bool createRtAudioStream() override;
+  void processAudio(void *outputBuffer, unsigned int nBufferFrames, double streamTime, RtAudioStreamStatus status) override;
+
 protected:
 
   static size_t read(void*, size_t, size_t, void*);
   static int seek64(void*, ogg_int64_t, int);
   static int close(void*);
   static long tell(void*);
+  
+  void handleOVError(int error) const;
 
   OggVorbis_File vorbisFile;
   QFile file;

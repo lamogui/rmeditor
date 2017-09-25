@@ -36,7 +36,6 @@ public:
                             double streamTime, RtAudioStreamStatus status) = 0;
 
 public slots:
-  virtual bool load() = 0;
   virtual void setPosition(double time) = 0;
   virtual void updateTextures() = 0;
 

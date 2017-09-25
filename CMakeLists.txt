@@ -155,6 +155,7 @@ set(RMEDITOR_LIBS
   tunefish4
   ogg
   vorbis
+  vorbisfile
   )
 
 if(UNIX)
