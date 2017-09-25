@@ -77,7 +77,7 @@ bool OggVorbisMusic::load()
     Log::Info("[" + getPath().fileName() + "] Encoded by: " + ov_comment(&vorbisFile, -1)->vendor);
   }
 
-  return true;
+  return createRtAudioStream();
 }
 
 
@@ -95,12 +95,57 @@ void OggVorbisMusic::updateTextures()
 
 bool OggVorbisMusic::createRtAudioStream()
 {
-  return false;
+  try
+  {
+    vorbis_info *vi = ov_info(&vorbisFile, -1);
+    RtAudio::StreamParameters parameters;
+    parameters.deviceId = audio.getDefaultOutputDevice();
+    parameters.nChannels = vi->channels;
+    parameters.firstChannel = 0;
+    unsigned int sampleRate = vi->rate;
+    unsigned int bufferFrames = 512;  // Hum maybe music should control the global framerate and use an appropriate value here ? 
+    bytesPerFrame = sizeof(float) * parameters.nChannels; // For Music 
+    audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, rtAudioCallback, (void*) this, 0, Music::rtAudioError);
+    audio.startStream();
+  }
+  catch (RtAudioError &err)
+  {
+    Log::Error("[" + getPath().fileName() + "] " + QString::fromStdString(err.getMessage()));
+    return false;
+  }
+  return true;
 }
 
-void OggVorbisMusic::processAudio(void *outputBuffer, unsigned int nBufferFrames, double streamTime, RtAudioStreamStatus status)
+void OggVorbisMusic::processAudio(void *outputBuffer, unsigned int nBufferFrames, double, RtAudioStreamStatus)
 {
+  int requestSize = nBufferFrames;
+  int startOffset = 0;
+  float* out = (float*)outputBuffer;
+  while (requestSize > 0)
+  {
+    float** ov_buffers;
+    int currentBitstream;
+    int readed = ov_read_float(&vorbisFile, &ov_buffers, requestSize, &currentBitstream);
+    if (readed < 0)
+    {
+      handleOVError(readed);
+      break;
+    }
 
+    jassert(readed <= requestSize); // wrongly understand the documentation
+    
+    vorbis_info *vi = ov_info(&vorbisFile, -1);
+    for (int c = 0; c < vi->channels; ++c)
+    {
+      for (int s = 0; s < readed; ++s)
+      {
+        out[startOffset + s * vi->channels + c] = ov_buffers[c][s];
+      }
+    }
+
+    startOffset += readed;
+    requestSize -= readed;
+  }
 }
 
 size_t OggVorbisMusic::read(void* buffer, size_t size, size_t count, void* f)

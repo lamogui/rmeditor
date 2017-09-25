@@ -48,6 +48,9 @@ int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int n
   {
     memset(outputBuffer,0,nBufferFrames*music->bytesPerFrame);
   }
+  if (status | RTAUDIO_OUTPUT_UNDERFLOW)
+    Log::Warning("[RtAudio] output buffer underflow !"); // TODO : make an Log::ASyncWarning Log::ASyncError etc calls 
+
   return 0;
 }
 
