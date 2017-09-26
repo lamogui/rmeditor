@@ -115,7 +115,7 @@ static bool LoadQQuaternionFromXmlNode(QVariant& target, const QDomElement& node
   return success;
 }
 
-static QObject* InstantiateContainedQObjectFromXmlNode(const QMetaObject& targetClass, const QDomNode& node, QString& failureReason, QStringList& warnings)
+static QObject* InstantiateOwnedQObjectFromXmlNode(const QMetaObject& targetClass, const QDomNode& node, QString& failureReason, QStringList& warnings)
 {
   if (!node.isElement())
   {
@@ -158,6 +158,7 @@ static QObject* InstantiateContainedQObjectFromXmlNode(const QMetaObject& target
 
 bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failureReason, QStringList& warnings)
 {
+  ClassManager* manager = ClassManager::get();
   const QMetaObject* cl = object.metaObject();
   QDomNode variableNode = node.firstChild();
   while (!variableNode.isNull())
@@ -193,7 +194,6 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
         QMetaType type(variable.userType());
         if (type.isValid())
         {
-          ClassManager* manager = ClassManager::get();
           if (manager->isContainer(variable.userType()))
           {
             const QMetaObject* targetClass = manager->getContainerTargetClass(variable.userType());
@@ -231,7 +231,7 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
             QDomElement childElement = element.firstChildElement();
             while (!childElement.isNull())
             {
-              QObject* newInstance = InstantiateContainedQObjectFromXmlNode(*targetClass, childElement, failureReason, warnings);
+              QObject* newInstance = InstantiateOwnedQObjectFromXmlNode(*targetClass, childElement, failureReason, warnings);
               if (!newInstance)
                 return false;
               
@@ -251,6 +251,28 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
               childElement = childElement.nextSiblingElement();
             }
           }
+          else if (manager->isOwnedPointer(variable.userType()))
+          {
+            const QMetaObject* targetClass = QMetaType::metaObjectForType(variable.userType());
+            jassert(targetClass); // add robustness here
+            int nodes = element.childNodes().size();
+            if (nodes == 0)
+            {
+              failureReason = "line " + QString::number(element.lineNumber()) + " missing required child node !";
+              return false;
+            }
+            else if (nodes != 1)
+              warnings.append("line " + QString::number(element.lineNumber()) + " excepted only one child, ignoring the others");
+
+            QObject* newInstance = InstantiateOwnedQObjectFromXmlNode(*targetClass, element.firstChild(), failureReason, warnings);
+            if (!variable.write(&object, QVariant::fromValue(newInstance)))
+            {
+              failureReason = "line " + QString::number(element.lineNumber()) + " failed to write property " + element.tagName();
+              jassertfalse;
+              delete newInstance;
+              return false;
+            }
+          }
           else
           {
             QString value;
@@ -266,7 +288,6 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
             else
               jassertfalse; // todo
           }
-
         }
         else 
         {

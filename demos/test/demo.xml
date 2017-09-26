@@ -3,8 +3,11 @@
   <mediaFiles>
     <RaymarchingScene>
       <path>test.glsl</path>
-    </RaymarchingScene> 
+    </RaymarchingScene>
   </mediaFiles>
-	<music>
+  <music>
+    <OggVorbisMusic>
+      <path>Alternate Reality Kat.ogg</path>
+    </OggVorbisMusic>
   </music>
 </rmdemo>

@@ -13,7 +13,7 @@ class OggVorbisMusic : public Music
   Q_OBJECT
 
 public:
-  OggVorbisMusic(QObject* parent = nullptr);
+  Q_INVOKABLE OggVorbisMusic(QObject* parent = nullptr);
   ~OggVorbisMusic() override;
   
   // Music

@@ -20,6 +20,7 @@ public:
   bool isInt64Map(int type) const;
   bool isStringMap(int type) const;
   bool isContainer(int type) const;
+  bool isOwnedPointer(int type) const;
 
 private:
   // Singleton
@@ -31,8 +32,10 @@ private:
   void initializeQMapInt64Types();
   void initializeQMapStringTypes();
 
-  QMap<int, const QMetaObject*> objectPointerTypes;
+  static void logTypes(const QMap<int, const QMetaObject*>& types);
+
   QMap<QString, const QMetaObject*> classes;
+  QMap<int, const QMetaObject*> objectOwnedPointerTypes;
   QMap<int, const QMetaObject*> vectorTypes;
   QMap<int, const QMetaObject*> int64MapTypes;
   QMap<int, const QMetaObject*> stringMapTypes;
