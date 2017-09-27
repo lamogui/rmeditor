@@ -1,7 +1,7 @@
 #include "oggvorbismusic.hpp"
 #include "logmanager.hpp"
 
-OggVorbisMusic::OggVorbisMusic(QObject* parent)
+OggVorbisMusic::OggVorbisMusic(QObject* parent) : Music(parent), vorbisFile({0})
 {
 
 }
@@ -72,11 +72,12 @@ bool OggVorbisMusic::load()
       Log::Info("[" + getPath().fileName() + "] " + *ptr);
       ++ptr;
     }
-    Log::Info("[" + getPath().fileName() + "] Bitstream is " + QString::number(vi->channels) + "channel, " + QString::number(vi->rate) + "Hz");
+    Log::Info("[" + getPath().fileName() + "] Bitstream is " + QString::number(vi->channels) + " channel, " + QString::number(vi->rate) + "Hz");
     Log::Info("[" + getPath().fileName() + "] Decoded length: " + QString::number(ov_pcm_total(&vorbisFile, -1)) + " samples");
     Log::Info("[" + getPath().fileName() + "] Encoded by: " + ov_comment(&vorbisFile, -1)->vendor);
   }
 
+  play();
   return createRtAudioStream();
 }
 
@@ -103,7 +104,7 @@ bool OggVorbisMusic::createRtAudioStream()
     parameters.nChannels = vi->channels;
     parameters.firstChannel = 0;
     unsigned int sampleRate = vi->rate;
-    unsigned int bufferFrames = 512;  // Hum maybe music should control the global framerate and use an appropriate value here ? 
+    unsigned int bufferFrames = 1024;  // Hum maybe music should control the global framerate and use an appropriate value here ? 
     bytesPerFrame = sizeof(float) * parameters.nChannels; // For Music 
     audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, rtAudioCallback, (void*) this, 0, Music::rtAudioError);
     audio.startStream();
@@ -139,11 +140,11 @@ void OggVorbisMusic::processAudio(void *outputBuffer, unsigned int nBufferFrames
     {
       for (int s = 0; s < readed; ++s)
       {
-        out[startOffset + s * vi->channels + c] = ov_buffers[c][s];
+        out[startOffset + s * vi->channels + c] = ov_buffers[c][s] * 0.5f;
       }
     }
 
-    startOffset += readed;
+    startOffset += readed * vi->channels;
     requestSize -= readed;
   }
 }

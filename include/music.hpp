@@ -16,7 +16,7 @@ class Music : public MediaFile
   Q_PROPERTY(bool playing MEMBER playing READ isPlaying) // don't use macro because volatile bool + read only + non standard getter name
 
 public:
-  Music();
+  Music(QObject* parent);
   ~Music() override;
 
   virtual double getPosition() const = 0;
@@ -59,6 +59,9 @@ protected:
 
   // Control
   volatile bool playing;
+
+private:
+  DECLARE_PROPERTY(Timeline*, mainTimeline, MainTimeline);
 };
 
 class ExternalLengthMusic : public Music
@@ -66,7 +69,7 @@ class ExternalLengthMusic : public Music
   Q_OBJECT
 
 public:
-  ExternalLengthMusic();
+  ExternalLengthMusic(QObject* parent);
 
 private:
   DECLARE_PROPERTY(double, length, Length)

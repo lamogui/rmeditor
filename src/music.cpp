@@ -16,10 +16,11 @@
 ** Music
 */
 
-Music::Music():
-  MediaFile(),
+Music::Music(QObject* parent):
+  MediaFile(parent),
   audio(),
-  playing(false)
+  playing(false),
+  mainTimeline(nullptr)
 {
   /* 
   // FIXME : move this elsewhere
@@ -48,7 +49,7 @@ int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int n
   {
     memset(outputBuffer,0,nBufferFrames*music->bytesPerFrame);
   }
-  if (status | RTAUDIO_OUTPUT_UNDERFLOW)
+  if (status & RTAUDIO_OUTPUT_UNDERFLOW)
     Log::Warning("[RtAudio] output buffer underflow !"); // TODO : make an Log::ASyncWarning Log::ASyncError etc calls 
 
   return 0;
@@ -60,12 +61,25 @@ void Music::rtAudioError(RtAudioError::Type type, const std::string &errorText)
   Log::Error(tr("[RtAudio] ") + QString::fromStdString(errorText));
 }
 
+void Music::setMainTimeline(Timeline* timeline)
+{
+  if (mainTimeline != timeline)
+  {
+    QVariant oldValue = QVariant::fromValue(mainTimeline);
+    QVariant newValue = QVariant::fromValue(timeline);
+    if (timeline)
+      timeline->setParent(this);
+    mainTimeline = timeline;
+    emit propertyChanged(this, "mainTimeline", oldValue, newValue);
+  }
+}
+
 /*
 ** ExternalLengthMusic
 */
 
-ExternalLengthMusic::ExternalLengthMusic() : 
-  Music(),
+ExternalLengthMusic::ExternalLengthMusic(QObject* parent) : 
+  Music(parent),
   length(0)
 {
 }
