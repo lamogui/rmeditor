@@ -76,14 +76,14 @@ bool OggVorbisMusic::load()
     Log::Info("[" + getPath().fileName() + "] Decoded length: " + QString::number(ov_pcm_total(&vorbisFile, -1)) + " samples");
     Log::Info("[" + getPath().fileName() + "] Encoded by: " + ov_comment(&vorbisFile, -1)->vendor);
   }
-
-  play();
   return createRtAudioStream();
 }
 
 
 void OggVorbisMusic::setPosition(double time)
 {
+  if (time < 0.0)
+    time = 0.0;
   int ret = ov_time_seek(&vorbisFile, time);
   if (ret != 0)
     handleOVError(ret);
@@ -178,8 +178,11 @@ int OggVorbisMusic::seek64(void* f, ogg_int64_t off, int whence)
       return -1;
   }
   if (!success)
+  {
     Log::Error("[" + QFileInfo(file.fileName()).fileName() + "] " + file.errorString());
-  return -1;
+    return -1;
+  }
+  return 0;
 }
 
 int OggVorbisMusic::close(void* f)
@@ -203,6 +206,8 @@ void OggVorbisMusic::handleOVError(int error) const
     case OV_EOF: err = "End of file reached !"; break;
     case OV_HOLE: err = "Lost OGG packet !"; break;
     case OV_EREAD: err = "Error while trying reading the file"; break;
+    case OV_ENOSEEK: err = "Bitstream is not seekable."; break;
+    case OV_EINVAL: err = "Incorect value submitted to oggvorbis library."; jassertfalse; break;
     default: jassertfalse; // todo
   }
 

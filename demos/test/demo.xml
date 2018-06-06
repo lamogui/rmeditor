@@ -8,6 +8,24 @@
   <music>
     <OggVorbisMusic>
       <path>Alternate Reality Kat.ogg</path>
+      <mainTimeline>
+        <DemoTimeline>
+          <tracks>
+						<TimelineTrack>
+              <sequences>
+                <Sequence>
+                  <startFrame>
+                    0
+                  </startFrame>
+                  <length>
+                    3000
+                  </length>
+                </Sequence>
+              </sequences>
+						</TimelineTrack>
+					</tracks>
+        </DemoTimeline>
+      </mainTimeline>
     </OggVorbisMusic>
   </music>
 </rmdemo>

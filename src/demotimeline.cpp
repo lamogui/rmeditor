@@ -27,7 +27,7 @@ DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogW
 }
 */
 
-DemoTimeline::DemoTimeline(QObject* parentMusic) :
+DemoTimeline::DemoTimeline(Music* parentMusic) :
   Timeline(parentMusic),
   renderCache(nullptr)
 {
@@ -103,11 +103,12 @@ void DemoTimeline::updateCamera(qint64 frame, Camera &cam)
   }
 }
 
+*/
 void DemoTimeline::updateTime()
 {
-  updateCamera();
+  //updateCamera();
 }
-
+/*
 void DemoTimeline::insertCameraKeyframe(Camera *cam)
 {
   if (cam)
@@ -201,27 +202,6 @@ void DemoTimeline::addSequenceAction(QAction *action)
   e = node.firstChildElement("track").appendChild(e).toElement();
   Sequence* seq = new Sequence(*project,*this,e,*(project->getRayMarchScene(action->text())),mousePressPos.x(),600,trackHeight);
   addSequence(seq);
-}
-
-void DemoTimeline::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-{
-  mousePressPos = event->scenePos();
-
-  QMenu contextMenu;
-  QMenu addSequenceMenu;
-  addSequenceMenu.setTitle(tr("Add sequence"));
-
-  QMap<QString,Scene*> scenes = project->rayMarchScenes();
-  QMap<QString,Scene*>::const_iterator it = scenes.constBegin();
-  for (;it != scenes.constEnd(); it++)
-  {
-    QAction* action = new QAction(it.key(),&addSequenceMenu);
-    addSequenceMenu.addAction(action);
-  }
-
-  connect(&addSequenceMenu,SIGNAL(triggered(QAction*)),this,SLOT(addSequenceAction(QAction*)));
-  contextMenu.addMenu(&addSequenceMenu);
-  contextMenu.exec(event->screenPos());
 }
 
 qint64 DemoTimeline::maxSequenceLengthBeforeOverlap(Sequence* seq) const

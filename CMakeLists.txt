@@ -171,7 +171,7 @@ if (MSVC)
 	    set(RMEDITOR_LIBS ${RMEDITOR_LIBS} 
           #Qt static dependencies
           general User32 
-          general Ws2_32 
+          general Ws2_32
           general Iphlpapi 
           general UxTheme 
           general Winmm

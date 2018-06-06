@@ -81,7 +81,6 @@ void TimelineWidget::updateWithTime()
 
 void TimelineWidget::onTimelineDestroy()
 {
-
   disconnect(updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
   disconnect(this,SIGNAL(timePositionChanged(double)),0,0);
   updateTimer->stop();
@@ -94,6 +93,9 @@ void TimelineWidget::drawForeground(QPainter* painter, const QRectF& rect)
 {
 
   QScrollBar *vertical = this->verticalScrollBar(), *horizontal = this->horizontalScrollBar();
+  qDebug() << "horizontal" << "min" << horizontal->minimum() << "value" << horizontal->value() << "max" << horizontal->maximum() << "pageStep" << horizontal->pageStep();
+  qDebug() << "vertical" << "min" << vertical->minimum() << "value" << vertical->value() << "max" << vertical->maximum() << "pageStep" << vertical->pageStep();
+  qDebug() << "sceneRect" << sceneRect();
   qreal x = sceneRect().width() * (horizontal->value() - horizontal->minimum())/
             (qreal)(horizontal->maximum() - horizontal->minimum() + horizontal->pageStep());
   qreal y = sceneRect().height() * (vertical->value() - vertical->minimum())/

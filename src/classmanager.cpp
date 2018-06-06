@@ -8,17 +8,20 @@
 
 // declared classes 
 #include "camera.hpp"  // for CameraKeyframe
+#include "demotimeline.hpp"
 #include "mediafile.hpp"
 #include "music.hpp"
 #include "oggvorbismusic.hpp"
 #include "scene.hpp"   // for RaymarchingScene
 #include "sequence.hpp"
+#include "timeline.hpp"
 #include "timelinetrack.hpp"
 
 
 #define REGISTER_QOBJECT_CLASS(CLASSNAME) do {classes.insert(#CLASSNAME, &CLASSNAME::staticMetaObject); objectOwnedPointerTypes.insert(qRegisterMetaType<CLASSNAME*>(), &CLASSNAME::staticMetaObject); } while (false)
 #define REGISTER_QOBJECT_INT64MAP_TYPE(CLASSNAME) int64MapTypes.insert(qRegisterMetaType<QMap<qint64, CLASSNAME*> >(), &CLASSNAME::staticMetaObject)
 #define REGISTER_QOBJECT_STRINGMAP_TYPE(CLASSNAME) stringMapTypes.insert(qRegisterMetaType<StringMap<CLASSNAME*> >(), &CLASSNAME::staticMetaObject)
+#define REGISTER_QOBJECT_VECTOR_TYPE(CLASSNAME) vectorTypes.insert(qRegisterMetaType<QVector<CLASSNAME*> >(), &CLASSNAME::staticMetaObject)
 
 /*
 ** Declare MetaTypes
@@ -28,8 +31,6 @@ Q_DECLARE_METATYPE(QVector<TimelineTrack*>)
 Q_DECLARE_METATYPE(StringMap<MediaFile*>)
 Q_DECLARE_METATYPE(Int64Map<CameraKeyframe*>)
 Q_DECLARE_METATYPE(Int64Map<Sequence*>)
-//Q_DECLARE_METATYPE(Music*);
-//Q_DECLARE_METATYPE(OggVorbisMusic*);
 
 /*
 ** Class manager
@@ -105,17 +106,21 @@ void ClassManager::initalizeClasses()
 
 void ClassManager::initializeQObjectClasses()
 {
-  REGISTER_QOBJECT_CLASS(TimelineTrack);
-  REGISTER_QOBJECT_CLASS(Sequence);
-  REGISTER_QOBJECT_CLASS(RaymarchingScene);
+  REGISTER_QOBJECT_CLASS(DemoTimeline);
   REGISTER_QOBJECT_CLASS(Music);
   REGISTER_QOBJECT_CLASS(OggVorbisMusic);
-
+  REGISTER_QOBJECT_CLASS(RaymarchingScene);
+  REGISTER_QOBJECT_CLASS(Sequence);
+  REGISTER_QOBJECT_CLASS(Timeline);
+  REGISTER_QOBJECT_CLASS(TimelineTrack);
+  
   logTypes(objectOwnedPointerTypes);
 }
 
 void ClassManager::initializeQVectorTypes()
 {
+  REGISTER_QOBJECT_VECTOR_TYPE(TimelineTrack);
+
   logTypes(vectorTypes);
 }
 

@@ -72,10 +72,7 @@ void Keyframe::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
   QGraphicsItem::mouseReleaseEvent(event);
   if (mouseCapture)
   {
-    ASSERT_IF_UNIQUE_RECEIVER(sendUndoCommand(QUndoCommand*))
-    {
-      emit sendUndoCommand(new ModifyPropertyCommand(*this, "relativeFrame", mousePressRelativeFrame, (qint64)(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x())));
-    }
+    UndoStack::assertSendUndoCommand(*this, new ModifyPropertyCommand(*this, "relativeFrame", mousePressRelativeFrame, (qint64)(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x())));
   }
   mouseCapture = false;
 }
