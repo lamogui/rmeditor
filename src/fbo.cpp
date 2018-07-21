@@ -13,8 +13,8 @@ FBO::FBO(size_t width, size_t height):
 {
     FrameBuffer=0;
     ColorTextureID=0;
-    width = width;
-    height = height;
+    this->width = width;
+    this->height = height;
     format = GL_RGBA;
 
     //Create texture.
@@ -104,8 +104,8 @@ void FBO::disable(void)
 //-----------------------------------------------------------------------------
 void FBO::setSize(size_t width, size_t height )
 {
-    width = width;
-    height = height;
+    this->width = width;
+    this->height = height;
 
     updateTexture();
 }

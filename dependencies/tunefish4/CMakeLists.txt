@@ -6,8 +6,6 @@ set(SRCROOT ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(SRC  
   ${SRCROOT}/array.cpp
   ${INCROOT}/array.hpp
-  ${SRCROOT}/datastream.cpp
-  ${INCROOT}/datastream.hpp
   ${SRCROOT}/random.cpp
   ${INCROOT}/random.hpp
   ${SRCROOT}/runtime.cpp

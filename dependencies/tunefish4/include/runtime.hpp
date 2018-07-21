@@ -44,6 +44,14 @@
 #define eASSERT_ALIGNED16(x)    eASSERT(eU32(x)%16 == 0)
 #define eCOALESCE(x, y)         (x == nullptr ? y : x)
 
+#if defined(eRELEASE) && defined(ePLAYER)
+ePtr eCDECL operator new(eU32 size);
+ePtr eCDECL operator new[](eU32 size);
+void eCDECL operator delete(ePtr ptr);
+void eCDECL operator delete(ePtr ptr, unsigned int size);
+void eCDECL operator delete[](ePtr ptr);
+#endif
+
 ePtr    eAllocAligned(eU32 size, eU32 alignment);
 ePtr    eAllocAlignedAndZero(eU32 size, eU32 alignment);
 void    eFreeAligned(ePtr ptr);
@@ -54,12 +62,9 @@ void    eMemMove(ePtr dst, eConstPtr src, eU32 count);
 eBool   eMemEqual(eConstPtr mem0, eConstPtr mem1, eU32 count);
 void    eStrClear(eChar *str);
 void    eStrCopy(eChar *dst, const eChar *src);
-void    eStrLCopy(eChar *dst, const eChar *src, eU32 count);
 eChar * eStrClone(const eChar *str);
 eU32    eStrLength(const eChar *str);
 eChar * eStrAppend(eChar *dst, const eChar *src);
-eInt    eStrCompare(const eChar *str0, const eChar *str1);
-eBool   eStrEqual(const eChar *str0, const eChar *str1);
 eChar * eStrUpper(eChar *str);
 eChar * eIntToStr(eInt val);
 eChar * eFloatToStr(eF32 val);
@@ -103,12 +108,6 @@ eBool   eIsNan(eF32 x);
 eF32    eDegToRad(eF32 degrees);
 eF32    eRadToDeg(eF32 radians);
 eBool   eIsAligned(eConstPtr data, eU32 alignment);
-eU32    eHashInt(eInt key);
-eU32    eHashStr(const eChar *str);
-eU32    eNextPowerOf2(eU32 x);
-eBool   eIsPowerOf2(eU32 x);
-eU32    eBzr(eU32 x);
-eBool   eClosedIntervalsOverlap(eInt start0, eInt end0, eInt start1, eInt end1);
 
 // negative safe modulo  -1 % 5 will return -1.  eNsMod(-1, 5) will return 4.
 eFORCEINLINE eInt eNsMod(eInt x, eInt y)
@@ -129,11 +128,6 @@ eINLINE void eUndenormalise(eF32 &sample)
 {
     if (((*(eU32 *)&sample)&0x7f800000) == 0)
         sample = 0.0f;
-}
-
-template<class T> eU32 eHashPtr(const T * const &ptr)
-{
-    return eHashInt((eInt)ptr);
 }
 
 eINLINE eU16 eLoword(eU32 x)
@@ -263,10 +257,10 @@ template<class T> T eCubic(T x)
     return x*x*x;
 }
 
-template<class T> T eAlign(const T &val, eU32 alignment)
+template<class T> T eAlign(const T &val, eU64 alignment)
 {
     static_assert(sizeof(val) <= sizeof(alignment), "doesn't work correctly if sizeof(alignment) < sizeof(val)");
-    return (T)((((eU32)val)+alignment-1)&(~(alignment-1)));
+    return (T)((((T)val)+alignment-1)&(~(alignment-1)));
 }
 
 template<class T> eBool eInRange(const T &x, const T &min, const T &max)
@@ -282,13 +276,6 @@ template<class TO, class FROM> TO eRawCast(FROM x)
 template<class T> void eMemZero(T &val)
 {
     eMemSet(&val, 0, sizeof(T));
-}
-
-template<class MEMBER, class PARENT>
-PARENT & eGetContainerOf(MEMBER &memberInst, const MEMBER PARENT::*memberVar)
-{
-    const eSize off = reinterpret_cast<eSize>(&(reinterpret_cast<PARENT *>(0)->*memberVar));
-    return *reinterpret_cast<PARENT *>(reinterpret_cast<eSize>(memberInst)-off);
 }
 
 #endif

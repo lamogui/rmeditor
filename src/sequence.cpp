@@ -170,7 +170,7 @@ void Sequence::renderImages()
     scene->getShader().sendf("cam_rotation",cam.getRotation().x(),cam.getRotation().y(),cam.getRotation().z(),cam.getRotation().scalar());
     scene->getShader().sendf("cam_position",cam.getPosition().x(),cam.getPosition().y(),cam.getPosition().z());
 
-    scene->getShader().sendf("xy_scale_factor",(float)fbo.getSizeX()/(float)fbo.getSizeY());
+    scene->getShader().sendf("resolution",(float)fbo.getSizeX(), (float)fbo.getSizeY());
     scene->getShader().sendf("sequence_time",0.f);
     scene->getShader().sendf("track_time",(float)this->pos().x()/timeline->getFramerate());
 

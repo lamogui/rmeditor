@@ -1,9 +1,9 @@
-#version 120
+//#version 120
 #define PI 3.14159265
 
 uniform sampler2D notes_velocity;
-varying vec2 coords;
-uniform float xy_scale_factor;
+
+uniform vec2 resolution;
 uniform float sequence_time;
 uniform float track_time;
 uniform vec3 cam_position;
@@ -149,9 +149,12 @@ vec4 rm(vec3 ro, vec3 rd)
 void main()
 {
 	vec3 color = vec3(1.);
-	vec2 uv = vec2(coords.x*xy_scale_factor,coords.y);
+  vec2 uv = vec2(gl_FragCoord.xy) / resolution;
+	uv = uv * 2.0 - 1.0;
+	uv.x *= gl_FragCoord.x / gl_FragCoord.y;
+	//vec2 uv = vec2(coords.x*xy_scale_factor,coords.y);
 	vec3 ro = cam_position;
-	vec3 rd = rotate_dir(cam_rotation, normalize(vec3(uv,2.0)));
+	vec3 rd = rotate_dir(cam_rotation, normalize(vec3(uv, 2.0)));
 
 	/*snare = max(
 					 max(
@@ -187,11 +190,11 @@ void main()
 	color = pow(color, vec3(1.1/2.2));
 	
   //Render_normals
-  /*vec3 n = vec3(0.0);
+  vec3 n = vec3(0.0);
   for (int i = 0; i < numReflexions; ++i)
 	  n += ns[i] * 0.5 + vec3(0.5);
-  n /= vec3(numReflexions);*/
-	//color = color + n * 0.2;
+  n /= vec3(numReflexions);
+	color = color + n * 0.2;
 
 	//Render ambient Occlusion
 	float ao = ambientOcclusion(pmats[0].xyz, ns[0]);

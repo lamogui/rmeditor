@@ -502,7 +502,7 @@ void DemoRenderer::glRender()
       scene->getShader().sendf("cam_rotation",0.f,0.f,0.f,1.f);
     }
 
-    scene->getShader().sendf("xy_scale_factor",(float)fbo.getSizeX()/(float)fbo.getSizeY());
+    scene->getShader().sendf("resolution",(float)fbo.getSizeX(), (float)fbo.getSizeY());
     scene->getShader().sendf("sequence_time",(float)timeline->getMusic()->getTime() - (float)current_sequence->startFrame()/timeline->getFramerate());
     scene->getShader().sendf("track_time",(float) timeline->getMusic()->getTime());
     Fast2DQuadDraw();

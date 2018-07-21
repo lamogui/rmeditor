@@ -22,7 +22,7 @@
 #ifdef eENIGMA
 #include "synth.hpp"
 #else
-#include "system.hpp"
+#include "../runtime/system.hpp"
 #include "tf4.hpp"
 #endif
 
@@ -244,7 +244,7 @@ void eTfEffectReverbDelete(eTfEffect *fx)
     eFreeAligned(fx);
 }
 
-void eTfEffectReverbProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF32 **signal, eU32 len)
+void eTfEffectReverbProcess(eTfEffect *fx, eTfSynth &, eTfInstrument &instr, eF32 **signal, eU32 len)
 {
     eASSERT_ALIGNED16(fx);
     eTfEffectReverb *reverb = static_cast<eTfEffectReverb *>(fx);
@@ -306,14 +306,14 @@ void eTfEffectReverbProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr
     while(len--)
     {
         eF32x2 in = eSimdSet2(*dryL, *dryR);
-        eF32x2 wet1 = eSimdSet2(*wetL, *wetR);
-		eF32x2 wet2 = eSimdSet2(*wetR++, *wetL++);
+        eF32x2 lwet1 = eSimdSet2(*wetL, *wetR);
+		eF32x2 lwet2 = eSimdSet2(*wetR++, *wetL++);
         eF32x2 out = eSimdSetAll(0.0f);
 
         out = eSimdAdd(
                 eSimdAdd(
-                    eSimdMul(wet1, wet1x2),
-                    eSimdMul(wet2, wet2x2)),
+                    eSimdMul(lwet1, wet1x2),
+                    eSimdMul(lwet2, wet2x2)),
                 eSimdMul(in, dry0x2));
 
         eSimdStore2(out, *dryL++, *dryR++);
@@ -338,7 +338,7 @@ void eTfEffectDistortionDelete(eTfEffect *fx)
     eFreeAligned(fx);
 }
 
-void eTfEffectDistortionProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF32 **signal, eU32 len)
+void eTfEffectDistortionProcess(eTfEffect *fx, eTfSynth &, eTfInstrument &instr, eF32 **signal, eU32 len)
 {
     eASSERT_ALIGNED16(fx);
     eTfEffectDistortion *dist = static_cast<eTfEffectDistortion *>(fx);
@@ -384,7 +384,7 @@ void eTfEffectFormantDelete(eTfEffect *fx)
     eFreeAligned(fx);
 }
 
-void eTfEffectFormantProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF32 **signal, eU32 len)
+void eTfEffectFormantProcess(eTfEffect *fx, eTfSynth &, eTfInstrument &instr, eF32 **signal, eU32 len)
 {
     eASSERT_ALIGNED16(fx);
     eTfEffectFormant *formant = static_cast<eTfEffectFormant *>(fx);
