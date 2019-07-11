@@ -64,6 +64,6 @@ if (MSVC)
 endif()
 
 add_subdirectory(rtaudio)
-add_subdirectory(tunefish4)
+#add_subdirectory(tunefish4)
 
 

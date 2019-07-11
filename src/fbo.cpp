@@ -1,4 +1,6 @@
-﻿#include "fbo.hpp"
+﻿#include <QOpenGLFunctions>
+
+#include "fbo.hpp"
 
 #include <iostream>
 

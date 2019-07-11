@@ -9,9 +9,9 @@
 #include <QTimer>
 
 #include "texteditable.hpp"
+#include "music.hpp"
 
 class DemoTimeline;
-class Music;
 class Framework;
 class Scene;
 class Timeline;

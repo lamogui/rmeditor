@@ -71,6 +71,14 @@ set(RMEDITOR_H
   ${RMEDITOR_INCLUDE_DIR}/timelinedockwidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/timelinewidget.hpp
   ${RMEDITOR_INCLUDE_DIR}/tunefish4music.hpp
+  ${RMEDITOR_INCLUDE_DIR}/tf4.hpp
+  ${RMEDITOR_INCLUDE_DIR}/tf4fx.hpp
+  ${RMEDITOR_INCLUDE_DIR}/array.hpp
+  ${RMEDITOR_INCLUDE_DIR}/datastream.hpp
+  ${RMEDITOR_INCLUDE_DIR}/runtime.hpp
+  ${RMEDITOR_INCLUDE_DIR}/simd.hpp
+  ${RMEDITOR_INCLUDE_DIR}/random.hpp
+  ${RMEDITOR_INCLUDE_DIR}/system.hpp
 )
 
 #sources
@@ -106,6 +114,13 @@ set(RMEDITOR_SRC
   ${RMEDITOR_SRC_DIR}/timelinedockwidget.cpp
   ${RMEDITOR_SRC_DIR}/timelinewidget.cpp
   ${RMEDITOR_SRC_DIR}/tunefish4music.cpp
+  ${RMEDITOR_SRC_DIR}/tf4.cpp
+  ${RMEDITOR_SRC_DIR}/tf4fx.cpp
+  ${RMEDITOR_SRC_DIR}/array.cpp
+  ${RMEDITOR_SRC_DIR}/datastream.cpp
+  ${RMEDITOR_SRC_DIR}/runtime.cpp
+  ${RMEDITOR_SRC_DIR}/simd.cpp
+  ${RMEDITOR_SRC_DIR}/random.cpp
 )
 
 #ui

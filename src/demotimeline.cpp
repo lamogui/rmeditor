@@ -1,6 +1,7 @@
-﻿#include "demotimeline.hpp"
+﻿#include "music.hpp"
+#include "demotimeline.hpp"
 #include "fast2dquad.hpp"
-#include "music.hpp"
+
 #include "sequence.hpp"
 #include "scene.hpp"
 #include "shaderminifier.hpp"
