@@ -1,208 +1,138 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- *   This file is part of
- *       ______        _                             __ __
- *      / ____/____   (_)____ _ ____ ___   ____ _   / // /
- *     / __/  / __ \ / // __ `// __ `__ \ / __ `/  / // /_
- *    / /___ / / / // // /_/ // / / / / // /_/ /  /__  __/
- *   /_____//_/ /_//_/ \__, //_/ /_/ /_/ \__,_/     /_/.   
- *                    /____/                              
- *
- *   Copyright © 2003-2012 Brain Control, all rights reserved.
- *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---------------------------------------------------------------------
+Tunefish 4  -  http://tunefish-synth.com
+---------------------------------------------------------------------
+This file is part of Tunefish.
 
-#include "system.hpp"
+Tunefish is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Tunefish is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Tunefish.  If not, see <http://www.gnu.org/licenses/>.
+---------------------------------------------------------------------
+*/
+
+#include "datastream.hpp"
 
 eDataStream::eDataStream(eConstPtr mem, eU32 length) :
-    m_reading(eFALSE),
-    m_readIndex(0),
-    m_bitCount(0),
-    m_curByte(0)
+    Reading(eFALSE),
+    ReadIdx(0),
+    NumBits(0),
+    CurByte(0)
 {
-    attach(mem, length);
+    Attach(mem, length);
 }
 
-eDataStream::eDataStream(const eByteArray &data) :
-    m_reading(eFALSE),
-    m_readIndex(0),
-    m_bitCount(0),
-    m_curByte(0)
+eDataStream::eDataStream(const eByteArray &data) : eDataStream(data.isEmpty() ? nullptr : &data[0], data.size())
 {
-    if (!data.isEmpty())
-        attach(&data[0], data.size());
 }
 
-void eDataStream::attach(eConstPtr data, eU32 size)
+void eDataStream::Attach(eConstPtr data, eU32 size)
 {
     if (data && size)
     {
-        m_data.resize(size);
-        eMemCopy(&m_data[0], data, size);
-        m_reading = eTRUE;
-        m_bitCount = 8;
+        Data.resize(size);
+        eMemCopy(&Data[0], data, size);
+        Reading = eTRUE;
+        NumBits = 8;
     }
 }
 
-void eDataStream::advance(eU32 offset) 
+void eDataStream::Flush()
 {
-    m_readIndex += offset;
+    Data.append(CurByte);
 }
 
-void eDataStream::writeBit(eBool bit, eU32 count)
+void eDataStream::WriteBit(eBool bit, eU32 count)
 {
-    eASSERT(!m_reading);
+    eASSERT(!Reading);
 
-    for (eU32 i=0; i<count; i++)
+    for (eU32 i = 0; i<count; i++)
     {
-        eSetBit(m_curByte, m_bitCount, bit);
-        m_bitCount++;
+        if (bit)
+            eSetBit(CurByte, NumBits);
 
-        if (m_bitCount == 8)
+        NumBits++;
+
+        if (NumBits == 8)
         {
-            m_data.append(m_curByte);
-            m_bitCount = 0;
-            m_curByte = 0;
+            Data.append(CurByte);
+            NumBits = 0;
+            CurByte = 0;
         }
     }
 }
 
-void eDataStream::writeU8(eU8 byte)
+void eDataStream::WriteBits(eU32 val, eU32 bitCount)
 {
-    writeBits(byte, 8);
+    eASSERT(bitCount <= 32);
+
+    for (eU32 i = 0; i<bitCount; i++)
+        WriteBit(eGetBit(val, i));
 }
 
-void eDataStream::writeU16(eU16 word)
+void eDataStream::WriteU8(eU8 val)
 {
-    writeBits(word, 16);
+    WriteBits(val, 8);
 }
 
-eU32 eDataStream::writeU_dynamic(eU32 dword)
+void eDataStream::WriteU16(eU16 val)
 {
-	for(eU32 i = 0; i < 4; i++) {
-		if((dword & 0xFFFFFF80) == 0) {
-			writeBits(dword, 8);
-			return i;
-		} else
-			writeBits((dword & 0x0000007F) | 0x00000080, 8);
-
-		dword = dword >> 7;
-	}
-	return 4;
+    WriteBits(val, 16);
 }
 
-
-void eDataStream::writeU32(eU32 dword)
+void eDataStream::WriteU32(eU32 val)
 {
-    writeBits(dword, 32);
+    WriteBits(val, 32);
 }
 
-void eDataStream::writeBits(eU32 dword, eU32 bitCount)
+eBool eDataStream::ReadBit()
 {
-    for (eU32 i=0; i<bitCount; i++)
-        writeBit(eGetBit(dword, i));
-}
+    eASSERT(Reading);
+    eASSERT(ReadIdx <= Data.size());
 
-// writes elias gamma encoded integer
-void eDataStream::writeVbr(eU32 dword)
-{
-    eASSERT(dword < eU32_MAX);
-    dword++; // 0 is not encodable
-    const eInt bitCount = eFtoL(eLog2((eF32)dword))+1; // truncation crucial
-
-    for (eInt i=0; i<bitCount-1; i++)
-        writeBit(eFALSE);
-
-    for (eInt i=bitCount-1; i>=0; i--)
-        writeBit(eGetBit(dword, i));
-}
-
-eBool eDataStream::readBit()
-{
-    eASSERT(m_reading);
-    eASSERT(m_readIndex <= m_data.size());
-
-    if (m_bitCount == 8)
+    if (NumBits == 8)
     {
-        m_curByte = m_data[m_readIndex++];
-        m_bitCount = 0;
+        CurByte = Data[ReadIdx++];
+        NumBits = 0;
     }
 
-    return eGetBit(m_curByte, m_bitCount++);
+    return eGetBit(CurByte, NumBits++);
 }
 
-eBool eDataStream::readBitOrZero()
+eBool eDataStream::ReadBitOrZero()
 {
-    if (m_readIndex >= m_data.size() && m_bitCount >= 7)
-        return 0;
-    else
-        return readBit();
+    return (ReadIdx >= Data.size() && NumBits >= 7 ? 0 : ReadBit());
 }
 
-eU32 eDataStream::readBits(eU32 bitCount)
+eU32 eDataStream::ReadBits(eU32 bitCount)
 {
-    eU32 result = 0;
-    for (eU32 i=0; i<bitCount; i++)
-        result |= (readBit()<<i);
+    eU32 res = 0;
 
-    return result;
+    for (eU32 i = 0; i<bitCount; i++)
+        res |= ((eU32)ReadBit() << i);
+
+    return res;
 }
 
-eU8 eDataStream::readU8()
+eU8 eDataStream::ReadU8()
 {
-    return readBits(8);
+    return (eU8)ReadBits(8);
 }
 
-eU32 eDataStream::readU_dynamic()
+eU16 eDataStream::ReadU16()
 {
-	eU32 result = 0;
-	for(eU32 i = 0; i < 5; i++) {
-		eU32 cur = readBits(8);
-		result |= (cur & 0x0000007F) << (i * 7);
-		if((cur & 0x00000080) == 0) 
-			break;
-	}
-	return result;
+    return (eU16)ReadBits(16);
 }
 
-eU16 eDataStream::readU16()
+eU32 eDataStream::ReadU32()
 {
-    return readBits(16);
-}
-
-eU32 eDataStream::readU32()
-{
-    return readBits(32);
-}
-
-// reads elias gamma encoded integer
-eU32 eDataStream::readVbr()
-{
-    eInt bitCount = 0;
-    while (!readBit())
-        bitCount++;
-
-    eU32 dword = 0;
-    for (eInt i=bitCount-1; i>=0; i--)
-        eSetBit(dword, i, readBit());
-
-    eSetBit(dword, bitCount, eTRUE);
-    return dword-1; // because of +1 when encoding
-}
-
-eByteArray eDataStream::getData() const
-{
-    eByteArray finalData = m_data;
-    finalData.append(m_curByte);
-    return finalData;
-}
-
-eU32 eDataStream::getReadIndex() const
-{
-    return m_readIndex;
-}
-
-eU32 eDataStream::getWriteIndex() const
-{
-    return m_data.size();
+    return (eU32)ReadBits(32);
 }

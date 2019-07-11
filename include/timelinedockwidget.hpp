@@ -44,7 +44,7 @@ protected slots:
 private:
     Ui::TimelineDockWidget *ui;
 
-    Project* project;
+    Project* m_project;
 };
 
 #endif

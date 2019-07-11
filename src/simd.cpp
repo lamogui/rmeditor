@@ -1,16 +1,23 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- *   This file is part of
- *       ______        _                             __ __
- *      / ____/____   (_)____ _ ____ ___   ____ _   / // /
- *     / __/  / __ \ / // __ `// __ `__ \ / __ `/  / // /_
- *    / /___ / / / // // /_/ // / / / / // /_/ /  /__  __/
- *   /_____//_/ /_//_/ \__, //_/ /_/ /_/ \__,_/     /_/.   
- *                    /____/                              
- *
- *   Copyright © 2003-2012 Brain Control, all rights reserved.
- *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+ ---------------------------------------------------------------------
+ Tunefish 4  -  http://tunefish-synth.com
+ ---------------------------------------------------------------------
+ This file is part of Tunefish.
+
+ Tunefish is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Tunefish is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Tunefish.  If not, see <http://www.gnu.org/licenses/>.
+ ---------------------------------------------------------------------
+ */
 
 #include "system.hpp"
 
@@ -28,9 +35,9 @@ void eSimdSetArithmeticFlags(eInt flags)
     static const eU16 DEFAULT_FLAGS = 0x1f80;
 
     eU16 mxcsr = DEFAULT_FLAGS;
-    eSetBit(mxcsr, 15, flags&eSAF_FTZ);
-    eSetBit(mxcsr,  6, flags&eSAF_DAZ);
-    eSetBit(mxcsr, 13, (flags&eSAF_RN) || (flags&eSAF_RTZ));
-    eSetBit(mxcsr, 14, (flags&eSAF_RP) || (flags&eSAF_RTZ));
+    eModifyBit(mxcsr, 15, (flags&eSAF_FTZ) != 0);
+    eModifyBit(mxcsr,  6, (flags&eSAF_DAZ) != 0);
+    eModifyBit(mxcsr, 13, (flags&eSAF_RN) || (flags&eSAF_RTZ));
+    eModifyBit(mxcsr, 14, (flags&eSAF_RP) || (flags&eSAF_RTZ));
     _mm_setcsr(mxcsr);
 }

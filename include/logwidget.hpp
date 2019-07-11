@@ -18,13 +18,13 @@ public slots:
   void writeWarning(QString txt);
   void writeError(QString txt);
 
-  inline void setPrintTime(bool e) { printTime = e; }
+  inline void setPrintTime(bool e) { m_printTime = e; }
 
 signals:
 
 private:
-  bool printTime;
+  bool m_printTime;
 
 };
 
-#endif // !LOGWIDGET_HPP
+#endif // DATA_H

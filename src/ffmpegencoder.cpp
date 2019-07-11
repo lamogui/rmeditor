@@ -93,7 +93,7 @@ void FFmpegEncoder::run()
   connect(_ffmpeg,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(ffmpegFinished(int,QProcess::ExitStatus)));
 
 
-  Music* music = _timeline->getMusic();
+  Music* music = _timeline->music();
   Q_ASSERT(music);
 
   qint64 startFrame = 0;
@@ -105,7 +105,7 @@ void FFmpegEncoder::run()
 
   //Ugly wait the music thread to pause shoud do a better pause func with mutex
   QThread::sleep(1);
-  music->setPosition((double)startFrame/_timeline->getFramerate());
+  music->setPosition((double)startFrame/_timeline->framerate());
 
   size_t audioBufferSize = sizeof(qint16) * 2 * 512;
   size_t videoBufferSize = sizeof(uchar)*_resolution.width()*_resolution.height()*3;
@@ -129,7 +129,7 @@ void FFmpegEncoder::run()
 
   emit logInfo(tr("[ffmpeg] video resolution ") + QString::number(_resolution.width()) + "x" + QString::number(_resolution.height()));
   emit logInfo(tr("[ffmpeg] video buffer size ") + video_recv_buffer_size);
-  emit logInfo(tr("[ffmpeg] audio buffer size ") + QString::number(audioBufferSize));
+  emit logInfo(tr("[ffmpeg] audio buffer size ") + audioBufferSize);
 
   //globals options
   arguments << "-y"; // << "-loglevel" <<  "56";
@@ -139,11 +139,11 @@ void FFmpegEncoder::run()
             << "-f" << "rawvideo"
             << "-pixel_format" << "rgb24"
             << "-s" << res_str
-            << "-r" << QString::number(_timeline->getFramerate())
+            << "-r" << QString::number(_timeline->framerate())
             << "-i" << (QString("tcp://127.0.0.1:1911?listen&listen_timeout=3000&recv_buffer_size=") + video_recv_buffer_size);
 
   //audio input arguments
-#ifndef Q_OS_LINUX
+#if 0 //ndef Q_OS_LINUX
   arguments << "-f" << "s16le"
             << "-ar" << "44100"
             << "-ac" << "2"
@@ -163,7 +163,7 @@ void FFmpegEncoder::run()
   if (!_ffmpeg->waitForStarted(3000))
   {
     emit logError(tr("Error unable to start ffmpeg: ") + _ffmpeg->errorString());
-    //QMessageBox::critical(nullptr,"ffmpeg error",tr("Error unable to start ffmpeg: ") + _ffmpeg.errorString());
+    //QMessageBox::critical(NULL,"ffmpeg error",tr("Error unable to start ffmpeg: ") + _ffmpeg.errorString());
     QCoreApplication::processEvents();
     delete _ffmpeg;
     return;
@@ -176,7 +176,7 @@ void FFmpegEncoder::run()
   if (!videoSocket.waitForConnected(3000))
   {
     emit logError(tr("Error can't connect video to ffmpeg server: ") + videoSocket.errorString());
-    //QMessageBox::critical(nullptr,"ffmpeg error",tr("Error can't connect video to ffmpeg server: ") + videoSocket.errorString());
+    //QMessageBox::critical(NULL,"ffmpeg error",tr("Error can't connect video to ffmpeg server: ") + videoSocket.errorString());
     QCoreApplication::processEvents();
     delete _ffmpeg;
     return;
@@ -187,13 +187,14 @@ void FFmpegEncoder::run()
   {
     emit requestRendering(_resolution,&image); //SHOULD BE BLOCKING
     image = image.convertToFormat(QImage::Format_RGB888);
+    //image.save("0.png");
 
     Q_ASSERT(image.size() == _resolution);
     Q_ASSERT(image.byteCount() == videoBufferSize);
 
     qint64 writted = 0;
     size_t tot_writted = 0;
-    while (writted != (qint64)-1 && (tot_writted += writted) != image.byteCount())
+    while (writted !=-1 && (tot_writted += writted) != image.byteCount())
     {
       writted = videoSocket.write((char*)(image.bits() + tot_writted),image.byteCount()-tot_writted);
     }
@@ -205,7 +206,7 @@ void FFmpegEncoder::run()
     if (writted == - 1)
     {
       emit logError(tr("VIDEO TCP SOCKET ERROR: ") + videoSocket.errorString());
-      //QMessageBox::critical(nullptr,tr("VIDEO TCP SOCKET ERROR"), videoSocket.errorString());
+      //QMessageBox::critical(NULL,tr("VIDEO TCP SOCKET ERROR"), videoSocket.errorString());
       QCoreApplication::processEvents();
       delete _ffmpeg;
       return;
@@ -214,14 +215,14 @@ void FFmpegEncoder::run()
     QCoreApplication::processEvents();
   }
 
-#ifndef Q_OS_LINUX
+#if 0 //ndef Q_OS_LINUX
   //connect audio socket
   audioSocket.setSocketOption(QAbstractSocket::SendBufferSizeSocketOption, (qulonglong)audioBufferSize);
   audioSocket.connectToHost(QHostAddress("127.0.0.1"),777);
   if (!audioSocket.waitForConnected(3000))
   {
     emit logError(tr("Error can't connect audio to ffmpeg server: ") + audioSocket.errorString());
-    //QMessageBox::critical(nullptr,"ffmpeg error",tr("Error can't connect audio to ffmpeg server: ") + audioSocket.errorString());
+    //QMessageBox::critical(NULL,"ffmpeg error",tr("Error can't connect audio to ffmpeg server: ") + audioSocket.errorString());
     QCoreApplication::processEvents();
     delete _ffmpeg;
     return;
@@ -230,13 +231,13 @@ void FFmpegEncoder::run()
 
   //Lets' go !
   void* outputBuffer = malloc(audioBufferSize);
-  for (size_t i = startFrame + 1; !_cancel && (qint64)i < endFrame; ++i)
+  for (size_t i = startFrame + 1; !_cancel && i < endFrame; ++i)
   {
-    double track_time = (double)i/_timeline->getFramerate();
+    double track_time = (double)i/_timeline->framerate();
     while (track_time >= music->getTime())
     {
       music->processAudio(outputBuffer,512,track_time,0);
-#ifndef Q_OS_LINUX
+#if 0 //ndef Q_OS_LINUX
       qint64 writted = 0;
       size_t tot_writted = 0;
       while (writted !=-1 && (tot_writted += writted) != audioBufferSize) //love ugly loop conditions <333
@@ -247,7 +248,7 @@ void FFmpegEncoder::run()
       if (writted == - 1)
       {
         emit logError(tr("AUDIO TCP SOCKET ERROR: ") + audioSocket.errorString());
-        //QMessageBox::critical(nullptr,tr("AUDIO TCP SOCKET ERROR"), audioSocket.errorString());
+        //QMessageBox::critical(NULL,tr("AUDIO TCP SOCKET ERROR"), audioSocket.errorString());
         break;
       }
 #endif
@@ -256,13 +257,14 @@ void FFmpegEncoder::run()
 
     emit requestRendering(_resolution,&image); //SHOULD BE BLOCKING
     image = image.convertToFormat(QImage::Format_RGB888);
+    //image.save(QString::number(i) + ".png");
 
     Q_ASSERT(image.size() == _resolution);
     Q_ASSERT(image.byteCount() == videoBufferSize);
 
     qint64 writted = 0;
     size_t tot_writted = 0;
-    while (writted != (quint64)-1 && (tot_writted += writted) != image.byteCount())
+    while (writted !=-1 && (tot_writted += writted) != image.byteCount())
     {
       writted = videoSocket.write((char*)(image.bits() + tot_writted),image.byteCount()-tot_writted);
       QCoreApplication::processEvents();
@@ -275,10 +277,10 @@ void FFmpegEncoder::run()
     if (writted == - 1)
     {
       emit logError(tr("VIDEO TCP SOCKET ERROR: ") + videoSocket.errorString());
-      //QMessageBox::critical(nullptr,tr("VIDEO TCP SOCKET ERROR"), videoSocket.errorString());
+      //QMessageBox::critical(NULL,tr("VIDEO TCP SOCKET ERROR"), videoSocket.errorString());
       break;
     }
-    emit newFrameEncoded((int)i);
+    emit newFrameEncoded(i);
     QCoreApplication::processEvents();
   }
 
@@ -296,7 +298,7 @@ void FFmpegEncoder::run()
   if (!_ffmpeg->waitForFinished())
   {
     emit logError(tr("error ffmpeg process not finnished: ") + _ffmpeg->errorString());
-    //QMessageBox::critical(nullptr,tr("ffmpeg error"), _ffmpeg.errorString());
+    //QMessageBox::critical(NULL,tr("ffmpeg error"), _ffmpeg.errorString());
   }
   else
   {

@@ -27,22 +27,21 @@ public slots:
 
        void setRenderer(Renderer* renderer);
 
-       inline void setOnlyShowTexture(bool e) { onlyShowTexture = e;}
+       inline void setOnlyShowTexture(bool e) { m_onlyShowTexture = e;}
        void startUpdateLoop();
        void stopUpdateLoop();
 
 
 
 protected slots:
-       // QGLWidget
-       void mousePressEvent(QMouseEvent* event) override;
-       void mouseReleaseEvent(QMouseEvent* event) override;
-       void mouseMoveEvent(QMouseEvent* event) override;
-       void wheelEvent(QWheelEvent* event) override;
-       void keyPressEvent(QKeyEvent* event) override;
-       void keyReleaseEvent(QKeyEvent* event) override;
+       void mousePressEvent(QMouseEvent* event);
+       void mouseReleaseEvent(QMouseEvent* event);
+       void mouseMoveEvent(QMouseEvent* event);
+       void wheelEvent(QWheelEvent* event);
+       void keyPressEvent(QKeyEvent* event);
+       void keyReleaseEvent(QKeyEvent* event);
 
-       void onRendererDestroy();
+       virtual void onRendererDestroy();
 
 
 
@@ -52,13 +51,13 @@ protected:
        void resizeGL(int width, int height);
 
 
-       QTimer updateTimer;
-       Renderer* renderer;
-       QPointF previousMousePos;
-       QSet<Qt::Key> keysPressed;
-       bool captureMouse;
+       QTimer m_updateTimer;
+       Renderer* m_renderer;
+       QPointF m_previousMousePos;
+       QSet<Qt::Key> m_keysPressed;
+       bool m_captureMouse;
 
-       bool onlyShowTexture;
+       bool m_onlyShowTexture;
 
 };
 

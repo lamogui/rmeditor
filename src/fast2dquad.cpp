@@ -3,7 +3,7 @@
 
 
 
-#define BUFFER_OFFSET(a) ((char*)nullptr + (a))
+#define BUFFER_OFFSET(a) ((char*)NULL + (a))
 struct vec2
 {
     float x,y;
@@ -26,7 +26,7 @@ void Fast2DQuadInit(void)
 	//make the vertex buffer object
   glFuncs.glGenBuffers(1, &vbo);
   glFuncs.glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glFuncs.glBufferData(GL_ARRAY_BUFFER, 4*2*sizeof(float)*2, nullptr, GL_STATIC_DRAW);
+    glFuncs.glBufferData(GL_ARRAY_BUFFER, 4*2*sizeof(float)*2, NULL, GL_STATIC_DRAW);
       glFuncs.glBufferSubData(GL_ARRAY_BUFFER, 0, 4*2*sizeof(float), point);
       glFuncs.glBufferSubData(GL_ARRAY_BUFFER, 4*2*sizeof(float), 4*2*sizeof(float), uv);
   glFuncs.glBindBuffer(GL_ARRAY_BUFFER, 0);

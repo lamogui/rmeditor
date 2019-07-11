@@ -7,11 +7,11 @@
 
 Timeline::Timeline(Music &music, double height, double framerate, LogWidget &log):
   QGraphicsScene(&music),
-  height(height),
-  framerate(framerate),
-  music(&music)
+  m_height(height),
+  m_framerate(framerate),
+  m_music(&music)
 {
-  setSceneRect(0,0,this->music->getLength()*framerate,height);
+  setSceneRect(0,0,m_music->length()*framerate,height);
 
   connectLog(log);
 }
@@ -27,15 +27,15 @@ void Timeline::connectLog(LogWidget &log)
 
 qint64 Timeline::currentFrame() const
 {
-  return (qint64)(getMusic()->getTime()*framerate);
+  return (qint64)(music()->getTime()*m_framerate);
 }
 
 qint64 Timeline::length() const
 {
-  return (qint64)(music->getLength()*framerate);
+  return (qint64)(m_music->length()*m_framerate);
 }
 
 void Timeline::requestFramePosition(qint64 frame)
 {
-  music->setPosition(((double)frame/framerate) + (0.5/framerate));
+  m_music->setPosition(((double)frame/m_framerate) + (0.5/m_framerate));
 }

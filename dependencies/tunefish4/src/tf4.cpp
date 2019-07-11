@@ -1,4 +1,4 @@
-/*
+﻿/*
  ---------------------------------------------------------------------
  Tunefish 4  -  http://tunefish-synth.com
  ---------------------------------------------------------------------
@@ -19,43 +19,11 @@
  ---------------------------------------------------------------------
  */
 
-// use this to dump waveforms after several stages of synthesis for debugging
-//#define eTF_DUMP_DATA 
-
-#ifdef eTF_DUMP_DATA
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#undef min
-#undef max
-#endif
-#endif
-
-#ifdef eENIGMA
-#include "synth.hpp"
-#else
-#include "system.hpp"
 #include "tf4.hpp"
-#endif
-
-#ifndef eCFG_NO_TF
 
 // ------------------------------------------------------------------------------------
 // HELPER FUNCTIONS
 // ------------------------------------------------------------------------------------
-
-void eTfSignalMix16(eS16 *master, eS16 *in, eU32 length)
-{
-	for (eU32 i=0; i<length; i++)
-	{
-		eS32 sample = master[i] + in[i];
-		if (sample < -32768)
-			sample = 32768;
-		if (sample > 32767)
-			sample = 32767;
-		master[i] = static_cast<eS16>(sample);
-	}
-}
 
 eBool eTfSignalMix(eF32 **master, eF32 **in, eU32 length, eF32 volume)
 {
@@ -117,8 +85,8 @@ void eTfSignalToS16(eF32 **sig, eS16 *out, const eF32 gain, eU32 length)
         val = eSimdMin(eSimdMax(eSimdMul(val, const_gain), const_min), const_max);
         eF32 store_val[2];
         eSimdStore2(val, store_val[0], store_val[1]);
-        *dest++ = static_cast<eS16>(eFtoL(store_val[0]));
-        *dest++ = static_cast<eS16>(eFtoL(store_val[1]));
+        *dest++ = eFtoL(store_val[0]);
+        *dest++ = eFtoL(store_val[1]);
     }
 }
 
@@ -148,78 +116,6 @@ void eTfSignalToPeak(eF32 **sig, eF32 *peak_left, eF32 *peak_right, eU32 length)
 
     eSimdStore2(peak, *peak_left, *peak_right);
 }
-
-#ifdef eTF_DUMP_DATA
-
-#ifdef _WIN32
-struct DumpFile
-{
-	HANDLE file;
-	eU32 hash;
-};
-
-static eArray<DumpFile> dumpFiles;
-
-HANDLE eTfGetDumpFileHandle(eChar *name)
-{
-	eU32 hash = eHashStr(name);
-
-	for (eU32 i=0; i<dumpFiles.size(); i++)
-	{
-		if (dumpFiles[i].hash == hash)
-			return dumpFiles[i].file;
-	}
-
-	DumpFile df;
-	df.hash = hash;
-	df.file = CreateFile(name, GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
-	if (df.file == INVALID_HANDLE_VALUE)
-	{
-		df.file = CreateFile(name, GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-		SetFilePointer(df.file, 0, nullptr, FILE_END);
-	}
-	dumpFiles.append(df);
-
-	return df.file;
-}
-
-void eTfDumpClose()
-{
-	for (eU32 i = 0; i<dumpFiles.size(); i++)
-	{
-		CloseHandle(dumpFiles[i].file);
-	}
-
-	dumpFiles.clear();
-}
-
-#endif
-
-void eTfDumpToFile(eChar *name, eTfInstrument &instr, eF32** outputs, eU32 frameSize)
-{
-	eChar finalName[255];
-	eStrClear(finalName);
-	eStrAppend(finalName, name);
-	eStrAppend(finalName, eIntToStr(instr.index));
-	eStrAppend(finalName, ".raw");
-
-	eS16 *s16data = new eS16[frameSize * 2];
-	eTfSignalToS16(outputs, s16data, 1000.0f, frameSize);
-	
-#ifdef _WIN32
-	HANDLE file = eTfGetDumpFileHandle(finalName);
-	WriteFile(file, s16data, frameSize * 4, nullptr, nullptr);
-#else
-	// code non-win32 version if needed
-#endif
-
-	delete[] s16data;
-}
-
-#else
-#define eTfDumpToFile(name, instr, outputs, frameSize)
-#define eTfDumpClose()
-#endif
 
 // ------------------------------------------------------------------------------------
 // ENVELOPE
@@ -256,11 +152,11 @@ eF32 eTfEnvelopeProcess(eTfSynth &synth, eTfInstrument &instr, eTfEnvelope &envS
     eF32 slope = instr.params[paramOffset+4];
 
     eF32 scale = 0.00050f * frameSize * (synth.sampleRate / 44100.0f);
-    eF32 attack = -eLog10(eMax(0.000000001f, ePow(a, 3)) * .94f) * scale;
-	d = eMax(0.000000001f, ePow(d * decayMod, 3));
+    eF32 attack = -eLog10(eMax(0.000000001f, ePow(a, 3.f)) * .94f) * scale;
+    d = eMax(0.000000001f, ePow(d * decayMod, 3.f));
     eF32 decay = eLog10(d * .94f) * 0.25f * scale;
     eF32 sustain = eMin(s, 0.99f);
-    eF32 release = eLog10(eMax(ePow(r, 3), 0.000000001f) * .94f) * 0.25f * scale;
+    eF32 release = eLog10(eMax(ePow(r, 3.f), 0.000000001f) * .94f) * 0.25f * scale;
     eF32 volume = envState.volume;
 
     switch (envState.phase)
@@ -350,20 +246,37 @@ eF32 eTfLfoProcess(eTfSynth &synth, eTfInstrument &instr, eTfLfo &lfoState, eU32
 {
     eF32 freq = instr.params[paramOffset];
     eF32 depth = instr.params[paramOffset+1];
-    eU32 shape = eFtoL(eRoundNearest(instr.params[paramOffset + 2] * (TF_LFOSHAPECOUNT - 1)));
+    eF32 shape = instr.params[paramOffset+2];
 
     eF32 result = 1.0f;
     depth = depth * depth;
     freq = (freq * freq) / synth.sampleRate * frameSize * 50.0f;
 
-    switch (shape)
-    {
-    case 0: result = ((eSin(lfoState.phase) + 1.0f) / 2.0f); break; // sine
-    case 1: result = eMod(lfoState.phase, eTWOPI) / eTWOPI; break;  // ramp up
-    case 2: result = 1.0f - (eMod(lfoState.phase, eTWOPI) / eTWOPI); break; // ramp down
-    case 3: result = (lfoState.phase < ePI) ? 1.0f : 0.0f; break; // square
-    case 4: result = synth.lfoNoiseTable[eFtoL(lfoState.phase / (ePI * 2) * TF_LFONOISETABLESIZE)]; break; // noise
-    }
+#ifdef eCFG_NO_TF_LFO_SINE
+	if (shape < 0.2f)       { }
+#else
+    if (shape < 0.2f)       result = ((eSin(lfoState.phase) + 1.0f) / 2.0f);
+#endif
+#ifdef eCFG_NO_TF_LFO_SAWDOWN
+    else if (shape < 0.4f)  { }
+#else
+	else if (shape < 0.4f)  result = eMod(lfoState.phase, eTWOPI) / eTWOPI;
+#endif
+#ifdef eCFG_NO_TF_LFO_SAWUP
+	else if (shape < 0.6f)  { }
+#else
+	else if (shape < 0.6f)  result = 1.0f - (eMod(lfoState.phase, eTWOPI) / eTWOPI);
+#endif
+#ifdef eCFG_NO_TF_LFO_PULSE
+	else if (shape < 0.8f)  { }
+#else
+	else if (shape < 0.8f)  result = (lfoState.phase < ePI) ? 1.0f : 0.0f;
+#endif
+#ifdef eCFG_NO_TF_LFO_NOISE
+	else                    { }
+#else
+	else                    result = synth.lfoNoiseTable[eFtoL(lfoState.phase / (ePI*2) * TF_LFONOISETABLESIZE)];
+#endif
 
     result = (result * depth) + (1.0f - depth);
 
@@ -518,17 +431,17 @@ void eTfModMatrixPanic(eTfModMatrix &state)
 void eTfGeneratorReset(eTfGenerator &state)
 {
     eRandom rand;
-    rand.SeedRandomly();
+    rand.seedRandomly();
 
     for(eU32 i=0; i<TF_MAXUNISONO; i++)
 	{
-        eF32 base = rand.NextFloat();
-		eF32 off = rand.NextFloat()*0.1f;
+        eF32 base = rand.nextFloat();
+		eF32 off = rand.nextFloat()*0.1f;
         state.phase[i*2] = base;
 		state.phase[i*2+1] = base+off;
 	}
 
-    state.modulation = rand.NextFloat(0.0f, 100.0f);
+    state.modulation = rand.nextFloat(0.0f, 100.0f);
     state.freq1 = state.freq2 = 0.0f;
 }
 
@@ -573,7 +486,7 @@ void eTfGeneratorNormalize(eF32 *buffer, eU32 frameSize)
 	}
 }
 
-void eTfGeneratorFft(eTfFftType type, eU32 frameSize, eF32 *fftBuffer)
+void eTfGeneratorFft(eTfSynth &synth, eTfFftType type, eU32 frameSize, eF32 *fftBuffer)
 {
     eInt sign = (eInt)type;
     eF32 wr, wi, arg, *p1, *p2, temp;
@@ -721,7 +634,7 @@ void eTfGeneratorUpdate(eTfSynth &synth, eTfInstrument &instr, eTfVoice &voice, 
     }
 }
 
-eBool eTfGeneratorModulate(eTfSynth &synth, eTfInstrument &instr, eTfGenerator &generator)
+eBool eTfGeneratorModulate(eTfSynth &synth, eTfInstrument &instr, eTfVoice &voice, eTfGenerator &generator)
 {
     if (eIsFloatZero(generator.modulation))
         return eFALSE;
@@ -730,7 +643,6 @@ eBool eTfGeneratorModulate(eTfSynth &synth, eTfInstrument &instr, eTfGenerator &
     eU32 frameSizeHalf = frameSize / 2;
 
     eF32 random = instr.params[TF_GEN_MODULATION];
-    eBool randomizationOn = !eIsFloatZero(instr.params[TF_GEN_MODULATION]);
     eF32 modulation = ePow(random, 3);
 
     eF32 *readPtr = generator.freqTable;
@@ -739,10 +651,10 @@ eBool eTfGeneratorModulate(eTfSynth &synth, eTfInstrument &instr, eTfGenerator &
 
     for (eU32 i=0; i<frameSizeHalf; i++)
     {
-        eF32 modulationStrength = static_cast<eF32>(i) / static_cast<eF32>(frameSizeHalf);
+        eF32 modulationStrength = (eF32)i / (eF32)frameSizeHalf;
 
         eF32 sineOffset = 0.0f;
-        if (randomizationOn)
+        if (instr.params[TF_GEN_MODULATION])
             sineOffset = (generator.modulation * TF_FRAMESIZE) * (1.0f - (random * *randPtr++));
 
         eU32 sinLookup = eFtoL(sineOffset * modulationStrength) % TF_FRAMESIZE;
@@ -756,8 +668,6 @@ eBool eTfGeneratorModulate(eTfSynth &synth, eTfInstrument &instr, eTfGenerator &
     generator.freqModTable[1] = 0.0f;
 
     generator.modulation += modulation / 100.0f;
-    if (generator.modulation >= 100.0f)
-        generator.modulation -= 100.0f;
 
     return eTRUE;
 }
@@ -797,11 +707,11 @@ eBool eTfGeneratorProcess(eTfSynth &synth, eTfInstrument &instr, eTfVoice &voice
         drive   *= 32.0f;
         drive   += 1.0f;
         freq    = ePow(freq, 2.0f) * 1000.0f;
-        spread  = ePow(spread, 4.0f) / static_cast<eF32>(synth.sampleRate) * 10.0f;
+        spread  = ePow(spread, 4.0f) / (eF32)synth.sampleRate * 10.0f;
 
         // calculate octave multiplicator
         // -------------------------------------------------
-        eU32 ioctave = eFtoL(eRoundNearest(octave * (TF_MAXOCTAVES-1)));
+        eU32 ioctave = eFtoL(octave * (TF_MAXOCTAVES-1));
         eF32 octave_mul = TF_OCTAVES[ioctave];
 
         // calculate final frequency
@@ -898,10 +808,10 @@ eBool eTfGeneratorProcess(eTfSynth &synth, eTfInstrument &instr, eTfVoice &voice
 void eTfNoiseReset(eTfNoise &state)
 {
     eRandom rand;
-    rand.SeedRandomly();
+    rand.seedRandomly();
 
-    state.offset1 = rand.NextInt(0, TF_NOISETABLESIZE/2);
-    state.offset2 = rand.NextInt(0, TF_NOISETABLESIZE/2);
+    state.offset1 = rand.nextInt(0, TF_NOISETABLESIZE/2);
+    state.offset2 = rand.nextInt(0, TF_NOISETABLESIZE/2);
     state.filterOn = eFALSE;
     state.amount = 0.0f;
 }
@@ -922,7 +832,7 @@ void eTfNoiseUpdate(eTfSynth &synth, eTfInstrument &instr, eTfNoise &state, eTfM
     }
 }
 
-eBool eTfNoiseProcess(eTfSynth &synth, eTfNoise &state, eF32 **signal, eU32 frameSize)
+eBool eTfNoiseProcess(eTfSynth &synth, eTfInstrument &instr, eTfNoise &state, eF32 **signal, eU32 frameSize)
 {
     eF32 *signal1 = signal[0];
     eF32 *signal2 = signal[1];
@@ -989,6 +899,7 @@ void eTfFilterUpdate(eTfSynth &synth, eTfFilter &state, eF32 f, eF32 q, eTfFilte
     else
     {
         f = f * f * 10000.0f + 30.0f;
+        eF32 A = 1.059253725f;
         eF32 w0 = 2.0f * ePI * f / synth.sampleRate;
 
         const eF32 cos_w0 = eCos(w0);
@@ -996,17 +907,25 @@ void eTfFilterUpdate(eTfSynth &synth, eTfFilter &state, eF32 f, eF32 q, eTfFilte
 
         eF32 alpha = sin_w0 * eSinH( eLog10(2.0f)/2.0f * (1.0f - q) * w0/sin_w0 );
 
-        if (type == eTfFilter::FILTER_HP)
+        switch(type)
         {
-            state.b0 = (1.0f + cos_w0) / 2.0f;
-            state.b1 = -(1.0f + cos_w0);
-            state.b2 = state.b0;
-        }
-        else if (type == eTfFilter::FILTER_BP)
-        {
-            state.b0 = sin_w0 / 2.0f;
-            state.b1 = 0.0f;
-            state.b2 = -state.b0;
+            case eTfFilter::FILTER_HP:
+                state.b0 =  (1.0f + cos_w0)/2.0f;
+                state.b1 = -(1.0f + cos_w0);
+                state.b2 =  state.b0;
+                break;
+
+            case eTfFilter::FILTER_BP:
+                state.b0 =  sin_w0 / 2.0f;
+                state.b1 =  0.0f;
+                state.b2 = -state.b0;
+                break;
+
+            /*case eTfFilter::FILTER_NT:
+                state.b0 =  1.0f;
+                state.b1 = -2.0f * cos_w0;
+                state.b2 =  1.0f;
+                break;*/
         }
 
         state.a0 =   1.0f + alpha;
@@ -1154,8 +1073,6 @@ void eTfVoiceReset(eTfVoice &state)
 {
     state.noteIsOn = eFALSE;
     state.playing = eFALSE;
-	state.pitchBendSemitones = 0.0f;
-	state.pitchBendCents = 0.0f;
     eTfModMatrixReset(state.modMatrix);
     eTfGeneratorReset(state.generator);
     eTfNoiseReset(state.noiseGen);
@@ -1164,11 +1081,11 @@ void eTfVoiceReset(eTfVoice &state)
 void eTfVoiceNoteOn(eTfVoice &state, eS32 note, eS32 velocity, eF32 lfoPhase1, eF32 lfoPhase2)
 {
     eRandom rand;
-    rand.SeedRandomly();
+    rand.seedRandomly();
 
     state.currentNote = note;
     state.currentVelocity = velocity;
-    state.currentSlop = rand.NextFloat(-1.0f, 1.0f);
+    state.currentSlop = rand.nextFloat(-1.0f, 1.0f);
     state.noteIsOn = eTRUE;
     state.time = 0;
 	state.lastVolL = 0.0f;
@@ -1202,16 +1119,8 @@ void eTfVoicePanic(eTfVoice &state)
 // INSTRUMENT
 // ------------------------------------------------------------------------------------
 
-#ifdef eTF_DUMP_DATA
-static eU32 instrIndex = 0;
-#endif
-
-void eTfInstrumentInit(eTfInstrument &instr)
+void eTfInstrumentInit(eTfSynth &synth, eTfInstrument &instr)
 {
-#ifdef eTF_DUMP_DATA
-	instr.index = instrIndex++;
-#endif
-
     instr.lfo1Phase = instr.lfo2Phase = 0.0f;
 
     for(eU32 i=0; i<TF_MAXEFFECTS; i++)
@@ -1224,25 +1133,7 @@ void eTfInstrumentInit(eTfInstrument &instr)
         eTfVoiceReset(instr.voice[i]);
 }
 
-void eTfInstrumentFree(eTfInstrument &instr)
-{
-    for (eU32 i = 0; i < TF_MAXEFFECTS; i++)
-    {
-        eTfEffect *fx = instr.effects[i];
-        eU32 fxIndex = instr.effectIndex[i];
-
-        if (fxIndex != 0)
-        {
-            s_effectDelete[fxIndex](fx);
-            instr.effects[i] = fx = nullptr;
-            instr.effectIndex[i] = 0;
-        }
-    }
-
-	eTfDumpClose();
-}
-
-eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs, eU32 frameSize)
+eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs, long frameSize)
 {
     eSimdSetArithmeticFlags(eSAF_FTZ);
     eASSERT(frameSize <= TF_MAXFRAMESIZE);
@@ -1276,14 +1167,8 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
 
             //  RUN NOISE GEN
             // -------------------------------------------------------------------------------
-#ifndef eCFG_NO_TF_NOISEGEN
             eTfNoiseUpdate(synth, instr, voice.noiseGen, voice.modMatrix, velocity);
-            eTfNoiseProcess(synth, voice.noiseGen, tempBuffers, frameSize);
-			eTfDumpToFile("tf_after_noise", instr, tempBuffers, frameSize);
-#else
-			eMemSet(tempBuffers[0], 0, sizeof(eF32) * frameSize);
-			eMemSet(tempBuffers[1], 0, sizeof(eF32) * frameSize);
-#endif
+            eTfNoiseProcess(synth, instr, voice.noiseGen, tempBuffers, frameSize);
 
             //  CALCULATE FREQUENCY
             // -------------------------------------------------------------------------------
@@ -1293,8 +1178,8 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
 
             // Pitch wheel calculation
             // -------------------------------------------------------------------------------
-            eU32 semiTonesUp = eFtoL(instr.params[TF_PITCHWHEEL_UP] * 12.0f + 1.0f);
-            eU32 semiTonesDown = eFtoL(instr.params[TF_PITCHWHEEL_DOWN] * 12.0f + 1.0f);
+            eU32 semiTonesUp = eFtoL(instr.params[TF_PITCHWHEEL_UP] * 23.0f + 1.0f);
+            eU32 semiTonesDown = eFtoL(instr.params[TF_PITCHWHEEL_DOWN] * 23.0f + 1.0f);
             while (semiTonesUp--) { nextFreq *= TF_12TH_ROOT_OF_2; }
             while (semiTonesDown--) { prevFreq *= (1.0f / TF_12TH_ROOT_OF_2); }
             baseFreq = eLerp(prevFreq, baseFreq, eClamp<eF32>(0.0f, voice.pitchBendSemitones + 1.0f, 1.0f));
@@ -1319,7 +1204,6 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
 
             //  RUN GENERATOR
             // -------------------------------------------------------------------------------
-#ifndef eCFG_NO_TF_GENERATOR
             if (voice.time % 4 == 1) // reduce cpu hit a bit. recalculate not more than every 4th frame
             {
                 eF32 freqRange = eClamp<eF32>(0.0f, (voice.currentFreq-8.0f) / 2000.0f, 1.0f);
@@ -1327,22 +1211,23 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
                 invFreqRange = ePow(invFreqRange, 3.0f);
                 eTfGeneratorUpdate(synth, instr, voice, voice.generator, invFreqRange);
 
-                if (eTfGeneratorModulate(synth, instr, voice.generator))
+                if (eTfGeneratorModulate(synth, instr, voice, voice.generator))
                     eMemCopy(voice.generator.resultTable, voice.generator.freqModTable, TF_IFFT_FRAMESIZE * sizeof(eF32) * 2);
                 else
                     eMemCopy(voice.generator.resultTable, voice.generator.freqTable, TF_IFFT_FRAMESIZE * sizeof(eF32) * 2);
 
-                eTfGeneratorFft(IFFT, TF_IFFT_FRAMESIZE, voice.generator.resultTable);
+                eTfGeneratorFft(synth, IFFT, TF_IFFT_FRAMESIZE, voice.generator.resultTable);
                 eTfGeneratorNormalize(voice.generator.resultTable, TF_IFFT_FRAMESIZE);
             }
 
             eTfGeneratorProcess(synth, instr, voice, voice.generator, velocity, tempBuffers, frameSize);
-			eTfDumpToFile("tf_after_generator", instr, tempBuffers, frameSize);
-#endif
+
+            //  RUN VOICE SYNTHESIS
+            // -------------------------------------------------------------------------------
+            //eTfVocSynGenerate(synth, *synth.vocSyn, voice.vocState, (voice.time / 100) % 5, velocity, tempBuffers, frameSize);
 
             //  RUN LOWPASS FILTER
             // -------------------------------------------------------------------------------
-#ifndef eCFG_NO_TF_LOWPASS_FILTER
             if (instr.params[TF_LP_FILTER_ON] > 0.5f)
             {
                 eF32 lpCutoff = instr.params[TF_LP_FILTER_CUTOFF];
@@ -1353,14 +1238,10 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
 
                 eTfFilterUpdate(synth, *voice.filterLP, lpCutoff, lpResonance, eTfFilter::FILTER_LP);
                 eTfFilterProcess(*voice.filterLP, eTfFilter::FILTER_LP, tempBuffers, frameSize);
-
-				eTfDumpToFile("tf_after_lp", instr, tempBuffers, frameSize);
             }
-#endif
 
             //  RUN HIGHPASS FILTER
             // -------------------------------------------------------------------------------
-#ifndef eCFG_NO_TF_HIGHPASS_FILTER
             if (instr.params[TF_HP_FILTER_ON] > 0.5f)
             {
                 eF32 hpCutoff = instr.params[TF_HP_FILTER_CUTOFF];
@@ -1371,14 +1252,10 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
 
                 eTfFilterUpdate(synth, *voice.filterHP, hpCutoff, hpResonance, eTfFilter::FILTER_HP);
                 eTfFilterProcess(*voice.filterHP, eTfFilter::FILTER_HP, tempBuffers, frameSize);
-
-				eTfDumpToFile("tf_after_hp", instr, tempBuffers, frameSize);
             }
-#endif
 
             //  RUN BANDPASS FILTER
             // -------------------------------------------------------------------------------
-#ifndef eCFG_NO_TF_BANDPASS_FILTER
             if (instr.params[TF_BP_FILTER_ON] > 0.5f)
             {
                 eF32 bpCutoff = instr.params[TF_BP_FILTER_CUTOFF];
@@ -1389,14 +1266,10 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
 
                 eTfFilterUpdate(synth, *voice.filterBP, bpCutoff, bpQ, eTfFilter::FILTER_BP);
                 eTfFilterProcess(*voice.filterBP, eTfFilter::FILTER_BP, tempBuffers, frameSize);
-
-				eTfDumpToFile("tf_after_bp", instr, tempBuffers, frameSize);
             }
-#endif
 
             //  RUN NOTCH FILTER
             // -------------------------------------------------------------------------------
-#ifndef eCFG_NO_TF_NOTCH_FILTER
             if (instr.params[TF_NT_FILTER_ON] > 0.5f)
             {
                 eF32 ntCutoff = instr.params[TF_NT_FILTER_CUTOFF];
@@ -1407,10 +1280,7 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
 
                 eTfFilterUpdate(synth, *voice.filterNT, ntCutoff, ntQ, eTfFilter::FILTER_NT);
                 eTfFilterProcess(*voice.filterNT, eTfFilter::FILTER_NT, tempBuffers, frameSize);
-
-				eTfDumpToFile("tf_after_nt", instr, tempBuffers, frameSize);
             }
-#endif
 
             // MIX SIGNAL
             // ------------------------------------------------------------------------------
@@ -1419,11 +1289,8 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
         }
     }
 
-	eTfDumpToFile("tf_after_mix", instr, outputs, frameSize);
-
     //    RUN EFFECTS
     // ------------------------------------------------------------------------------
-#ifndef eCFG_NO_TF_FX
     if (instr.effectsInactiveTime < TF_EFFECT_SWITCHOFF_TIME)
     {
         for(eU32 i=0;i<TF_MAXEFFECTS;i++)
@@ -1454,10 +1321,6 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
         }
     }
 
-	eTfDumpToFile("tf_after_fx", instr, outputs, frameSize);
-#endif
-
-#ifndef eCFG_NO_TF_PEAK
     eF32 peak_left = 0.0f;
     eF32 peak_right = 0.0f;
     eTfSignalToPeak(outputs, &peak_left, &peak_right, frameSize);
@@ -1467,9 +1330,6 @@ eF32 eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs,
         instr.effectsInactiveTime += (eF32)frameSize / synth.sampleRate;
 
     return peak;
-#else
-	return 0.0f;
-#endif
 }
 
 void eTfInstrumentNoteOn(eTfInstrument &instr, eS32 note, eS32 velocity)
@@ -1562,7 +1422,7 @@ eU32 eTfInstrumentAllocateVoice(eTfInstrument &instr)
         }
     }
 
-    return static_cast<eU32>(chosen);
+    return (eU32)chosen;
 }
 
 // ------------------------------------------------------------------------------------
@@ -1572,12 +1432,12 @@ eU32 eTfInstrumentAllocateVoice(eTfInstrument &instr)
 void eTfSynthInit(eTfSynth &synth)
 {
     eRandom rand;
-    rand.SeedRandomly();
+    rand.seedRandomly();
 
     for (eU32 i=0; i<TF_MAXFRAMESIZE; i++)
     {
-        synth.randomBuffer[i] = eSin(rand.NextFloat(0.0f, eTWOPI));
-        synth.sinBuffer[i] = eSin(static_cast<eF32>(i) / TF_MAXFRAMESIZE * 2 * ePI);
+        synth.randomBuffer[i] = eSin(rand.nextFloat(0.0f, eTWOPI));
+        synth.sinBuffer[i] = eSin((eF32)i / TF_MAXFRAMESIZE * 2 * ePI);
         synth.expBuffer[i] = eExp(-(5.0f / TF_MAXFRAMESIZE * i));
     }
 
@@ -1589,23 +1449,23 @@ void eTfSynthInit(eTfSynth &synth)
 
     for (eU32 i = 0; i < TF_NUMFREQS; i++)    // 128 midi notes
     {
-        synth.freqTable[i] = static_cast<eF32>(a);
+        synth.freqTable[i] = (eF32)a;
         a *= TF_12TH_ROOT_OF_2;
     }
 
     for (eU32 i=0;i<TF_LFONOISETABLESIZE;i++)
     {
-        synth.lfoNoiseTable[i] = rand.NextFloat(0.0f, 1.0f);
+        synth.lfoNoiseTable[i] = rand.nextFloat(0.0f, 1.0f);
     }
-
-    const eInt q = 15;
-    const eF32 c1 = (1 << q) - 1;
-    const eF32 c2 = static_cast<eF32>(eFtoL(c1 / 3.0f)) + 1;
-    const eF32 c3 = 1.f / c1;
 
     for (eU32 i=0;i<TF_NOISETABLESIZE;i++)
     {
-        eF32 random = rand.NextFloat(0.0f, 1.0f);
+        const static eInt q = 15;
+        const static eF32 c1 = (1 << q) - 1;
+        const static eF32 c2 = (eF32)(eFtoL(c1 / 3)) + 1;
+        const static eF32 c3 = 1.f / c1;
+
+        eF32 random = rand.nextFloat(0.0f, 1.0f);
         synth.whiteNoiseTable[i] = (2.f * ((random * c2) + (random * c2) + (random * c2)) - 3.f * (c2 - 1.f)) * c3;
     }
 
@@ -1613,5 +1473,207 @@ void eTfSynthInit(eTfSynth &synth)
         synth.instr[j] = nullptr;
 
 }
+// ------------------------------------------------------------------------------------
+// SYNTH
+// ------------------------------------------------------------------------------------
 
-#endif
+void eTfPlayerInit(eTfPlayer &player, eU32 sampleRate)
+{
+    eTfSynthInit(player.synth);
+    player.synth.sampleRate = sampleRate;
+    player.song.instrCount = 0;
+    player.playing = eFALSE;
+    player.volume = 0.1f;
+}
+
+void eTfPlayerLoadSong(eTfPlayer &player, const eU8 *data, eU32 len, eF32 delay)
+{
+    eTfPlayerUnloadSong(player);
+    if (!len) return;
+
+    eDataStream stream(data, len);
+
+    eTfSong &song = player.song;
+    eTfSynth &synth = player.synth;
+
+    eU16 eventCounts[TF_MAX_INSTR];
+    song.instrCount = stream.readU16();
+    song.tempo = stream.readU16();
+
+    // calculate speed values
+    const eU32 rows_per_beat = stream.readU16();
+    const eU32 rows_per_min = song.tempo * rows_per_beat;
+    const eF32 rows_per_sec = (eF32)rows_per_min / 60.0f;
+    const eF32 secs_per_row = 1.0f / rows_per_sec;
+
+    //  init instruments & event arrays
+    // -----------------------------------------------------------------------------------------
+    for (eU32 i=0; i<song.instrCount; i++)
+    {
+        synth.instr[i] = new eTfInstrument;
+        eTfInstrumentInit(synth, *synth.instr[i]);
+        eventCounts[i] = stream.readU16();
+        song.events[i].resize(eventCounts[i] * sizeof(eTfEvent));
+    }
+
+    //  read instruments
+    // -----------------------------------------------------------------------------------------
+    eU32 tagInst = stream.readU32();
+    eASSERT(eMemEqual(&tagInst, "INST", 4));
+
+  // grouped by instrument
+  for (eU32 j=0; j<song.instrCount; j++)
+    {
+        for (eU8 i=0; i<TF_PARAM_COUNT; i++)
+        {
+            eF32 p = (eF32)stream.readU8()/100.0f;
+            synth.instr[j]->params[i] = p;
+        }
+    }
+  /*
+  // grouped by paramindex
+  for (eU8 i=0; i<TF_PARAM_COUNT; i++)
+    {
+        for (eU32 j=0; j<song.instrCount; j++)
+        {
+            eF32 p = (eF32)stream.readU8()/100.0f;
+            synth.instr[j]->params[i] = p;
+        }
+    }
+  */
+
+    //  read song
+    // -----------------------------------------------------------------------------------------
+    eU32 tagSong = stream.readU32();
+    eASSERT(eMemEqual(&tagSong, "SONG", 4));
+
+    for (eU32 j=0; j<song.instrCount; j++)
+    {
+        eArray<eTfEvent> &events = song.events[j];
+
+        // read times
+        eU32 row = 0;
+        for(eU32 i=0; i<eventCounts[j]; i++)
+        {
+            eU32 diff = stream.readU16();
+            row += diff;
+            events[i].time = (eF32)row * secs_per_row + delay;
+        }
+
+        // read notes
+        for(eU32 i=0; i<eventCounts[j]; i++)
+        {
+            events[i].note = stream.readU8();
+        }
+
+        // read velocities
+        for(eU32 i=0; i<eventCounts[j]; i++)
+        {
+            events[i].velocity = stream.readU8();
+        }
+    }
+
+    eU32 tagEnd = stream.readU32();
+    eASSERT(eMemEqual(&tagEnd, "ENDS", 4));
+}
+
+void eTfPlayerUnloadSong(eTfPlayer &player)
+{
+    for (eU32 i=0; i<TF_MAX_INSTR; i++)
+    {
+        player.song.events[i].clear();
+        player.song.instrCount = 0;
+        eDelete(player.synth.instr[i]);
+    }
+}
+
+void eTfPlayerProcess(eTfPlayer &player, const eU8 **output)
+{
+    ePROFILER_FUNC();
+
+    if (!player.playing)
+        return;
+
+    eF32 timeStep = (eF32)TF_FRAMESIZE / player.synth.sampleRate;
+    eF32 nextTime = player.time + timeStep;
+
+    eTfSong &song = player.song;
+    eTfSynth &synth = player.synth;
+
+    for (eU32 j=0; j<song.instrCount; j++)
+    {
+        eArray<eTfEvent> &events = song.events[j];
+
+        for(eU32 i=0; i<events.size(); i++)
+        {
+            eTfEvent &ev = events[i];
+
+            if (ev.time >= player.time && ev.time < nextTime)
+            {
+                if (ev.note && ev.instr >= 0)
+                {
+                    eTfInstrument *instr = synth.instr[j];
+
+                    if (instr)
+                    {
+                        if (!ev.velocity)
+                            eTfInstrumentNoteOff(*instr, ev.note);
+                        else
+                            eTfInstrumentNoteOn(*instr, ev.note, ev.velocity);
+                    }
+                }
+            }
+        }
+    }
+
+    eF32 *tempSignals[2];
+    tempSignals[0] = &player.tempSignal[0];
+    tempSignals[1] = &player.tempSignal[TF_FRAMESIZE];
+
+    eF32 *signals[2];
+    signals[0] = &player.outputSignal[0];
+    signals[1] = &player.outputSignal[TF_FRAMESIZE];
+
+    eMemSet(player.outputSignal, 0, sizeof(eF32)*TF_FRAMESIZE*2);
+
+    //eU32 polyPhony = 0;
+    for (eU32 i=0; i<TF_MAX_INSTR; i++)
+    {
+        eTfInstrument *instr = player.synth.instr[i];
+
+        if (instr)
+        {
+            eMemSet(player.tempSignal, 0, sizeof(eF32)*TF_FRAMESIZE*2);
+            eTfInstrumentProcess(player.synth, *instr, tempSignals, TF_FRAMESIZE);
+            //polyPhony += eTfInstrumentGetPolyphony(*instr);
+            eTfSignalMix(signals, tempSignals, TF_FRAMESIZE, 1.0f);
+        }
+    }
+
+    eTfSignalToS16(signals, player.outputFinal, 10000.0f * TF_MASTER_VOLUME * player.volume, TF_FRAMESIZE);
+    *output = (const eU8*)player.outputFinal;
+
+    player.time = nextTime;
+}
+
+void eTfPlayerStart(eTfPlayer &player, eF32 time)
+{
+    player.time = time;
+    player.playing = eTRUE;
+}
+
+void eTfPlayerStop(eTfPlayer &player)
+{
+    player.playing = eFALSE;
+
+  for (eU32 i=0; i<TF_MAX_INSTR; i++)
+    {
+        eTfInstrument *instr = player.synth.instr[i];
+
+        if (instr)
+        {
+      eTfInstrumentAllNotesOff(*instr);
+    }
+  }
+}
+

@@ -7,34 +7,34 @@
 
 Scene::Scene(const QString &filename, QDomNode node, Framework *framework, LogWidget &log, QObject *parent):
   FragmentShaderCode(filename,node,log,parent),
-  framework(framework),
-  sceneRenderer(new SceneRenderer(*this,1280,720,this))
+  m_framework(framework),
+  m_sceneRenderer(new SceneRenderer(*this,1280,720,this))
 {
-  sceneRenderer->setCamera(&camera);
+  m_sceneRenderer->setCamera(&m_camera);
   load();
 }
 
 Renderer* Scene::getRenderer() const
 {
-  return sceneRenderer;
+  return m_sceneRenderer;
 }
 
 Scene::~Scene()
 {
-  sceneRenderer->setCamera(nullptr);
+  m_sceneRenderer->setCamera(NULL);
 }
 
 
 bool Scene::build(const QString &text)
 {
-  fragmentcode = text;
+  m_fragmentcode = text;
   QString code;
-  if (framework)
+  if (m_framework)
   {
-    code += framework->getText();
+    code += m_framework->text();
     emit startLineNumberChanged(code.count(QChar::LineFeed));
   }
-  code += fragmentcode;
-  return (shader.compil(Shader::getVertexShader(), code.toStdString().c_str()) == SHADER_SUCCESS);
+  code += m_fragmentcode;
+  return (m_shader.compil(Shader::getVertexShader(), code.toStdString().c_str()) == SHADER_SUCCESS);
 }
 

@@ -23,7 +23,7 @@ along with Tunefish.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef eENIGMA
 #include "../system/datastream.hpp"
 #else
-#include "../enigma/datastream.hpp"
+#include "datastream.hpp"
 #endif
 
 void eTfPlayerInit(eTfPlayer &player)
@@ -58,10 +58,10 @@ void eTfPlayerSetSampleRate(eTfPlayer &player, eU32 sampleRate)
 	player.synth.sampleRate = sampleRate;
 }
 
-void eTfPlayerLoadSong(eTfPlayer &player, const eU8 *data, eU32 len, eF32 delay)
+bool eTfPlayerLoadSong(eTfPlayer &player, const eU8 *data, eU32 len, eF32 delay)
 {
 	eTfPlayerUnloadSong(player);
-	if (!len) return;
+    if (!len) return false;
 
 	eDataStream stream(data, len);
 
@@ -136,6 +136,7 @@ void eTfPlayerLoadSong(eTfPlayer &player, const eU8 *data, eU32 len, eF32 delay)
 
 	eU32 tagEnd = stream.ReadU32();
 	eASSERT(eMemEqual(&tagEnd, "ENDS", 4));
+    return true;
 }
 
 void eTfPlayerUnloadSong(eTfPlayer &player)

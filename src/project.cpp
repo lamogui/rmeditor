@@ -9,20 +9,20 @@
 #include "scene.hpp"
 #include "shaderminifier.hpp"
 #include "tunefish4music.hpp"
-#include "4klangmusic.hpp"
+
 
 Project::Project(const QDir &dir, const QString &filename, LogWidget &log, QObject *parent):
   TextEditable(filename, QDomNode() ,log,parent),
-  music(nullptr),
-  demoTimeline(nullptr),
-  dir(dir),
-  log(&log),
-  textUpdateTimer(new QTimer(this))
+  m_music(NULL),
+  m_demoTimeline(NULL),
+  m_dir(dir),
+  m_log(&log),
+  m_textUpdateTimer(new QTimer(this))
 {
   load();
-  textUpdateTimer->setSingleShot(true);
-  textUpdateTimer->setInterval(1000);
-  connect(textUpdateTimer,SIGNAL(timeout()),this,SLOT(computeText()));
+  m_textUpdateTimer->setSingleShot(true);
+  m_textUpdateTimer->setInterval(1000);
+  connect(m_textUpdateTimer,SIGNAL(timeout()),this,SLOT(computeText()));
 }
 
 Project::~Project()
@@ -32,56 +32,56 @@ Project::~Project()
 /*
 bool Project::needTextRefresh() const
 {
-  bool temp = needRefreshText;
-  needRefreshText = false;
+  bool temp = m_needRefreshText;
+  m_needRefreshText = false;
   return temp;
 }
 */
 
-const QString& Project::getText() const
+const QString& Project::text() const
 {
-  return text;
+  return m_text;
 }
 
 void Project::connectLog(LogWidget &log)
 {
-  this->log = &log;
+  m_log=&log;
   TextEditable::connectLog(log);
 }
 
 void Project::resetProject()
 {
-  textUpdateTimer->stop();
-  if (demoTimeline)
+  m_textUpdateTimer->stop();
+  if (m_demoTimeline)
   {
-    emit demoTimelineChanged(nullptr);
-    delete demoTimeline;
+    emit demoTimelineChanged(NULL);
+    delete m_demoTimeline;
   }
-  demoTimeline = nullptr;
-  //text.clear();
-  node = QDomNode();
-  document.clear();
-  //emit objectTextChanged(text);
+  m_demoTimeline = NULL;
+  //m_text.clear();
+  m_node = QDomNode();
+  m_document.clear();
+  //emit objectTextChanged(m_text);
 
-  QList<QString> keys = rmScenes.keys();
+  QList<QString> keys = m_rmScenes.keys();
   foreach (QString key, keys)
   {
-    delete rmScenes[key];
+    delete m_rmScenes[key];
   }
-  rmScenes.clear();
-  keys = frameworks.keys();
+  m_rmScenes.clear();
+  keys = m_frameworks.keys();
   foreach (QString key, keys)
   {
-    delete frameworks[key];
+    delete m_frameworks[key];
   }
-  frameworks.clear();
+  m_frameworks.clear();
 
 
-  if (music)
+  if (m_music)
   {
-    delete music;
+    delete m_music;
   }
-  music = nullptr;
+  m_music = NULL;
 
 }
 
@@ -125,12 +125,12 @@ QString Project::nodeTypeToString(QDomNode::NodeType type)
 bool Project::build(const QString &text)
 {
   resetProject();
-  this->text = text;
+  m_text = text;
   bool buildSuccess = true;
   QString errorMsg;
   int errorLine, errCol;
 
-  if (!document.setContent(text,&errorMsg,&errorLine,&errCol))
+  if (!m_document.setContent(text,&errorMsg,&errorLine,&errCol))
   {
     emit error(QString("[") + fileName() + "]" + QString(" XML Error at line ") +
                QString::number(errorLine) + " col " + QString::number(errCol) + " " + errorMsg);
@@ -138,8 +138,8 @@ bool Project::build(const QString &text)
   }
   else
   {
-    QDomNode node = document.documentElement().firstChild();
-    node = node;
+    QDomNode node = m_document.documentElement().firstChild();
+    m_node = node;
     while (!node.isNull())
     {
       QDomElement element = node.toElement();
@@ -185,7 +185,7 @@ bool Project::build(const QString &text)
       node = node.nextSibling();
     }
   }
-  //needRefreshText = true;
+  //m_needRefreshText = true;
 
   if (buildSuccess)
   {
@@ -205,7 +205,7 @@ bool Project::parseTagFrameworks(QDomNode node)
       QString filename = element.attribute("file");
       QString name = element.attribute("name", filename.section(".",0,-2));
       element.setAttribute("name",name);
-      if (frameworks.contains(name))
+      if (m_frameworks.contains(name))
       {
         emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
                    "(" + element.nodeName() +  ") duplicate framework '" + name + "'");
@@ -222,9 +222,9 @@ bool Project::parseTagFrameworks(QDomNode node)
       else
       {
         emit info(QString("[") + fileName() + "]" + " loading framework '" + name + "' (file: " + filename + ")");
-        frameworks[name] = new Framework(filename,element,*log,this);
-        frameworks[name]->setObjectName(name);
-        emit appendTextEditable(frameworks[name]);
+        m_frameworks[name] = new Framework(filename,element,*m_log,this);
+        m_frameworks[name]->setObjectName(name);
+        emit appendTextEditable(m_frameworks[name]);
       }
     }
     element = element.nextSiblingElement();
@@ -243,7 +243,7 @@ bool Project::parseTagScenes(QDomNode node)
       QString name = element.attribute("name", filename.section(".",0,-2));
       QString framework = element.attribute("framework","");
       element.setAttribute("name",name);
-      if (rmScenes.contains(name))
+      if (m_rmScenes.contains(name))
       {
         emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
                    "(" + element.nodeName() +  ") duplicate scene '" + name + "'");
@@ -255,11 +255,11 @@ bool Project::parseTagScenes(QDomNode node)
       }
       else
       {
-        Framework* fw=nullptr;
+        Framework* fw=NULL;
         if (!framework.isEmpty())
         {
-          auto it = frameworks.find(framework);
-          if (it==frameworks.end())
+          auto it = m_frameworks.find(framework);
+          if (it==m_frameworks.end())
           {
             emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
                        "(" + element.nodeName() +  ")  '" + name + "' need the framework '" + framework + "' loaded before");
@@ -269,9 +269,9 @@ bool Project::parseTagScenes(QDomNode node)
         }
 
         emit info(QString("[") + fileName() + "]" + " loading scene '" + name + "' (file: " + filename + ")");
-        rmScenes[name] = new Scene(filename,element,fw,*log,this);
-        rmScenes[name]->setObjectName(name);
-        emit appendTextEditable(rmScenes[name]);
+        m_rmScenes[name] = new Scene(filename,element,fw,*m_log,this);
+        m_rmScenes[name]->setObjectName(name);
+        emit appendTextEditable(m_rmScenes[name]);
       }
     }
     element = element.nextSiblingElement();
@@ -282,7 +282,7 @@ bool Project::parseTagScenes(QDomNode node)
 bool Project::parseTagMusic(QDomNode node)
 {
   QDomElement element = node.toElement();
-  if (music)
+  if (m_music)
   {
     emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
               "(" + element.nodeName() +  ") multiple music !");
@@ -290,7 +290,12 @@ bool Project::parseTagMusic(QDomNode node)
   }
 
   QString filename = element.attribute("file");
+  QString name = element.attribute("name", filename.section(".",0,-2));
+  QString ext = filename.section(".",-1);
+  element.setAttribute("name",name);
   QString lstr = element.attribute("length","");
+
+
   bool lok = false;
   double length = lstr.toDouble(&lok);
   if (!lok)
@@ -306,25 +311,12 @@ bool Project::parseTagMusic(QDomNode node)
     return false;
   }
 
-#ifdef Q_OS_WIN32
-  if (filename=="4klang") // Special case for 4klang
-  {
-      music = new _4KlangMusic(filename,length,node,*log,this);
-      return music->load() && music->createRtAudioStream();
-  }
-#endif // Q_OS_WIN32
-
-  QString name = element.attribute("name", filename.section(".",0,-2));
-  QString ext = filename.section(".",-1);
-  element.setAttribute("name",name);
-
   if (ext == "tf4m")
   {
-    music = new Tunefish4Music(filename,length,node,*log,this);
+    m_music = new Tunefish4Music(filename,length,node,*m_log,this);
     emit info(QString("[") + fileName() + "]" + " loading music '" + name + "' (file: " + filename + ")");
-    bool s =  music->load();
-    if (s)
-        s = music->createRtAudioStream();
+    bool s =  m_music->load();
+    if (s) s = m_music->createRtAudioStream();
     return s;
   }
   else
@@ -340,13 +332,13 @@ bool Project::parseTagMusic(QDomNode node)
 bool Project::parseTagTimeline(QDomNode node)
 {
   QDomElement element = node.toElement();
-  if (demoTimeline)
+  if (m_demoTimeline)
   {
     emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
               "(" + element.nodeName() +  ") multiple timelines !");
     return false;
   }
-  if (!music)
+  if (!m_music)
   {
     emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
               "(" + element.nodeName() +  ") you need to include a music before include a timeline");
@@ -362,8 +354,8 @@ bool Project::parseTagTimeline(QDomNode node)
               "(" + element.nodeName() +  ") invalid framerate '" + framerate_str + "'");
     return false;
   }
-  demoTimeline = new DemoTimeline(element,*this,framerate,*log);
-  emit demoTimelineChanged(demoTimeline);
+  m_demoTimeline = new DemoTimeline(element,*this,framerate,*m_log);
+  emit demoTimelineChanged(m_demoTimeline);
   return true;
 }
 
@@ -371,24 +363,24 @@ bool Project::parseTagTimeline(QDomNode node)
 Scene* Project::getRayMarchScene(const QString& name) const
 {
   QMap<QString,Scene*>::const_iterator it;
-  it = rmScenes.find(name);
-  if (it !=rmScenes.end())
+  it = m_rmScenes.find(name);
+  if (it !=m_rmScenes.end())
   {
     return it.value();
   }
-  return nullptr;
+  return NULL;
 }
 
 
 Framework* Project::getFramework(const QString& name) const
 {
   QMap<QString,Framework*>::const_iterator it;
-  it = frameworks.find(name);
-  if (it !=frameworks.end())
+  it = m_frameworks.find(name);
+  if (it !=m_frameworks.end())
   {
     return it.value();
   }
-  return nullptr;
+  return NULL;
 }
 
 QString Project::getDefaultProjectText()
@@ -408,14 +400,14 @@ QString Project::getDefaultProjectText()
 
 void Project::notifyDocumentChanged()
 {
-  textUpdateTimer->stop();
-  textUpdateTimer->start();
+  m_textUpdateTimer->stop();
+  m_textUpdateTimer->start();
 }
 
 void Project::computeText()
 {
-  text = document.toString(2);
-  emit objectTextChanged(text);
+  m_text = m_document.toString(2);
+  emit objectTextChanged(m_text);
 }
 
 void Project::destroyNode(QDomNode &node)
@@ -429,9 +421,9 @@ void Project::exportAsLinuxDemo(const QDir &dir) const
   emit info(QString("[") + fileName() + "]" + tr("building linux project into directory: ") + dir.path());
   exportFrameworkSources(dir);
   exportScenesSources(dir);
-  if (demoTimeline)
+  if (m_demoTimeline)
   {
-    demoTimeline->exportSources(dir);
+    m_demoTimeline->exportSources(dir);
   }
 }
 
@@ -458,9 +450,9 @@ void Project::exportFrameworkSources(const QDir &dir) const
   header_code << "#define FRAMEWORKS_H\n\n";
 
   QMap<QString,Framework*>::const_iterator it;
-  for  (it = frameworks.constBegin(); it !=frameworks.constEnd(); it++)
+  for  (it = m_frameworks.constBegin(); it !=m_frameworks.constEnd(); it++)
   {
-    ShaderMinifier minifier(*log);
+    ShaderMinifier minifier(*m_log);
 
     header_code << "extern const char* const fs_" << it.value()->objectName() << ";\n";
     header_code << "extern const unsigned int fs_" << it.value()->objectName() << "_len;\n";
@@ -499,7 +491,7 @@ void Project::exportScenesSources(const QDir &dir) const
   header_code << "#define SCENES_H\n\n";
   header_code << "#include \"frameworks.hpp\"\n";
   header_code << "#include <GL/gl.h>\n\n";
-  header_code << "#define " << scenes_count_str << " " << QString::number(rmScenes.size()) << "\n\n";
+  header_code << "#define " << scenes_count_str << " " << QString::number(m_rmScenes.size()) << "\n\n";
 
   QString scenes_src = "const char* const scenes_src[" +  scenes_count_str + "]";
   QString scenes_framework_src = "const char* const scenes_framework_src[" +  scenes_count_str + "]";
@@ -510,9 +502,9 @@ void Project::exportScenesSources(const QDir &dir) const
   header_code << "extern " << scenes_programs << ";\n"; scenes_programs += " = {\n";
 
   QMap<QString,Scene*>::const_iterator it;
-  for  (it = rmScenes.constBegin(); it !=rmScenes.constEnd(); it++)
+  for  (it = m_rmScenes.constBegin(); it !=m_rmScenes.constEnd(); it++)
   {
-    ShaderMinifier minifier(*log);
+    ShaderMinifier minifier(*m_log);
 
 
 
@@ -541,16 +533,16 @@ void Project::exportScenesSources(const QDir &dir) const
     source_code << "GLuint fs_" << it.value()->objectName() << "_program;\n";
 
     QString comma = ",";
-    if (it == rmScenes.constEnd() - 1)
+    if (it == m_rmScenes.constEnd() - 1)
     {
       comma = "";
     }
 
     scenes_src += "  fs_" + it.value()->objectName() + comma + "\n";
     scenes_programs += "  &fs_" + it.value()->objectName() + "_program" + comma + "\n";
-    if (it.value()->getFramework())
+    if (it.value()->framework())
     {
-      scenes_framework_src += "  fs_" + it.value()->getFramework()->objectName() + comma + "\n";
+      scenes_framework_src += "  fs_" + it.value()->framework()->objectName() + comma + "\n";
     }
     else
     {

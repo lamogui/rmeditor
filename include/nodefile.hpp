@@ -13,7 +13,7 @@ class NodeFile : public QFile
 
 public:
   NodeFile(const QString& filename, QDomNode node, LogWidget& log,QObject* parent);
-  inline QDomNode getNode() const { return node; }
+  inline QDomNode getNode() const { return m_node; }
 
   //Do the connections to log
   virtual void connectLog(LogWidget& log);
@@ -25,7 +25,7 @@ signals:
   void info(QString txt) const;
 
 protected:
-  QDomNode node;
+  QDomNode m_node;
 };
 
 #endif

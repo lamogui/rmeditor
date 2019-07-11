@@ -23,9 +23,9 @@ public:
   DemoRenderer(DemoTimeline&  timeline, size_t w, size_t h);
 
 protected:
-  void glRender() override;
+  virtual void glRender();
 
-  DemoTimeline* timeline;
+  DemoTimeline* m_timeline;
 
 
 };
@@ -38,9 +38,9 @@ class DemoTimeline : public Timeline
 
 public:
   DemoTimeline(QDomElement& node, Project& project, double fps, LogWidget& log);
-  ~DemoTimeline() override;
+  virtual ~DemoTimeline();
 
-  inline QDomElement getNode() const { return node; }
+  inline QDomElement getNode() const { return m_node; }
 
   qint64 sequenceStartFrameChanged(qint64 previous_frame,  Sequence* seq); //return the correct start frame of the seq
   qint64 maxSequenceLengthBeforeOverlap(Sequence* seq) const;
@@ -48,16 +48,17 @@ public:
 
   qint64 addSequence(Sequence* seq); //Return the correct start frame of the seq
   Sequence* isInsideSequence(qint64 frame) const;
+  unsigned int sequenceID(qint64 frame) const;
 
-  inline Renderer* getRenderer() override { return renderer; }
+  inline  virtual Renderer* getRenderer() { return m_renderer; }
 
-  void updateTime() override;
+  virtual void updateTime();
 
 public slots:
   void updateCamera(qint64 frame, Camera& cam);
   inline void updateCamera(Camera& cam) { updateCamera(currentFrame(),cam);}
-  inline void updateCamera(qint64 frame) { updateCamera(frame,camera); }
-  inline void updateCamera() { updateCamera(currentFrame(),camera); }
+  inline void updateCamera(qint64 frame) { updateCamera(frame,m_camera); }
+  inline void updateCamera() { updateCamera(currentFrame(),m_camera); }
 
   void insertCameraKeyframe(qint64 frame, const QVector3D& pos, const QQuaternion& rot);
   void insertCameraKeyframe(const QVector3D& pos, const QQuaternion& rot);
@@ -76,22 +77,22 @@ protected slots:
   void addSequenceAction(QAction* action);
 
 protected:
-  void keyReleaseEvent(QKeyEvent *keyEvent) override;
-  void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+  virtual void keyReleaseEvent(QKeyEvent *keyEvent);
+  virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
 
   void load();
-  bool correctStartFrame(Sequence* seq); //seq must not be in sequences !
+  bool correctStartFrame(Sequence* seq); //seq must not be in m_sequences !
 
 
   bool parseTrackNode(QDomElement& node);
 
-  QDomElement node;
-  Camera camera;
-  double trackHeight;
-  Project* project;
-  DemoRenderer* renderer;
-  QMap<qint64, Sequence*> sequences;
-  QPointF mousePressPos;
+  QDomElement m_node;
+  Camera m_camera;
+  double m_trackHeight;
+  Project* m_project;
+  DemoRenderer* m_renderer;
+  QMap<qint64, Sequence*> m_sequences;
+  QPointF m_mousePressPos;
 
 };
 

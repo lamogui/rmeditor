@@ -5,6 +5,7 @@
 #include "music.hpp"
 #include "system.hpp"
 #include "tf4.hpp"
+#include "tf4player.hpp"
 
 class Tunefish4Music : public Music
 {
@@ -12,32 +13,33 @@ class Tunefish4Music : public Music
 
 public:
   Tunefish4Music(const QString& filename, double length, QDomNode node ,LogWidget& log,QObject* parent);
-  ~Tunefish4Music() override;
+  virtual ~Tunefish4Music();
 
-  double getTime() const override;
+  virtual double getTime() const;
 
-  void exportMusicCData(const QFile& source, const QFile& header) const override;
+  virtual void exportMusicCData(const QFile& source, const QFile& header) const;
 
   /*
     RtAudio stuff
   */
-  bool createRtAudioStream() override;
-  void processAudio(void *outputBuffer, unsigned int nBufferFrames,
-                    double streamTime, RtAudioStreamStatus status) override;
+  virtual bool createRtAudioStream();
+  virtual void processAudio(void *outputBuffer, unsigned int nBufferFrames,
+                            double streamTime, RtAudioStreamStatus status);
 
-  size_t instrumentCount() const { return player.song.instrCount; }
+  size_t instrumentCount() const { return m_player.song.instrCount; }
 
 
 
 public slots:
-  bool load() override;
-  void setPosition(double time) override;
-  void updateTextures() override;
+  virtual bool load();
+  virtual void setPosition(double time);
+  virtual void updateTextures();
 
 protected:
-  eTfPlayer player;
-  std::vector<eF32> noteVelocityBuffer;
-  QMutex mutex;
+  eTfPlayer m_player;
+  std::vector<eF32> m_noteVelocityBuffer;
+  std::vector<eF32> m_maxNoteVelocityBuffer;
+  QMutex m_mutex;
 
 };
 

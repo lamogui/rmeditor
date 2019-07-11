@@ -17,12 +17,12 @@ public:
   TextEditable(const QString& filename, QDomNode node ,LogWidget& log,QObject* parent);
 
   //The text to print in the editor and that will be saved in the file
-  virtual const QString& getText() const = 0;
+  virtual const QString& text() const = 0;
 
 
   //Is the object buildable
   virtual bool buildable() const {return false;}
-  inline virtual Renderer* getRenderer() const {return nullptr;}
+  inline virtual Renderer* getRenderer() const {return NULL;}
 
 public slots:
   //Return true is the file is loaded or created (not if it build correctly)

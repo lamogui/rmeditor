@@ -17,8 +17,8 @@ class Timeline : public QGraphicsScene
 public:
   Timeline(Music& music, double height, double framerate, LogWidget& log);
 
-  inline double getFramerate() const { return framerate; }
-  inline Music* getMusic() const { return music; }
+  inline double framerate() const { return m_framerate; }
+  inline Music* music() const { return m_music; }
   qint64 length() const; //in frames
 
   //Do the connections to log
@@ -26,7 +26,7 @@ public:
 
   qint64 currentFrame() const;
 
-  virtual Renderer* getRenderer() { return nullptr; }
+  virtual Renderer* getRenderer() { return NULL; }
   virtual void updateTime() = 0;
 
 signals:
@@ -38,10 +38,12 @@ public slots:
   void requestFramePosition(qint64 frame);
 
 protected:
-  double height;
-  double framerate;
-  Music* music;
+  double m_height;
+  double m_framerate;
+  Music* m_music;
 
 };
 
-#endif // !TIMELINE_HPP
+
+
+#endif

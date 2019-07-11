@@ -7,10 +7,10 @@
 Renderer::Renderer(size_t w, size_t h, QObject *parent):
   QObject(parent),
   QOpenGLFunctions(QOpenGLContext::currentContext()),
-  fbo(),
-  camera(nullptr)
+  m_fbo(),
+  m_camera(NULL)
 {
-  fbo.setSize(w,h);
+  m_fbo.setSize(w,h);
 }
 
 Renderer::~Renderer()
@@ -21,13 +21,13 @@ Renderer::~Renderer()
 
 void Renderer::resize(size_t width, size_t height)
 {
-  fbo.setSize(width,height);
+  m_fbo.setSize(width,height);
   customResize(width,height);
 }
 
 void Renderer::glRender(size_t width, size_t height)
 {
-  if (width != fbo.getSizeX() || height != fbo.getSizeY())
+  if (width != m_fbo.getSizeX() || height != m_fbo.getSizeY())
   {
     resize(width,height);
   }
@@ -36,9 +36,9 @@ void Renderer::glRender(size_t width, size_t height)
 
 QImage Renderer::getImage()
 {
-  fbo.enable();
-  QImage img = fbo.getImage();
-  fbo.disable();
+  m_fbo.enable();
+  QImage img = m_fbo.getImage();
+  m_fbo.disable();
   return img;
 }
 
@@ -46,41 +46,42 @@ QImage Renderer::getImage()
 
 SceneRenderer::SceneRenderer(Scene &scene, size_t w, size_t h, QObject* parent):
   Renderer(w,h,parent),
-  scene(&scene)
+  m_scene(&scene)
 {
 
 }
 
 void SceneRenderer::glRender()
 {
-  fbo.enable();
+  m_fbo.enable();
 
-  scene->getShader().enable();
+  m_scene->getShader().enable();
 
-  if (camera)
+  if (m_camera)
   {
-    scene->getShader().sendf("cam_position",camera->getPosition().x(),camera->getPosition().y(), camera->getPosition().z());
-    scene->getShader().sendf("cam_rotation",camera->getRotation().x(),camera->getRotation().y(), camera->getRotation().z(), camera->getRotation().scalar());
+    m_scene->getShader().sendf("cam_position",m_camera->position().x(),m_camera->position().y(), m_camera->position().z());
+    m_scene->getShader().sendf("cam_rotation",m_camera->rotation().x(),m_camera->rotation().y(), m_camera->rotation().z(), m_camera->rotation().scalar());
   }
   else
   {
-    scene->getShader().sendf("cam_rotation",0.f,0.f,0.f,1.f);
+    m_scene->getShader().sendf("cam_rotation",0.f,0.f,0.f,1.f);
   }
 
-  scene->getShader().sendf("resolution",(float)fbo.getSizeX(), (float)fbo.getSizeY());
-  scene->getShader().sendf("sequence_time",(float)(sequenceTime.elapsed())/1000.f);
-  scene->getShader().sendf("track_time",(float)(sequenceTime.elapsed())/1000.f);
+  m_scene->getShader().sendf("xy_scale_factor",(float)m_fbo.getSizeX()/(float)m_fbo.getSizeY());
+  m_scene->getShader().sendf("sequence_time",(float)(m_sequenceTime.elapsed())/1000.f);
+  m_scene->getShader().sendf("sequence_id",(float)(0));
+  m_scene->getShader().sendf("track_time",(float)(m_sequenceTime.elapsed())/1000.f);
   Fast2DQuadDraw();
-  scene->getShader().disable();
+  m_scene->getShader().disable();
 
-  fbo.disable();
+  m_fbo.disable();
 }
 
 void SceneRenderer::attachedWidget(RenderWidget *widget)
 {
   if (widget)
   {
-    sequenceTime.restart();
+    m_sequenceTime.restart();
   }
   else
   {

@@ -16,30 +16,32 @@ public:
   virtual void update(GLvoid* pixels) = 0;
   virtual void bind() = 0;
 
-  inline GLuint getId() const { return id; }
+  inline GLuint id() const { return m_id; }
 
 protected:
-  GLuint id;
+  GLuint m_id;
 };
+
+
 
 class Texture2D : public AbstractTexture
 {
 public:
     Texture2D();
 
-    bool create(GLsizei width, GLsizei height, const GLvoid *data = nullptr, GLint internalFormat = GL_RGBA, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
-    void update(GLvoid* pixels) override;
+    bool create(GLsizei width, GLsizei height, const GLvoid *data = NULL, GLint internalFormat = GL_RGBA, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE);
+    virtual void update(GLvoid* pixels);
     bool load(const std::string &path); //Load color 2D texture
-    void bind() override;
+    virtual void bind();
 
-    inline GLsizei getWidth() const { return width; }
-    inline GLsizei getHeight() const { return height; }
+    inline GLsizei width() const { return m_width; }
+    inline GLsizei height() const { return m_height; }
 
 protected:
-    GLsizei width;
-    GLsizei height;
-    GLenum format;
-    GLenum type;
+    GLsizei m_width;
+    GLsizei m_height;
+    GLenum m_format;
+    GLenum m_type;
 };
 
 #endif // TEXTURE_H

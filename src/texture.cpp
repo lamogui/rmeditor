@@ -9,8 +9,9 @@
 
 AbstractTexture::AbstractTexture():
   QOpenGLFunctions(QOpenGLContext::currentContext()),
-  id(-1)
+  m_id(-1)
 {
+     this->initializeOpenGLFunctions();
 }
 
 AbstractTexture::~AbstractTexture()
@@ -20,10 +21,10 @@ AbstractTexture::~AbstractTexture()
 
 void AbstractTexture::destroyTexture()
 {
-  if (id == -1)
+  if (m_id == -1)
   {
-    glDeleteTextures(1 , &id);
-    id = -1;
+    glDeleteTextures(1 , &m_id);
+    m_id = -1;
   }
 }
 
@@ -33,19 +34,19 @@ Texture2D::Texture2D()
 
 void Texture2D::bind()
 {
-    glBindTexture(GL_TEXTURE_2D, id);
+    glBindTexture(GL_TEXTURE_2D, m_id);
 }
 
 bool Texture2D::create(GLsizei width, GLsizei height, const GLvoid *data, GLint internalFormat, GLenum format, GLenum type)
 {
   destroyTexture();
 
-  width = width;
-  height = height;
-  format = format;
-  type = type;
-  glGenTextures( 1, &id );
-  glBindTexture( GL_TEXTURE_2D, id );
+  m_width = width;
+  m_height = height;
+  m_format = format;
+  m_type = type;
+  glGenTextures( 1, &m_id );
+  glBindTexture( GL_TEXTURE_2D, m_id );
   glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -63,7 +64,7 @@ bool Texture2D::load(const std::string &path)
 
     if( !b.load( path.c_str() ) )
     {
-        QMessageBox::critical(nullptr, "Error", QString(QString("Can't load image ")+path.c_str()) );
+        QMessageBox::critical(NULL, "Error", QString(QString("Can't load image ")+path.c_str()) );
         return false;
     }
     t = QGLWidget::convertToGLFormat( b );
@@ -72,9 +73,9 @@ bool Texture2D::load(const std::string &path)
 
 void Texture2D::update(GLvoid *pixels)
 {
-  if (id != -1)
+  if (m_id != -1)
   {
     bind();
-    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,this->getWidth(),this->getHeight(),format,type,pixels);
+    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,this->width(),this->height(),m_format,m_type,pixels);
   }
 }

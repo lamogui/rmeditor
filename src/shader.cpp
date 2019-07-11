@@ -25,7 +25,7 @@ Shader::~Shader()
 //-----------------------------------------------------------------------------
 void Shader::enable()
 {
-  this->glUseProgram(program);
+  this->glUseProgram(m_program);
 }
 void Shader::disable()
 {
@@ -38,23 +38,23 @@ void Shader::disable()
 //-----------------------------------------------------------------------------
 void Shader::sendi(const char *name, int x)
 {
-	glUniform1i(glGetUniformLocation(program,name), x);
+	glUniform1i(glGetUniformLocation(m_program,name), x);
 }
 void Shader::sendf(const char *name, float x)
 {
-	glUniform1f(glGetUniformLocation(program,name), x);
+	glUniform1f(glGetUniformLocation(m_program,name), x);
 }
 void Shader::sendf(const char *name, float x, float y)
 {
-    glUniform2f(glGetUniformLocation(program,name), x,y);
+    glUniform2f(glGetUniformLocation(m_program,name), x,y);
 }
 void Shader::sendf(const char *name, float x, float y, float z)
 {
-    glUniform3f(glGetUniformLocation(program,name), x,y,z);
+    glUniform3f(glGetUniformLocation(m_program,name), x,y,z);
 }
 void Shader::sendf(const char *name, float x, float y, float z, float w)
 {
-	glUniform4f(glGetUniformLocation(program,name), x,y,z,w);
+	glUniform4f(glGetUniformLocation(m_program,name), x,y,z,w);
 }
 
 
@@ -63,19 +63,19 @@ void Shader::sendf(const char *name, float x, float y, float z, float w)
 //-----------------------------------------------------------------------------
 int Shader::compil( const char *vertex, const char *fragment )
 {
-  program = this->glCreateProgram();
+  m_program = this->glCreateProgram();
 	if( !makeShader(vertex, GL_VERTEX_SHADER_ARB) )
     {
-        //QMessageBox::critical(nullptr, "Error", "Can't compil the vertex shader !");
+        //QMessageBox::critical(NULL, "Error", "Can't compil the vertex shader !");
 		return SHADER_VERTEX_ERROR;
     }
     if( !makeShader(fragment, GL_FRAGMENT_SHADER_ARB) )
     {
-        //QMessageBox::critical(nullptr, "Error", "Can't compil this pixel shader !");
+        //QMessageBox::critical(NULL, "Error", "Can't compil this pixel shader !");
         return SHADER_FRAGMENT_ERROR;
     }
 
-    glLinkProgram(program);
+    glLinkProgram(m_program);
 
 	return SHADER_SUCCESS;
 }
@@ -84,12 +84,12 @@ int Shader::compil( const char *vertex, const char *fragment )
 bool Shader::makeShader(const char *txt, GLuint type)
 {
     GLuint object = glCreateShader(type);
-	glShaderSource(object, 1, (const GLchar**)(&txt), nullptr);
+	glShaderSource(object, 1, (const GLchar**)(&txt), NULL);
 	glCompileShader(object);
 	
     if( checkShader(object) )
     {
-      this->glAttachShader(program, object);
+      this->glAttachShader(m_program, object);
       this->glDeleteShader(object);
     }
     else
@@ -107,7 +107,7 @@ bool Shader::checkShader(int id)
     if( ok != GL_TRUE )
     {
         GLint logLength = 0;
-        GLchar* log = nullptr;
+        GLchar* log = NULL;
 
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &logLength);
         log = new GLchar[logLength];
@@ -120,7 +120,7 @@ bool Shader::checkShader(int id)
     else
     {
         GLint logLength = 0;
-        GLchar* log = nullptr;
+        GLchar* log = NULL;
 
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &logLength);
         log = new GLchar[logLength];

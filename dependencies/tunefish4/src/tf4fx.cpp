@@ -1,4 +1,4 @@
-/*
+﻿/*
   ---------------------------------------------------------------------
     Tunefish 4  -  http://tunefish-synth.com
   ---------------------------------------------------------------------
@@ -19,12 +19,8 @@
  ---------------------------------------------------------------------
  */
 
-#ifdef eENIGMA
-#include "synth.hpp"
-#else
-#include "../runtime/system.hpp"
+#include "system.hpp"
 #include "tf4.hpp"
-#endif
 
 #define LEFT 0
 #define RIGHT 1
@@ -175,9 +171,7 @@ void eTfAllpassProcess(eTfAllpass &allpass1, eTfAllpass &allpass2, eF32 feedback
 
 eTfEffect * eTfEffectDelayCreate()
 {
-    eTfEffectDelay *delay = static_cast<eTfEffectDelay *>(eAllocAligned(sizeof(eTfEffectDelay), 16));
-    eMemSet(delay, 0, sizeof(eTfEffectDelay));
-
+    eTfEffectDelay *delay = (eTfEffectDelay *)eAllocAlignedAndZero(sizeof(eTfEffectDelay), 16);
     eTfDelayInit(delay->delay[LEFT], eFALSE);
     eTfDelayInit(delay->delay[RIGHT], eFALSE);
     return delay;
@@ -191,14 +185,14 @@ void eTfEffectDelayDelete(eTfEffect *fx)
 void eTfEffectDelayProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF32 **signal, eU32 len)
 {
     eASSERT_ALIGNED16(fx);
-    eTfEffectDelay *delay = static_cast<eTfEffectDelay *>(fx);
+    eTfEffectDelay *delay = (eTfEffectDelay *)fx;
 
     eU32 delayLeft = eFtoL(instr.params[TF_DELAY_LEFT] * TF_FX_DELAY_MAX_MILLISECONDS);
     eU32 delayRight = eFtoL(instr.params[TF_DELAY_RIGHT] * TF_FX_DELAY_MAX_MILLISECONDS);
     eF32 decay = instr.params[TF_DELAY_DECAY];
 
-    eTfDelayUpdate(delay->delay[LEFT], synth.sampleRate, static_cast<eF32>(delayLeft));
-    eTfDelayUpdate(delay->delay[RIGHT], synth.sampleRate, static_cast<eF32>(delayRight));
+    eTfDelayUpdate(delay->delay[LEFT], synth.sampleRate, (eF32)delayLeft);
+    eTfDelayUpdate(delay->delay[RIGHT], synth.sampleRate, (eF32)delayRight);
 
     eTfDelayProcess(delay->delay[LEFT], signal[LEFT], len, decay);
     eTfDelayProcess(delay->delay[RIGHT], signal[RIGHT], len, decay);
@@ -221,8 +215,7 @@ const eInt ALLPASSTUNINGS[] = { 556, 441, 341, 225 };
 
 eTfEffect * eTfEffectReverbCreate()
 {
-    eTfEffectReverb *reverb = static_cast<eTfEffectReverb *>(eAllocAligned(sizeof(eTfEffectReverb), 16));
-    eMemSet(reverb, 0, sizeof(eTfEffectReverb));
+    eTfEffectReverb *reverb = (eTfEffectReverb *)eAllocAlignedAndZero(sizeof(eTfEffectReverb), 16);
 
     for (int i=0; i<TF_FX_REVERB_NUMCOMBS; i++)
     {
@@ -244,10 +237,10 @@ void eTfEffectReverbDelete(eTfEffect *fx)
     eFreeAligned(fx);
 }
 
-void eTfEffectReverbProcess(eTfEffect *fx, eTfSynth &, eTfInstrument &instr, eF32 **signal, eU32 len)
+void eTfEffectReverbProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF32 **signal, eU32 len)
 {
     eASSERT_ALIGNED16(fx);
-    eTfEffectReverb *reverb = static_cast<eTfEffectReverb *>(fx);
+    eTfEffectReverb *reverb = (eTfEffectReverb *)fx;
 
     eF32 roomsize          = instr.params[TF_REVERB_ROOMSIZE] * SCALEROOM + OFFSETROOM;
     eF32 damp              = instr.params[TF_REVERB_DAMP] * SCALEDAMP;
@@ -306,14 +299,14 @@ void eTfEffectReverbProcess(eTfEffect *fx, eTfSynth &, eTfInstrument &instr, eF3
     while(len--)
     {
         eF32x2 in = eSimdSet2(*dryL, *dryR);
-        eF32x2 lwet1 = eSimdSet2(*wetL, *wetR);
-		eF32x2 lwet2 = eSimdSet2(*wetR++, *wetL++);
+        eF32x2 wet1 = eSimdSet2(*wetL, *wetR);
+		eF32x2 wet2 = eSimdSet2(*wetR++, *wetL++);
         eF32x2 out = eSimdSetAll(0.0f);
 
         out = eSimdAdd(
                 eSimdAdd(
-                    eSimdMul(lwet1, wet1x2),
-                    eSimdMul(lwet2, wet2x2)),
+                    eSimdMul(wet1, wet1x2),
+                    eSimdMul(wet2, wet2x2)),
                 eSimdMul(in, dry0x2));
 
         eSimdStore2(out, *dryL++, *dryR++);
@@ -326,9 +319,7 @@ void eTfEffectReverbProcess(eTfEffect *fx, eTfSynth &, eTfInstrument &instr, eF3
 
 eTfEffect * eTfEffectDistortionCreate()
 {
-    eTfEffectDistortion *dist = static_cast<eTfEffectDistortion *>(eAllocAligned(sizeof(eTfEffectDistortion), 16));
-    eMemSet(dist, 0, sizeof(eTfEffectDistortion));
-
+    eTfEffectDistortion *dist = (eTfEffectDistortion *)eAllocAlignedAndZero(sizeof(eTfEffectDistortion), 16);
     dist->generatedAmount = -1.0f;
     return dist;
 }
@@ -338,10 +329,10 @@ void eTfEffectDistortionDelete(eTfEffect *fx)
     eFreeAligned(fx);
 }
 
-void eTfEffectDistortionProcess(eTfEffect *fx, eTfSynth &, eTfInstrument &instr, eF32 **signal, eU32 len)
+void eTfEffectDistortionProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF32 **signal, eU32 len)
 {
     eASSERT_ALIGNED16(fx);
-    eTfEffectDistortion *dist = static_cast<eTfEffectDistortion *>(fx);
+    eTfEffectDistortion *dist = (eTfEffectDistortion *)fx;
 
     eF32 amount = 1.0f - instr.params[TF_DISTORT_AMOUNT];
     if (amount != dist->generatedAmount)
@@ -374,9 +365,7 @@ void eTfEffectDistortionProcess(eTfEffect *fx, eTfSynth &, eTfInstrument &instr,
 
 eTfEffect * eTfEffectFormantCreate()
 {
-    eTfEffectFormant *formant = static_cast<eTfEffectFormant *>(eAllocAligned(sizeof(eTfEffectFormant), 16));
-    eMemSet(formant, 0, sizeof(eTfEffectFormant));
-    return formant;
+    return eAllocAlignedAndZero(sizeof(eTfEffectFormant), 16);
 }
 
 void eTfEffectFormantDelete(eTfEffect *fx)
@@ -384,10 +373,10 @@ void eTfEffectFormantDelete(eTfEffect *fx)
     eFreeAligned(fx);
 }
 
-void eTfEffectFormantProcess(eTfEffect *fx, eTfSynth &, eTfInstrument &instr, eF32 **signal, eU32 len)
+void eTfEffectFormantProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF32 **signal, eU32 len)
 {
     eASSERT_ALIGNED16(fx);
-    eTfEffectFormant *formant = static_cast<eTfEffectFormant *>(fx);
+    eTfEffectFormant *formant = (eTfEffectFormant *)fx;
 
     const eF64 coeff[5][11]= {
         { 3.11044e-06,
@@ -449,9 +438,7 @@ void eTfEffectFormantProcess(eTfEffect *fx, eTfSynth &, eTfInstrument &instr, eF
 
 eTfEffect * eTfEffectEqCreate()
 {
-    eTfEffectEq *eq = static_cast<eTfEffectEq *>(eAllocAligned(sizeof(eTfEffectEq), 16));
-    eMemSet(eq, 0, sizeof(eTfEffectEq));
-    return eq;
+    return eAllocAlignedAndZero(sizeof(eTfEffectEq), 16);
 }
 
 void eTfEffectEqDelete(eTfEffect *fx)
@@ -462,7 +449,7 @@ void eTfEffectEqDelete(eTfEffect *fx)
 void eTfEffectEqProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF32 **signal, eU32 len)
 {
     eASSERT_ALIGNED16(fx);
-    eTfEffectEq *eq = static_cast<eTfEffectEq *>(fx);
+    eTfEffectEq *eq = (eTfEffectEq *)fx;
 
     eF32 gain[3];
     for(eU32 i=0;i<3;i++)
@@ -543,17 +530,15 @@ void eTfEffectEqProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF
 
 eTfEffect * eTfEffectChorusCreate()
 {
-    eTfEffectChorus *chorus = static_cast<eTfEffectChorus *>(eAllocAligned(sizeof(eTfEffectChorus), 16));
-    eMemSet(chorus, 0, sizeof(eTfEffectChorus));
-
+    eTfEffectChorus *chorus = (eTfEffectChorus *)eAllocAlignedAndZero(sizeof(eTfEffectChorus), 16);
     eRandom rand;
 
-    rand.SeedRandomly();
+    rand.seedRandomly();
 
     for(eU32 i=0; i<2*TF_FX_CHORUS_DELAYCOUNT; i++)
     {
         eTfDelayInit(chorus->delay[i], eTRUE);
-        chorus->lfoPhase[i] = rand.NextFloat();
+        chorus->lfoPhase[i] = rand.nextFloat();
     }
 
     return chorus;
@@ -566,7 +551,7 @@ void eTfEffectChorusDelete(eTfEffect *fx)
 
 void eTfEffectChorusProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF32 **signal, eU32 len)
 {
-    eTfEffectChorus *chorus = static_cast<eTfEffectChorus *>(fx);
+    eTfEffectChorus *chorus = (eTfEffectChorus *)fx;
 
     eF32 depth = instr.params[TF_CHORUS_DEPTH];
     eF32 gain = instr.params[TF_CHORUS_GAIN];
@@ -593,9 +578,7 @@ void eTfEffectChorusProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr
 
 eTfEffect * eTfEffectFlangerCreate()
 {
-    eTfEffectFlanger *flanger = static_cast<eTfEffectFlanger *>(eAllocAligned(sizeof(eTfEffectFlanger), 16));
-    eMemSet(flanger, 0, sizeof(eTfEffectFlanger));
-    return flanger;
+    return (eTfEffectFlanger *)eAllocAlignedAndZero(sizeof(eTfEffectFlanger), 16);
 }
 
 void eTfEffectFlangerDelete(eTfEffect *fx)
@@ -605,7 +588,7 @@ void eTfEffectFlangerDelete(eTfEffect *fx)
 
 void eTfEffectFlangerProcess(eTfEffect *fx, eTfSynth &synth, eTfInstrument &instr, eF32 **signal, eU32 len)
 {
-    eTfEffectFlanger *flanger = static_cast<eTfEffectFlanger *>(fx);
+    eTfEffectFlanger *flanger = (eTfEffectFlanger *)fx;
 
     eF32 *pcmleft  = signal[0];
     eF32 *pcmright = signal[1];

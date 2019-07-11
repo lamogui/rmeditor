@@ -9,9 +9,9 @@
 #include <QTimer>
 
 #include "texteditable.hpp"
-#include "music.hpp"
 
 class DemoTimeline;
+class Music;
 class Framework;
 class Scene;
 class Timeline;
@@ -21,27 +21,27 @@ class Project : public TextEditable
   Q_OBJECT
 
   public:
-    Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=nullptr);
-    ~Project() override;
+    Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=NULL);
+    virtual ~Project();
 
-    const QString& getText() const override;
-    void connectLog(LogWidget& log) override;
+    virtual const QString& text() const;
+    virtual void connectLog(LogWidget& log);
 
     Scene *getRayMarchScene(const QString& name) const;
     Framework *getFramework(const QString& name) const;
-    inline const QMap<QString,Scene*>& rayMarchScenes() const {return rmScenes;}
-    inline const QMap<QString,Framework*>& getFrameworks() const {return frameworks;}
+    inline const QMap<QString,Scene*>& rayMarchScenes() const {return m_rmScenes;}
+    inline const QMap<QString,Framework*>& frameworks() const {return m_frameworks;}
     static QString nodeTypeToString(QDomNode::NodeType type);
 
 
     static QString getDefaultProjectText();
 
-    bool buildable() const override { return true; }
+    virtual bool buildable() const { return true; }
 
-    inline Music* getMusic() const { return music; }
-    inline DemoTimeline* getDemoTimeline() const { return demoTimeline; }
+    inline Music* music() const { return m_music; }
+    inline DemoTimeline* demoTimeline() const { return m_demoTimeline; }
 
-    inline QDomDocument& getDocument() { return document; }
+    inline QDomDocument& document() { return m_document; }
 
     void exportFrameworkSources(const QDir& dir) const;
     void exportScenesSources(const QDir& dir) const;
@@ -49,7 +49,7 @@ class Project : public TextEditable
 
   public slots:
     void resetProject();
-    bool build(const QString& text) override;
+    virtual bool build(const QString& text);
     void notifyDocumentChanged();
     void destroyNode(QDomNode& node);
 
@@ -68,16 +68,16 @@ class Project : public TextEditable
     bool parseTagMusic(QDomNode node);
     bool parseTagTimeline(QDomNode node);
 
-    QMap<QString,Scene*> rmScenes;
-    QMap<QString,Framework*> frameworks;
+    QMap<QString,Scene*> m_rmScenes;
+    QMap<QString,Framework*> m_frameworks;
 
-    Music* music;
-    DemoTimeline* demoTimeline;
-    QString text;
-    QDir dir;
-    LogWidget* log;
-    QDomDocument document;
-    QTimer* textUpdateTimer;
+    Music* m_music;
+    DemoTimeline* m_demoTimeline;
+    QString m_text;
+    QDir m_dir;
+    LogWidget* m_log;
+    QDomDocument m_document;
+    QTimer* m_textUpdateTimer;
 };
 
-#endif // !PROJECT_HPP
+#endif

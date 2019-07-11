@@ -13,30 +13,30 @@
 
 
 Keyframe::Keyframe(Project &project, Sequence* seq, QDomElement &node):
-  QObject(nullptr), //lol
+  QObject(NULL), //lol
   QGraphicsItem(seq),
-  sequence(seq),
-  project(&project),
-  node(node),
-  color(255,195,77,255),
-  selectedColor(255,105,0,255),
-  mouseCapture(false)
+  m_sequence(seq),
+  m_project(&project),
+  m_node(node),
+  m_color(255,195,77,255),
+  m_selectedColor(255,105,0,255),
+  m_mouseCapture(false)
 {
   this->setFlags(QGraphicsItem::ItemIsSelectable);
   setAcceptHoverEvents(true);
 }
 
 Keyframe::Keyframe(qint64 rel_frame, Project &project, Sequence* seq, QDomElement &node):
-  QObject(nullptr), //lol
+  QObject(NULL), //lol
   QGraphicsItem(seq),
-  sequence(seq),
-  project(&project),
-  node(node),
-  color(255,195,77,255),
-  selectedColor(255,105,0,255),
-  mouseCapture(false)
+  m_sequence(seq),
+  m_project(&project),
+  m_node(node),
+  m_color(255,195,77,255),
+  m_selectedColor(255,105,0,255),
+  m_mouseCapture(false)
 {
-  node.setTagName("keyframe");
+  m_node.setTagName("keyframe");
   setRelativeFrame(rel_frame);
   this->setFlags(QGraphicsItem::ItemIsSelectable);
   setAcceptHoverEvents(true);
@@ -44,18 +44,21 @@ Keyframe::Keyframe(qint64 rel_frame, Project &project, Sequence* seq, QDomElemen
 
 void Keyframe::load()
 {
-  qint64 frame = node.attribute("frame","0").toLongLong();
+  qint64 frame = m_node.attribute("frame","0").toLongLong();
   setPos(checkFrameAvailable(frame),pos().y());
 }
 
+
+#if defined(Q_OS_WIN) && defined(QT_NO_DEBUG)
 Keyframe::~Keyframe()
 {
   QApplication::restoreOverrideCursor();
 }
+#endif
 
 void Keyframe::notifyChanged()
 {
-  project->notifyDocumentChanged();
+  m_project->notifyDocumentChanged();
 }
 
 void Keyframe::setRelativeFrame(qint64 frame, bool notify)
@@ -66,7 +69,7 @@ void Keyframe::setRelativeFrame(qint64 frame, bool notify)
   {
     qint64 new_frame = checkFrameAvailable(frame);
     setPos(new_frame,this->pos().y());
-    node.setAttribute(QString("frame"),relativeFrame());
+    m_node.setAttribute(QString("frame"),relativeFrame());
     positionChanged(previous_frame);
   }
   if (notify)
@@ -93,11 +96,11 @@ void Keyframe::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
   QGraphicsItem::mousePressEvent(event);
 
-  mousePressPos = event->scenePos();
+  m_mousePressPos = event->scenePos();
   if (boundingRect().contains(event->pos()))
   {
-    mouseCapture = true;
-    originalAbsoluteFrame = absoluteFrame();
+    m_mouseCapture = true;
+    m_originalAbsoluteFrame = absoluteFrame();
   }
 
 }
@@ -105,9 +108,9 @@ void Keyframe::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void Keyframe::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
   QGraphicsItem::mouseMoveEvent(event);
-  if (mouseCapture)
+  if (m_mouseCapture)
   {
-    setAbsoluteFrame(event->scenePos().x() - mousePressPos.x()  + originalAbsoluteFrame,false);
+    setAbsoluteFrame(event->scenePos().x() - m_mousePressPos.x()  + m_originalAbsoluteFrame,false);
   }
 }
 
@@ -115,18 +118,18 @@ void Keyframe::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 void Keyframe::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
   QGraphicsItem::mouseReleaseEvent(event);
-  if (mouseCapture)
+  if (m_mouseCapture)
   {
-    setAbsoluteFrame(event->scenePos().x() - mousePressPos.x()  + originalAbsoluteFrame,true);
+    setAbsoluteFrame(event->scenePos().x() - m_mousePressPos.x()  + m_originalAbsoluteFrame,true);
   }
-  mouseCapture = false;
+  m_mouseCapture = false;
 }
 
 qint64 Keyframe::checkFrameAvailable(qint64 rel_frame)
 {
-  if (sequence)
+  if (m_sequence)
   {
-    return sequence->nearestFrameAvailableForKeyframe(rel_frame);
+    return m_sequence->nearestFrameAvailableForKeyframe(rel_frame);
   }
   else
   {
@@ -144,11 +147,11 @@ QRectF Keyframe::boundingRect() const
 void Keyframe::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
   (void)option; (void) widget;
-  QBrush fillBrush(color);
+  QBrush fillBrush(m_color);
   QPen pen(QColor(255,64,35));
-  if (mouseCapture)
+  if (m_mouseCapture)
   {
-    fillBrush.setColor(selectedColor);
+    fillBrush.setColor(m_selectedColor);
   }
 
   painter->setPen(pen);
@@ -158,9 +161,9 @@ void Keyframe::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
 void Keyframe::positionChanged(qint64 previous)
 {
-  if (sequence)
+  if (m_sequence)
   {
-    sequence->keyframePositionChanged(previous,this);
+    m_sequence->keyframePositionChanged(previous,this);
   }
   else
   {

@@ -1,58 +1,60 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- *   This file is part of
- *       ______        _                             __ __
- *      / ____/____   (_)____ _ ____ ___   ____ _   / // /
- *     / __/  / __ \ / // __ `// __ `__ \ / __ `/  / // /_
- *    / /___ / / / // // /_/ // / / / / // /_/ /  /__  __/
- *   /_____//_/ /_//_/ \__, //_/ /_/ /_/ \__,_/     /_/.   
- *                    /____/                              
- *
- *   Copyright © 2003-2012 Brain Control, all rights reserved.
- *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---------------------------------------------------------------------
+Tunefish 4  -  http://tunefish-synth.com
+---------------------------------------------------------------------
+This file is part of Tunefish.
+
+Tunefish is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Tunefish is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Tunefish.  If not, see <http://www.gnu.org/licenses/>.
+---------------------------------------------------------------------
+*/
 
 #ifndef DATA_STREAM_HPP
 #define DATA_STREAM_HPP
 
-// bit- and byte-wise reading from and
-// writing to a memory buffer
+#include "system.hpp"
+
+// bit- and byte-wise buffer I/O
 class eDataStream
 {
 public:
-    eDataStream(eConstPtr data=nullptr, eU32 size=0);
+    eDataStream(eConstPtr data = nullptr, eU32 size = 0);
     eDataStream(const eByteArray &data);
 
-    void        attach(eConstPtr data, eU32 size);
-    void        advance(eU32 offset);
+    void        Attach(eConstPtr data, eU32 size);
+    void        Flush();
 
-    void        writeBit(eBool bit, eU32 count=1);
-    void        writeBits(eU32 dword, eU32 bitCount);
-    void        writeU8(eU8 byte);
-    eU32        writeU_dynamic(eU32 word);
-    void        writeU16(eU16 word);
-    void        writeU32(eU32 dword);
-    void        writeVbr(eU32 dword);
+    void        WriteBit(eBool bit, eU32 count = 1);
+    void        WriteBits(eU32 val, eU32 bitCount);
+    void        WriteU8(eU8 val);
+    void        WriteU16(eU16 val);
+    void        WriteU32(eU32 val);
 
-    eBool       readBit();
-    eBool       readBitOrZero();
-    eU32        readBits(eU32 bitCount);
-    eU8         readU8();
-    eU32        readU_dynamic();
-    eU16        readU16();
-    eU32        readU32();
-    eU32        readVbr();
+    eBool       ReadBit();
+    eBool       ReadBitOrZero();
+    eU32        ReadBits(eU32 bitCount);
+    eU8         ReadU8();
+    eU16        ReadU16();
+    eU32        ReadU32();
 
-    eByteArray  getData() const;
-    eU32        getReadIndex() const;
-    eU32        getWriteIndex() const;
+public:
+    eByteArray  Data;
+    eBool       Reading;
+    eU32        ReadIdx;
 
 private:
-    eByteArray  m_data;
-    eBool       m_reading;
-    eU32        m_readIndex;
-    eU32        m_bitCount;
-    eU8         m_curByte;
+    eU32        NumBits;
+    eU8         CurByte;
 };
 
-#endif // DATA_STREAM_HPP
+#endif

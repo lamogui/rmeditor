@@ -1,4 +1,4 @@
-﻿/*
+/*
  ---------------------------------------------------------------------
  Tunefish 4  -  http://tunefish-synth.com
  ---------------------------------------------------------------------
@@ -22,9 +22,7 @@
 #ifndef TF4_HPP
 #define TF4_HPP
 
-#include "system.hpp"
-
-//const eU32 TF_BUFFERSIZE            = 256;
+const eU32 TF_BUFFERSIZE            = 256;
 const eF32 TF_MASTER_VOLUME			= 2.0f;
 const eU32 TF_FRAMESIZE             = 512;
 const eU32 TF_MAXFRAMESIZE          = 4096;
@@ -48,6 +46,7 @@ const eU32 TF_MAXMODULATIONTYPES    = 4;
 const eU32 TF_FORMANTCOUNT          = 5;
 const eF32 TF_EFFECT_SWITCHOFF_TIME = 2.0f;
 const eF32 TF_12TH_ROOT_OF_2        = 1.059463094359f;
+const eU32 TF_MAX_STEPSEQUENCE_LEN  = 64;
 
 #include "tf4fx.hpp"
 
@@ -210,163 +209,6 @@ enum eTfParam
 };
 
 #ifdef eVSTI
-
-static const eF32 TF_DEFAULTPROG[] =
-{
-    0.5f,   // TF_GLOBAL_GAIN,
-
-    0.1f,   // TF_GEN_BANDWIDTH,
-    0.8f,   // TF_GEN_NUMHARMONICS,
-    0.1f,   // TF_GEN_DAMP,
-    0.2f,   // TF_GEN_MODULATION,
-    1.0f,   // TF_GEN_VOLUME,
-    0.5f,   // TF_GEN_PANNING,
-    0.5f,   // TF_GEN_SLOP,
-    0.5f,   // TF_GEN_OCTAVE,
-    0.0f,   // TF_GEN_GLIDE,
-    0.2f,   // TF_GEN_DETUNE,
-    0.0f,   // TF_GEN_FREQ,
-    1.0f,   // TF_GEN_POLYPHONY,
-    0.0f,   // TF_GEN_DRIVE,
-    1.0f,   // TF_GEN_UNISONO,
-    0.5f,   // TF_GEN_SPREAD,
-    0.0f,    // TF_GEN_SCALE,
-
-    // Noise
-    0.0f,
-    0.5f,
-    1.0f,
-
-    // LP Filter
-    0.0f,
-    0.1f,
-    0.1f,
-
-    // HP Filter
-    0.0f,
-    0.5f,
-    0.5f,
-
-    // ADSR1 (Osc/Noise)
-    0.0f,
-    0.5f,
-    0.5f,
-    0.2f,
-    0.5f,
-
-    // ADSR2 (Filter)
-    0.0f,
-    0.5f,
-    0.5f,
-    0.2f,
-    0.5f,
-
-    // LFO1 (Osc/Noise)
-    0.5f,
-    0.5f,
-    0.0f,
-    0.0f,
-
-    // LFO2 (Filter)
-    0.5f,
-    0.5f,
-    0.0f,
-    0.0f,
-
-    // Modulation matrix
-    0.0f,   //"Mm1Source",
-    0.50f,  //"Mm1Mod,
-    0.0f,   //"Mm1Target",
-    0.0f,   //"Mm2Source",
-    0.50f,  //"Mm2Mod,
-    0.0f,   //"Mm2Target",
-    0.0f,   //"Mm3Source",
-    0.50f,  //"Mm3Mod,
-    0.0f,   //"Mm3Target",
-    0.0f,   //"Mm4Source",
-    0.50f,  //"Mm4Mod,
-    0.0f,   //"Mm4Target",
-    0.0f,   //"Mm5Source",
-    0.50f,  //"Mm5Mod,
-    0.0f,   //"Mm5Target",
-    0.0f,   //"Mm6Source",
-    0.50f,  //"Mm6Mod,
-    0.0f,   //"Mm6Target",
-    0.0f,   //"Mm7Source",
-    0.50f,  //"Mm7Mod,
-    0.0f,   //"Mm7Target",
-    0.0f,   //"Mm8Source",
-    0.50f,  //"Mm8Mod,
-    0.0f,   //"Mm8Target",
-    0.0f,   //"Mm9Source",
-    0.50f,  //"Mm9Mod,
-    0.0f,   //"Mm9Target",
-    0.0f,   //"Mm10Source",
-    0.50f,  //"Mm10Mod,
-    0.0f,   //"Mm10Target",
-
-    // Effects section
-    0.0f,   //"Effect1",
-    0.0f,   //"Effect2",
-    0.0f,   //"Effect3",
-    0.0f,   //"Effect4",
-    0.0f,   //"Effect5",
-    0.0f,   //"Effect6",
-    0.0f,   //"Effect7",
-    0.0f,   //"Effect8",
-    0.0f,   //"Effect9",
-    0.0f,   //"Effect10",
-
-    // Distortion
-    0.2f,
-
-    // Chorus
-    0.2f,
-    0.2f,
-
-    // Delay
-    0.2f,
-    0.2f,
-    0.2f,
-
-    //Reverb
-    0.2f,
-    0.2f,
-    0.5f,
-    0.5f,
-
-    //Flanger
-    0.2f,
-    0.2f,
-    0.2f,
-    0.5f,
-
-    //Chorus
-    1.0f,
-
-    //Formant
-    0.0f,
-    1.0f,
-
-    //EQ
-    0.5f,
-    0.5f,
-    0.5f,
-
-    // pitch wheel up/down
-    0.0f,
-    0.0f,
-
-    //bandpass
-    0.0f,
-    0.5f,
-    0.5f,
-
-    //notch
-    0.0f,
-    0.5f,
-    0.5f,
-};
 
 static const eChar * TF_NAMES[] =
 {
@@ -675,8 +517,11 @@ struct eTfNoise
 {
     eTfNoise()
     {
-        filterLP = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
-        filterHP = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
+        filterLP = static_cast<eTfFilter*>(eAllocAligned(sizeof(eTfFilter), 16));
+        filterHP = static_cast<eTfFilter*>(eAllocAligned(sizeof(eTfFilter), 16));
+        eMemSet(filterLP, 0, sizeof(eTfFilter));
+        eMemSet(filterHP, 0, sizeof(eTfFilter));
+
     }
 
     ~eTfNoise()
@@ -695,12 +540,26 @@ struct eTfNoise
 
 struct eTfVoice
 {
-    eTfVoice()
+    eTfVoice(eBool allocFilters = eTRUE)
     {
-        filterLP = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
-        filterHP = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
-        filterBP = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
-        filterNT = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
+        if (allocFilters) 
+        {
+            filterLP = (eTfFilter*)eAllocAligned(sizeof(eTfFilter), 16);
+            filterHP = (eTfFilter*)eAllocAligned(sizeof(eTfFilter), 16);
+            filterBP = (eTfFilter*)eAllocAligned(sizeof(eTfFilter), 16);
+            filterNT = (eTfFilter*)eAllocAligned(sizeof(eTfFilter), 16);
+            eMemSet(filterLP, 0, sizeof(eTfFilter));
+            eMemSet(filterHP, 0, sizeof(eTfFilter));
+            eMemSet(filterBP, 0, sizeof(eTfFilter));
+            eMemSet(filterNT, 0, sizeof(eTfFilter));
+        } 
+        else
+        {
+            filterLP = nullptr;
+            filterHP = nullptr;
+            filterBP = nullptr;
+            filterNT = nullptr;
+        }
     }
 
     ~eTfVoice()
@@ -749,6 +608,20 @@ struct eTfInstrument
     eF32            effectsInactiveTime;
 };
 
+struct eTfStepSequencer
+{
+    eU32            steps;
+    eF32            tempo;
+    eU32            bpm;
+    eBool           playing;
+    eF32            time;
+    eS32            instrument[TF_MAX_STEPSEQUENCE_LEN];
+    eU32            velocity[TF_MAX_STEPSEQUENCE_LEN];
+    eF32            delay[TF_MAX_STEPSEQUENCE_LEN];
+    eF32            sustain[TF_MAX_STEPSEQUENCE_LEN];
+    eTfSynth *      synth;
+};
+
 struct eTfSynth
 {
     eU32            sampleRate;
@@ -759,6 +632,7 @@ struct eTfSynth
     eF32            lfoNoiseTable[TF_LFONOISETABLESIZE];
     eF32            whiteNoiseTable[TF_NOISETABLESIZE];
     eTfInstrument * instr[TF_MAX_INSTR];
+    eTfStepSequencer stepSequencer;
 };
 
 struct eTfEvent
@@ -769,11 +643,9 @@ struct eTfEvent
 		this->instr = instr;
 		this->note = note;
 		this->velocity = velocity;
-		this->row = 0;
 	}
 
 	eF32			time;
-	eU16			row;
 	eU8				instr;
 	eU8				note;
 	eU8				velocity;
@@ -786,20 +658,7 @@ struct eTfSong
 	eU32				tempo;
 };
 
-struct eTfPlayer
-{
-	eTfSong				song;
-    eTfSynth            synth;
-
-    eF32                volume;
-    eF32                time;
-    eBool               playing;
-
-    eF32                outputSignal[sizeof(eF32)*TF_FRAMESIZE*2];
-    eF32                tempSignal[sizeof(eF32)*TF_FRAMESIZE*2];
-    eS16                outputFinal[sizeof(eF32)*TF_FRAMESIZE];
-};
-
+void	eTfSignalMix16(eS16 *master, eS16 *in, eU32 length);
 eBool   eTfSignalMix(eF32 **master, eF32 **in, eU32 length, eF32 volume);
 void    eTfSignalToS16(eF32 **sig, eS16 *out, const eF32 gain, eU32 length);
 void    eTfSignalToPeak(eF32 **sig, eF32 *peak_left, eF32 *peak_right, eU32 length);
@@ -822,15 +681,15 @@ eBool   eTfModMatrixProcess(eTfSynth &synth, eTfInstrument &instr, eTfModMatrix 
 eF32    eTfModMatrixGet(eTfModMatrix &state, eTfModMatrix::Output output);
 
 void    eTfGeneratorReset(eTfGenerator &state);
-void    eTfGeneratorFft(eTfSynth &synth, eTfFftType type, eU32 frameSize, eF32 *buffer);
+void    eTfGeneratorFft(eTfFftType type, eU32 frameSize, eF32 *buffer);
 void    eTfGeneratorNormalize(eF32 *buffer, eU32 frameSize);
 void    eTfGeneratorUpdate(eTfSynth &synth, eTfInstrument &instr, eTfVoice &voice, eTfGenerator &generator, eF32 frequencyRange);
-eBool   eTfGeneratorModulate(eTfSynth &synth, eTfInstrument &instr, eTfVoice &voice, eTfGenerator &generator);
+eBool   eTfGeneratorModulate(eTfSynth &synth, eTfInstrument &instr, eTfGenerator &generator);
 eBool   eTfGeneratorProcess(eTfSynth &synth, eTfInstrument &instr, eTfVoice &voice, eTfGenerator &generator, eF32 velocity, eF32 **signal, eU32 frameSize);
 
 void    eTfNoiseReset(eTfNoise &state);
 void    eTfNoiseUpdate(eTfSynth &synth, eTfInstrument &instr, eTfNoise &state, eTfModMatrix &modMatrix, eF32 velocity);
-eBool   eTfNoiseProcess(eTfSynth &synth, eTfInstrument &instr, eTfNoise &state, eF32 **signal, eU32 frameSize);
+eBool   eTfNoiseProcess(eTfSynth &synth, eTfNoise &state, eF32 **signal, eU32 frameSize);
 
 void    eTfFilterUpdate(eTfSynth &synth, eTfFilter &state, eF32 f, eF32 q, eTfFilter::Type type);
 void    eTfFilterProcess(eTfFilter &state, eTfFilter::Type type, eF32 **signal, eU32 frameSize);
@@ -841,8 +700,9 @@ void    eTfVoiceNoteOff(eTfVoice &state);
 void    eTfVoicePitchBend(eTfVoice &state, eF32 semitones, eF32 cents);
 void    eTfVoicePanic(eTfVoice &state);
 
-void    eTfInstrumentInit(eTfSynth &synth, eTfInstrument &instr);
-eF32    eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs, long sampleFrames);
+void    eTfInstrumentInit(eTfInstrument &instr);
+void    eTfInstrumentFree(eTfInstrument &instr);
+eF32    eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs, eU32 sampleFrames);
 void    eTfInstrumentNoteOn(eTfInstrument &instr, eS32 note, eS32 velocity);
 eBool   eTfInstrumentNoteOff(eTfInstrument &instr, eS32 note);
 void    eTfInstrumentAllNotesOff(eTfInstrument &instr);
@@ -851,14 +711,24 @@ void    eTfInstrumentPanic(eTfInstrument &instr);
 eU32    eTfInstrumentGetPolyphony(eTfInstrument &instr);
 eU32    eTfInstrumentAllocateVoice(eTfInstrument &instr);
 
+void    eTfStepSequencerInit(eTfStepSequencer &seq, eTfSynth &synth);
+void    eTfStepSequencerFree(eTfStepSequencer &seq);
+void    eTfStepSequencerSetBpm(eTfStepSequencer &seq, eU32 bpm);
+void    eTfStepSequencerSetSteps(eTfStepSequencer &seq, eU32 steps);
+void    eTfStepSequencerSetInstrument(eTfStepSequencer &seq, eU32 step, eU32 instrument);
+void    eTfStepSequencerSetVelocity(eTfStepSequencer &seq, eU32 step, eU32 velocity);
+void    eTfStepSequencerSetDelay(eTfStepSequencer &seq, eU32 step, eF32 delay);
+void    eTfStepSequencerSetSustain(eTfStepSequencer &seq, eU32 step, eF32 sustain);
+eU32    eTfStepSequencerGetBpm(eTfStepSequencer &seq);
+eU32    eTfStepSequencerGetSteps(eTfStepSequencer &seq);
+eU32    eTfStepSequencerGetInstrument(eTfStepSequencer &seq, eU32 step);
+eU32    eTfStepSequencerGetVelocity(eTfStepSequencer &seq, eU32 step);
+eF32    eTfStepSequencerGetDelay(eTfStepSequencer &seq, eU32 step);
+eF32    eTfStepSequencerGetSustain(eTfStepSequencer &seq, eU32 step);
+void    eTfStepSequencerPlay(eTfStepSequencer &seq);
+void    eTfStepSequencerStop(eTfStepSequencer &seq);
+eF32    eTfStepSequencerProcess(eTfStepSequencer &seq, eF32 **outputs, eU32 sampleFrames);
+
 void    eTfSynthInit(eTfSynth &synth);
-
-void  	eTfPlayerInit(eTfPlayer &player, eU32 sampleRate);
-void    eTfPlayerLoadSong(eTfPlayer &player, const eU8 *data, eU32 len, eF32 delay);
-void    eTfPlayerUnloadSong(eTfPlayer &player);
-void    eTfPlayerProcess(eTfPlayer &player, const eU8 **output);
-void    eTfPlayerStart(eTfPlayer &player, eF32 time);
-void    eTfPlayerStop(eTfPlayer &player);
-
 
 #endif

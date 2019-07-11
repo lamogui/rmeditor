@@ -12,20 +12,20 @@ class Scene : public FragmentShaderCode
 {
 public:
   Scene(const QString& filename, QDomNode node, Framework* framework, LogWidget& log,QObject* parent);
-  ~Scene() override;
+  virtual ~Scene();
 
-  Renderer* getRenderer() const override;
+  virtual Renderer* getRenderer() const;
 
-  inline Framework* getFramework() const { return framework; }
+  inline Framework* framework() const { return m_framework; }
 
 public slots:
-  bool build(const QString& text) override;
+  virtual bool build(const QString& text);
 
 private:
 
-  Framework* framework;
-  SceneRenderer* sceneRenderer;
-  Camera camera;
+  Framework* m_framework;
+  SceneRenderer* m_sceneRenderer;
+  Camera m_camera;
 
 };
 

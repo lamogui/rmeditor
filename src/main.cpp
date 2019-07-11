@@ -7,11 +7,6 @@
 #include <QFile>
 #include <QMessageBox>
 
-#ifdef MSVC_STATIC
-  #include <QtPlugin>
-  Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
-#endif // MSVC_STATIC
-
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);

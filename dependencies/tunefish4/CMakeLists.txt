@@ -6,6 +6,8 @@ set(SRCROOT ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(SRC  
   ${SRCROOT}/array.cpp
   ${INCROOT}/array.hpp
+  ${SRCROOT}/datastream.cpp
+  ${INCROOT}/datastream.hpp
   ${SRCROOT}/random.cpp
   ${INCROOT}/random.hpp
   ${SRCROOT}/runtime.cpp
@@ -28,8 +30,8 @@ else()
   set(TF4_DEFINITIONS ${TF4_DEFINITIONS} -DeLINUX)
 endif()
 
-string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
-if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+string(TOUPPER ${CMAKE_BUILD_TYPE} TF4_BUILD_TYPE)
+if (TF4_BUILD_TYPE MATCHES DEBUG)
   set(TF4_DEFINITIONS ${TF4_DEFINITIONS} -DeDEBUG)
 else()
   set(TF4_DEFINITIONS ${TF4_DEFINITIONS} -DeRELEASE)

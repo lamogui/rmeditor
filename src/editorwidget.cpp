@@ -1,5 +1,4 @@
 #include "editorwidget.hpp"
-
 #include "ui_editorwidget.h"
 
 #include <iostream>
@@ -13,7 +12,7 @@
 
 EditorWidget::EditorWidget(LogWidget &log, QWidget *parent) :
     QDockWidget(parent),
-    log(&log),
+    m_log(&log),
     ui(new Ui::EditorWidget)
 {
     ui->setupUi(this);
@@ -32,7 +31,7 @@ void EditorWidget::loadProject(Project &project)
     TextEditable* te = project.getRayMarchScene(key);
     appendTextEditable(te);
   }
-  foreach (QString key, project.getFrameworks().keys())
+  foreach (QString key, project.frameworks().keys())
   {
     TextEditable* te = project.getFramework(key);
     appendTextEditable(te);
@@ -42,15 +41,15 @@ void EditorWidget::loadProject(Project &project)
 void EditorWidget::on_saveButton_clicked(bool)
 {
   TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->currentWidget());
-  if (te != nullptr)
+  if (te != NULL)
   {
     if (te->save())
     {
-      log->writeInfo(tr("saved ") + te->textObject()->fileName());
+      m_log->writeInfo(tr("saved ") + te->textObject()->fileName());
     }
     else
     {
-     log->writeError(tr("unable to save the file ") + te->textObject()->fileName());
+     m_log->writeError(tr("unable to save the file ") + te->textObject()->fileName());
     }
   }
 }
@@ -58,15 +57,15 @@ void EditorWidget::on_saveButton_clicked(bool)
 void EditorWidget::on_buildButton_clicked(bool)
 {
   TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->currentWidget());
-  if (te != nullptr)
+  if (te != NULL)
   {
     if (te->build())
     {
-      log->writeInfo(QString("[") + te->textObject()->fileName() + tr("] build success !"));
+      m_log->writeInfo(QString("[") + te->textObject()->fileName() + tr("] build success !"));
     }
     else
     {
-      log->writeError(QString("[") + te->textObject()->fileName() + tr("] build failure !"));
+      m_log->writeError(QString("[") + te->textObject()->fileName() + tr("] build failure !"));
     }
   }
 }
@@ -79,7 +78,7 @@ void EditorWidget::on_tab_currentChanged(int index)
   }
 
   TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->widget(index));
-  Q_ASSERT(te != nullptr);
+  Q_ASSERT(te != NULL);
   //te->refresh();
   ui->buildButton->setEnabled(te->textObject()->buildable());
   emit rendererChanged(te->textObject()->getRenderer());
@@ -129,11 +128,11 @@ void EditorWidget::saveAllShaders()
 
       if (shaderCode)
       {
-        if (dynamic_cast<Framework*>(shaderCode) != nullptr)
+        if (dynamic_cast<Framework*>(shaderCode) != NULL)
         {
           frameworks.append(editor);
         }
-        else if (dynamic_cast<Scene*>(shaderCode) != nullptr)
+        else if (dynamic_cast<Scene*>(shaderCode) != NULL)
         {
           scenes.append(editor);
         }

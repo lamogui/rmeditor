@@ -21,9 +21,11 @@ class Sequence : public QGraphicsRectItem
 public:
   Sequence(Project& project, DemoTimeline& timeline, QDomElement& node, qreal height = 60.0);
   Sequence(Project& project, DemoTimeline& timeline, QDomElement node, Scene& scene, int start, int length=600, qreal height = 60.0);
-  ~Sequence() override;
+  virtual ~Sequence();
 
-  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
+
+  virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
   inline bool isInside(qint64 frame) const { return (frame >= startFrame() && frame < endFrame()); }
   inline bool overlap(const Sequence& seq) const { return (isInside(seq.startFrame())||
@@ -34,12 +36,12 @@ public:
   inline qint64 endFrame() const { return pos().x() + length(); }
   inline qint64 length() const { return rect().width(); }
 
-  inline QMap<qint64, CameraKeyframe*> getCameraKeyframes() const { return cameraKeyframes; }
+  inline QMap<qint64, CameraKeyframe*> cameraKeyframes() const { return m_cameraKeyframes; }
 
   QBrush selectedBrush() { return QBrush(QColor(200,200,255)); }
   QBrush idleBrush() { return QBrush(QColor(200,200,200)); }
 
-  inline Scene* glScene() { return scene; }
+  inline Scene* glScene() { return m_scene; }
 
   void setCamera(qint64 relative_frame, Camera& cam) const;
   void insertCameraKeyframe(qint64 rel_frame, const QVector3D& pos, const QQuaternion& rot);
@@ -57,9 +59,9 @@ public:
 
   //Do not use this is only used by DemoTimeline (I know it's ugly)
   inline void forceSetStartFrame(qint64 frame) { this->setPos(QPointF((qreal)frame,this->pos().y())); }
-  inline qint64 getOrginalLength() const { return orginalLength; }
+  inline qint64 orginalLength() const { return m_orginalLength; }
   void deleteCameraKeyframe(CameraKeyframe* key); // key must be correctly in sequence
-  inline QDomElement& getNode() { return node; }
+  inline QDomElement& node() { return m_node; }
 
   //Used by keyframes
   qint64 nearestFrameAvailableForKeyframe(qint64 rel_frame) const;
@@ -70,31 +72,31 @@ protected:
   void load();
   void renderImages();
 
-  void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-  void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-  void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override; 
+  virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
+  virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+  virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 
 
-  void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
-  void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
-  void 	hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+  virtual void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+  virtual void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
+  virtual void 	hoverMoveEvent(QGraphicsSceneHoverEvent *event);
 
   bool isInsideRightExtend(QPointF rel_pos, qreal scale) const;
   qreal getScaleFromWidget(const QWidget *widget) const;
 
 
 protected:
-  QDomElement node;
-  QDomElement cameraNode;
-  Project* project;
-  DemoTimeline* timeline;
-  Scene* scene;
-  QImage preview;
-  QPointF mousePressPos;
-  qint64 mousePressStartFrame;
-  qint64 orginalLength;
-  MouseAction currentAction;
-  QMap<qint64, CameraKeyframe*> cameraKeyframes;
+  QDomElement m_node;
+  QDomElement m_cameraNode;
+  Project* m_project;
+  DemoTimeline* m_timeline;
+  Scene* m_scene;
+  QImage m_preview;
+  QPointF m_mousePressPos;
+  qint64 m_mousePressStartFrame;
+  qint64 m_orginalLength;
+  MouseAction m_currentAction;
+  QMap<qint64, CameraKeyframe*> m_cameraKeyframes;
 
 };
 

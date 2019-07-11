@@ -19,7 +19,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    project(nullptr),
+    m_project(NULL),
     ui(new Ui::MainWindow)
 
 {
@@ -27,17 +27,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->progressBar->setVisible(false);
     ui->cancelButton->setVisible(false);
 
-    info = new LogDockWidget(this);
-    info->getLogWidget()->setPrintTime(false);
+    m_info = new LogDockWidget(this);
+    m_info->getLogWidget()->setPrintTime(false);
 
-    editor = new EditorWidget(*(info->getLogWidget()),this);
-    timelineWidget = new TimelineDockWidget(this);
-    addDockWidget(Qt::BottomDockWidgetArea, info);
-    addDockWidget(Qt::BottomDockWidgetArea, timelineWidget);
-    addDockWidget(Qt::LeftDockWidgetArea, editor);
+    m_editor = new EditorWidget(*(m_info->getLogWidget()),this);
+    m_timeline = new TimelineDockWidget(this);
+    addDockWidget(Qt::BottomDockWidgetArea, m_info);
+    addDockWidget(Qt::BottomDockWidgetArea, m_timeline);
+    addDockWidget(Qt::LeftDockWidgetArea, m_editor);
 
-    connect(editor,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
-    connect(timelineWidget,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
+    connect(m_editor,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
+    connect(m_timeline,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
 
     //Main window actions
     ui->toolBar->addAction(ui->actionNew);
@@ -63,9 +63,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-  if (project)
+  if (m_project)
   {
-    delete project;
+    delete m_project;
   }
   delete ui;
 }
@@ -73,24 +73,23 @@ MainWindow::~MainWindow()
 
 void MainWindow::newProject()
 {
-
   QString d = QFileDialog::getExistingDirectory(this,tr("Select project directory"),QDir::currentPath());
   if (!d.isEmpty())
   {
     QDir dir = QDir(d);
     if (!QDir::setCurrent(dir.path()))
     {
-      info->getLogWidget()->writeError("Fatal Error: Cannot set the current directory to " + dir.path());
+      m_info->getLogWidget()->writeError("Fatal Error: Cannot set the current directory to " + dir.path());
     }
     else
     {
-      if (project)
+      if (m_project)
       {
-        delete project;
+        delete m_project;
       }
-      project = new Project(dir,"demo.xml",*(info->getLogWidget()),this);
+      m_project = new Project(dir,"demo.xml",*(m_info->getLogWidget()),this);
       connectProject();
-      project->build(Project::getDefaultProjectText());
+      m_project->build(Project::getDefaultProjectText());
     }
   }
 }
@@ -103,15 +102,15 @@ void MainWindow::open()
     QDir dir = QFileInfo(f).dir();
     if (!QDir::setCurrent(dir.path()))
     {
-      info->getLogWidget()->writeError("Fatal Error: Cannot set the current directory to " + dir.path());
+      m_info->getLogWidget()->writeError("Fatal Error: Cannot set the current directory to " + dir.path());
     }
     else
     {
-      if (project)
+      if (m_project)
       {
-        delete project;
+        delete m_project;
       }
-      project = new Project(dir,QFileInfo(f).fileName(),*(info->getLogWidget()),this);
+      m_project = new Project(dir,QFileInfo(f).fileName(),*(m_info->getLogWidget()),this);
       connectProject();
     }
   }
@@ -119,22 +118,21 @@ void MainWindow::open()
 
 void MainWindow::saveAllShaders()
 {
-  editor->saveAllShaders();
+  m_editor->saveAllShaders();
 }
 
 void MainWindow::connectProject()
 {
-  editor->loadProject(*project);
-  connect(project,SIGNAL(appendTextEditable(TextEditable*)),editor,SLOT(appendTextEditable(TextEditable*)));
-  connect(project,SIGNAL(demoTimelineChanged(Timeline*)),this,SLOT(setTimeline(Timeline*)));
-  timelineWidget->setProject(project);
+  m_editor->loadProject(*m_project);
+  connect(m_project,SIGNAL(appendTextEditable(TextEditable*)),m_editor,SLOT(appendTextEditable(TextEditable*)));
+  connect(m_project,SIGNAL(demoTimelineChanged(Timeline*)),this,SLOT(setTimeline(Timeline*)));
+  m_timeline->setProject(m_project);
 }
 
 void MainWindow::setTimeline(Timeline *t)
 {
-  (void)t; // oh !
-  Q_ASSERT(t == project->getDemoTimeline() || !t); // Don't support another case yet 
-  timelineWidget->setProject(project);
+  (void)t;
+  m_timeline->setProject(m_project);
 }
 
 void MainWindow::insertCameraKeyframe()
@@ -142,21 +140,21 @@ void MainWindow::insertCameraKeyframe()
   Camera* cam = ui->widget->camera();
   if (cam)
   {
-    timelineWidget->insertCameraKeyframe(cam);
+    m_timeline->insertCameraKeyframe(cam);
   }
 }
 
 
 void MainWindow::exportAsVideo()
 {
-  if (project && project->getDemoTimeline())
+  if (m_project && m_project->demoTimeline())
   {
     freezeAll();
 
-    ui->widget->setRenderer(project->getDemoTimeline()->getRenderer());
+    ui->widget->setRenderer(m_project->demoTimeline()->getRenderer());
 
     ui->progressBar->setMinimum(0);
-    ui->progressBar->setMaximum(project->getDemoTimeline()->length());
+    ui->progressBar->setMaximum(m_project->demoTimeline()->length());
     ui->progressBar->setValue(0);
     ui->progressBar->setFormat("Rendering %v/%m (%p%)");
     ui->progressBar->setVisible(true);
@@ -168,9 +166,9 @@ void MainWindow::exportAsVideo()
     FFmpegEncoder* encoder = new FFmpegEncoder(
                                this,
                                QString("render.mp4"),
-                               *(project->getDemoTimeline()),
-                               QSize(3840,2160),
-                               *(info->getLogWidget()));
+                               *(m_project->demoTimeline()),
+                               QSize(1920,1080),
+                               *(m_info->getLogWidget()));
 
     connect(ui->cancelButton,SIGNAL(clicked(bool)),encoder,SLOT(cancel()));
 
@@ -191,10 +189,10 @@ void MainWindow::freezeAll()
   ui->menuFile->setEnabled(false);
   ui->menuExport->setEnabled(false);
 
-  timelineWidget->setEnabled(false);
-  editor->setEnabled(false);
+  m_timeline->setEnabled(false);
+  m_editor->setEnabled(false);
 
- // timeline->getTimelineWidget()->stopUpdateLoop();
+ // m_timeline->getTimelineWidget()->stopUpdateLoop();
 
 }
 
@@ -205,24 +203,24 @@ void MainWindow::unfreezeAll()
   ui->menuFile->setEnabled(true);
   ui->menuExport->setEnabled(true);
 
-  timelineWidget->setEnabled(true);
-  editor->setEnabled(true);
+  m_timeline->setEnabled(true);
+  m_editor->setEnabled(true);
 
   ui->widget->setOnlyShowTexture(false);
 
   ui->progressBar->setVisible(false);
   ui->cancelButton->setVisible(false);
-  //timeline->getTimelineWidget()->startUpdateLoop();
+  //m_timeline->getTimelineWidget()->startUpdateLoop();
 }
 
 void MainWindow::exportAsLinuxDemo()
 {
-  if (project)
+  if (m_project)
   {
     QString d = QFileDialog::getExistingDirectory(this,tr("Select demo build directory"));
     if (!d.isEmpty())
     {
-      project->exportAsLinuxDemo(QDir(d));
+      m_project->exportAsLinuxDemo(QDir(d));
     }
   }
 }
