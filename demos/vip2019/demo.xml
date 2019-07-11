@@ -1,0 +1,150 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rmdemo>
+  <music file="music.tf4m" name="music" length="95.0"/>
+  <frameworks>
+    <framework file="fractal.glsl" name="fractal"/>
+  </frameworks>
+  <scenes>
+    <scene file="fractal1.glsl" name="fractal1" framework="fractal"/>
+    <scene file="fractal2.glsl" name="fractal2" framework="fractal"/>
+    <scene file="fractal3.glsl" name="fractal3" framework="fractal"/>
+    <scene file="fractal4.glsl" name="fractal4" framework="fractal"/>
+    <scene file="fractal5.glsl" name="fractal5" framework="fractal"/>
+    <scene file="fractal6.glsl" name="fractal6" framework="fractal"/>
+  </scenes>
+  <timeline>
+    <track>
+      <sequence start="0" scene="fractal1" length="1993">
+        <camera>
+          <keyframe pos_x="-0.0520357" rot_y="0.080977" rot_w="0.996026" pos_y="0.0584011" pos_z="-3.02328" rot_x="-0.00489402" rot_z="0.0367016" frame="702"/>
+          <keyframe pos_x="-0.32546" rot_y="0.105378" rot_w="0.991728" pos_y="0.783086" pos_z="-11.4079" rot_x="0.0684892" rot_z="0.0260599" frame="0"/>
+          <keyframe pos_x="-0.0491082" rot_y="0.069234" rot_w="0.996657" pos_y="0.0550418" pos_z="-2.78099" rot_x="-0.00457671" rot_z="0.0431356" frame="964"/>
+          <keyframe pos_x="0.0326971" rot_y="0.00229488" rot_w="0.998647" pos_y="0.10277" pos_z="-1.67586" rot_x="-0.0255802" rot_z="0.0452014" frame="978"/>
+          <keyframe pos_x="0.019505" rot_y="0.000718176" rot_w="0.998067" pos_y="0.0897214" pos_z="-1.53797" rot_x="-0.0331544" rot_z="0.0525511" frame="1305"/>
+          <keyframe pos_x="0.0905057" rot_y="-0.218435" rot_w="0.960859" pos_y="0.161254" pos_z="-0.993513" rot_x="-0.161352" rot_z="0.0547665" frame="1314"/>
+          <keyframe pos_x="-0.287542" rot_y="-0.232869" rot_w="0.9301" pos_y="0.333804" pos_z="-0.817969" rot_x="-0.283985" rot_z="-0.00615127" frame="1646"/>
+          <keyframe pos_x="-0.331581" rot_y="-0.459662" rot_w="0.715839" pos_y="0.34517" pos_z="-0.638055" rot_x="-0.505555" rot_z="-0.143837" frame="1657"/>
+          <keyframe pos_x="-0.323648" rot_y="-0.540725" rot_w="0.694502" pos_y="0.372214" pos_z="-0.653693" rot_x="-0.473285" rot_z="-0.0356196" frame="1982"/>
+          <keyframe pos_x="-0.323648" rot_y="-0.545405" rot_w="-0.10614" pos_y="0.372214" pos_z="-0.653693" rot_x="-0.80558" rot_z="-0.205642" frame="1994"/>
+          <keyframe pos_x="-0.00900053" rot_y="0.087152" rot_w="0.995238" pos_y="0.610348" pos_z="-9.62581" frame="689" rot_x="0.0341712" rot_z="0.0271783"/>
+        </camera>
+      </sequence>
+      <sequence start="2340" scene="fractal2" length="338">
+        <camera>
+          <keyframe pos_x="2.00903" rot_y="-0.356118" rot_w="0.933993" pos_y="0.00605567" pos_z="-1.02126" rot_x="-0.0282491" rot_z="0.00344568" frame="9"/>
+          <keyframe pos_x="1.63949" rot_y="-0.896467" rot_w="0.435388" pos_y="0.213852" pos_z="1.54141" rot_x="0.00304124" rot_z="0.0821449" frame="338"/>
+          <keyframe pos_x="2.00903" rot_y="-0.892819" rot_w="0.450241" pos_y="0.00605567" pos_z="-1.02126" rot_x="-0.0111514" rot_z="-0.00202948" frame="0"/>
+        </camera>
+      </sequence>
+      <sequence start="1993" scene="fractal3" length="347">
+        <camera>
+          <keyframe pos_x="3.38818" rot_y="-0.212572" rot_w="0.877293" pos_y="0.868103" pos_z="0.665543" rot_x="0.429855" rot_z="-0.019623" frame="4"/>
+          <keyframe pos_x="3.01466" rot_y="-0.286057" rot_w="0.930944" pos_y="0.640064" pos_z="1.17977" rot_x="-0.0885438" rot_z="-0.20895" frame="341"/>
+          <keyframe pos_x="3.38567" rot_y="-0.178817" rot_w="0.949554" pos_y="0.866572" pos_z="0.668995" rot_x="-0.206011" rot_z="-0.154688" frame="13"/>
+          <keyframe pos_x="3.01466" rot_y="-0.395904" rot_w="0.523217" pos_y="0.640064" pos_z="1.17977" rot_x="-0.706159" rot_z="-0.266138" frame="347"/>
+        </camera>
+      </sequence>
+      <sequence start="2678" scene="fractal4" length="337">
+        <camera>
+          <keyframe pos_x="2.83329" rot_y="-0.377633" rot_w="0.825964" pos_y="-0.127644" pos_z="-4.00315" rot_x="-0.276595" rot_z="0.314107" frame="8"/>
+          <keyframe pos_x="2.83329" rot_y="-0.832267" rot_w="0.375824" pos_y="-0.127644" pos_z="-4.00315" rot_x="-0.0122936" rot_z="0.407343" frame="2"/>
+          <keyframe pos_x="0.462759" rot_y="0.459386" rot_w="0.886542" pos_y="0.070578" pos_z="-3.5369" rot_x="0.0528607" rot_z="0.0143967" frame="338"/>
+        </camera>
+      </sequence>
+      <sequence start="3015" scene="fractal2" length="333">
+        <camera>
+          <keyframe pos_x="-0.423605" rot_y="0.0393023" rot_w="0.513735" pos_y="-1.00512" pos_z="-1.25631" rot_x="-0.83858" rot_z="-0.176962" frame="8"/>
+          <keyframe pos_x="-0.405218" rot_y="0.26055" rot_w="0.138068" pos_y="-1.01117" pos_z="-1.33106" rot_x="-0.785435" rot_z="0.544187" frame="0"/>
+          <keyframe pos_x="-0.0435416" rot_y="-0.202834" rot_w="0.617654" pos_y="-0.452668" pos_z="-0.687002" rot_x="0.679233" rot_z="-0.34059" frame="328"/>
+          <keyframe pos_x="-0.320774" rot_y="0.0398857" rot_w="0.469173" pos_y="-0.984643" pos_z="-1.19906" rot_x="-0.873142" rot_z="-0.126127" frame="31"/>
+          <keyframe pos_x="-0.0435416" rot_y="0.0208097" rot_w="0.618924" pos_y="-0.452668" pos_z="-0.687002" rot_x="0.774153" rot_z="-0.131077" frame="333"/>
+        </camera>
+      </sequence>
+      <sequence start="3348" scene="fractal5" length="339">
+        <camera>
+          <keyframe pos_x="-1.54736" rot_y="-0.463385" rot_w="0.858996" pos_y="-1.22341" pos_z="-5.77311" rot_x="-0.210693" rot_z="0.0548065" frame="3"/>
+          <keyframe pos_x="-1.54736" rot_y="-0.901656" rot_w="0.406805" pos_y="-1.22341" pos_z="-5.77311" rot_x="-0.12638" rot_z="0.0744889" frame="0"/>
+          <keyframe pos_x="-4.72548" rot_y="0.418708" rot_w="0.884878" pos_y="-0.138053" pos_z="-4.20982" rot_x="-0.134684" rot_z="-0.153385" frame="330"/>
+          <keyframe pos_x="-4.0729" rot_y="0.166579" rot_w="0.965901" pos_y="-0.564054" pos_z="-5.03593" rot_x="-0.172503" rot_z="-0.0976169" frame="256"/>
+          <keyframe pos_x="-1.65892" rot_y="0.431691" rot_w="0.880369" pos_y="0.22437" pos_z="-1.00346" rot_x="-0.095929" rot_z="-0.171414" frame="339"/>
+        </camera>
+      </sequence>
+      <sequence start="3687" scene="fractal5" length="292">
+        <camera>
+          <keyframe pos_x="-3.10656" rot_y="0.222929" rot_w="0.970893" pos_y="0.189837" pos_z="-7.48337" rot_x="-0.042417" rot_z="-0.0765935" frame="0"/>
+          <keyframe pos_x="-1.54446" rot_y="0.190952" rot_w="0.977535" pos_y="0.152798" pos_z="-4.64082" rot_x="0.0057869" rot_z="-0.0890125" frame="9"/>
+          <keyframe pos_x="-1.12993" rot_y="0.189971" rot_w="0.977409" pos_y="0.0865305" pos_z="-3.60255" rot_x="0.0164379" rot_z="-0.091146" frame="292"/>
+        </camera>
+      </sequence>
+      <sequence start="3979" scene="fractal5" length="25">
+        <camera>
+          <keyframe pos_x="-0.0364822" rot_y="-0.237805" rot_w="0.856877" pos_y="1.64662" pos_z="-1.62767" rot_x="0.439448" rot_z="0.126866" frame="1"/>
+          <keyframe pos_x="-0.869081" rot_y="-0.0208533" rot_w="0.877173" pos_y="1.4304" pos_z="-1.96975" rot_x="0.41715" rot_z="0.236889" frame="26"/>
+        </camera>
+      </sequence>
+      <sequence start="4004" scene="fractal5" length="14">
+        <camera>
+          <keyframe pos_x="-0.0670106" rot_y="-0.010828" rot_w="0.99104" pos_y="-0.281322" pos_z="-2.97854" rot_x="-0.132711" rot_z="0.0105403" frame="5"/>
+        </camera>
+      </sequence>
+      <sequence start="4018" scene="fractal5" length="22">
+        <camera>
+          <keyframe pos_x="-0.0956043" rot_y="-0.311357" rot_w="0.941725" pos_y="0.217049" pos_z="-2.35222" rot_x="0.123604" rot_z="-0.0305554" frame="1"/>
+        </camera>
+      </sequence>
+      <sequence start="4040" scene="fractal5" length="13">
+        <camera>
+          <keyframe pos_x="-1.51633" rot_y="0.419638" rot_w="0.800548" pos_y="0.709288" pos_z="-0.878208" rot_x="-0.411424" rot_z="0.117283" frame="1"/>
+        </camera>
+      </sequence>
+      <sequence start="4053" scene="fractal5" length="9">
+        <camera>
+          <keyframe pos_x="1.21891" rot_y="-0.844306" rot_w="0.358257" pos_y="1.41134" pos_z="0.31617" rot_x="0.316613" rot_z="0.241966" frame="2"/>
+        </camera>
+      </sequence>
+      <sequence start="4062" scene="fractal5" length="309">
+        <camera>
+          <keyframe pos_x="1.86352" rot_y="-0.28712" rot_w="0.933869" pos_y="1.86861" pos_z="-3.1313" rot_x="0.101509" rot_z="0.18743" frame="0"/>
+          <keyframe pos_x="1.11472" rot_y="-0.153516" rot_w="0.958255" pos_y="2.55533" pos_z="-3.38454" rot_x="0.220434" rot_z="0.0979012" frame="310"/>
+        </camera>
+      </sequence>
+      <sequence start="4737" scene="fractal6" length="298">
+        <camera>
+          <keyframe pos_x="-0.140465" rot_y="0.123796" rot_w="0.94695" pos_y="0.164878" pos_z="-2.61273" rot_x="0.152129" rot_z="-0.254578" frame="3"/>
+          <keyframe pos_x="-0.814291" rot_y="0.17216" rot_w="0.919481" pos_y="2.34122" pos_z="-3.311" rot_x="0.228074" rot_z="-0.26998" frame="299"/>
+        </camera>
+      </sequence>
+      <sequence start="4398" scene="fractal5" length="304">
+        <camera>
+          <keyframe pos_x="1.74251" rot_y="0.786935" rot_w="-0.475785" pos_y="0.352102" pos_z="2.1843" rot_x="0.0675926" rot_z="0.387029" frame="2"/>
+          <keyframe pos_x="2.11228" rot_y="0.282072" rot_w="-0.886619" pos_y="2.96787" pos_z="-1.55122" rot_x="-0.342344" rot_z="0.130911" frame="305"/>
+          <keyframe pos_x="3.07232" rot_y="0.597921" rot_w="-0.734591" pos_y="1.44456" pos_z="0.105772" rot_x="-0.143652" rot_z="0.286757" frame="164"/>
+        </camera>
+      </sequence>
+      <sequence start="5089" scene="fractal6" length="262">
+        <camera>
+          <keyframe pos_x="0.162069" rot_y="0.00321115" rot_w="0.967926" pos_y="2.6833" pos_z="-3.881" rot_x="0.251206" rot_z="-0.00206779" frame="1"/>
+          <keyframe pos_x="0.0406232" rot_y="0.00321115" rot_w="0.967926" pos_y="2.81976" pos_z="-4.12479" rot_x="0.251206" rot_z="-0.00206779" frame="263"/>
+        </camera>
+      </sequence>
+      <sequence start="5384" scene="fractal1" length="13">
+        <camera>
+          <keyframe pos_x="0.011604" rot_y="-0.0130892" rot_w="0.999876" pos_y="0.00750435" pos_z="-0.479793" rot_x="0.00872612" rot_z="6.6733e-5" frame="1"/>
+          <keyframe pos_x="0.018148" rot_y="-0.0109079" rot_w="0.999919" pos_y="0.0114311" pos_z="-0.779696" rot_x="0.00654441" rot_z="6.20149e-5" frame="14"/>
+        </camera>
+      </sequence>
+      <sequence start="5438" scene="fractal1" length="262">
+        <camera>
+          <keyframe pos_x="-0.0488788" rot_y="0.00872266" rot_w="0.999353" pos_y="0.192963" pos_z="-2.85296" rot_x="0.0348988" rot_z="-0.000133322" frame="0"/>
+          <keyframe pos_x="0.0444863" rot_y="-0.00436175" rot_w="0.998503" pos_y="1.03936" pos_z="-10.1047" rot_x="0.0545056" rot_z="-0.000827953" frame="284"/>
+        </camera>
+      </sequence>
+      <sequence start="5411" scene="fractal1" length="13">
+        <camera>
+          <keyframe pos_x="-0.0017453" rot_y="0.00654494" rot_w="0.999979" pos_y="-5.68434e-11" pos_z="-0.199992" rot_x="0" rot_z="9.31323e-10" frame="0"/>
+          <keyframe pos_x="-0.0034906" rot_y="0.0043633" rot_w="0.999981" pos_y="-0.000523597" pos_z="-0.399984" rot_x="-0.0043633" rot_z="1.90497e-5" frame="13"/>
+        </camera>
+      </sequence>
+    </track>
+  </timeline>
+</rmdemo>
