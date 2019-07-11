@@ -17,7 +17,7 @@
 TimelineWidget::TimelineWidget(QWidget *parent, qreal borderheight):
   QGraphicsView(parent),
   m_borderHeight(borderheight),
-  m_timeline(NULL),
+  m_timeline(nullptr),
   m_updateTimer(new QTimer(this)),
   m_grabTime(false),
   m_scale(1,1)
@@ -84,7 +84,7 @@ void TimelineWidget::onTimelineDestroy()
   disconnect(m_updateTimer,SIGNAL(timeout()),this,SLOT(updateWithTime()));
   disconnect(this,SIGNAL(timePositionChanged(double)),0,0);
   m_updateTimer->stop();
-  m_timeline=NULL;
+  m_timeline=nullptr;
   setScene(m_timeline);
 }
 

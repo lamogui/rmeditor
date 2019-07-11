@@ -15,13 +15,14 @@ class Music;
 class Framework;
 class Scene;
 class Timeline;
+class Gif;
 
 class Project : public TextEditable
 {
   Q_OBJECT
 
   public:
-    Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=NULL);
+    Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=nullptr);
     virtual ~Project();
 
     virtual const QString& text() const;
@@ -67,9 +68,11 @@ class Project : public TextEditable
     bool parseTagScenes(QDomNode node);
     bool parseTagMusic(QDomNode node);
     bool parseTagTimeline(QDomNode node);
+    bool parseTagResources(QDomNode node);
 
     QMap<QString,Scene*> m_rmScenes;
     QMap<QString,Framework*> m_frameworks;
+    QMap<QString, Gif*> m_gifs;
 
     Music* m_music;
     DemoTimeline* m_demoTimeline;

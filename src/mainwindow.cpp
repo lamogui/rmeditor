@@ -19,7 +19,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    m_project(NULL),
+    m_project(nullptr),
     ui(new Ui::MainWindow)
 
 {

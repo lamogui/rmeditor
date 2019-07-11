@@ -110,7 +110,7 @@ Sequence* DemoTimeline::isInsideSequence(qint64 frame) const
       return it.value();
     }
   }
-  return NULL;
+  return nullptr;
 }
 unsigned int DemoTimeline::sequenceID(qint64 frame) const
 {

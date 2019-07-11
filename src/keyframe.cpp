@@ -13,7 +13,7 @@
 
 
 Keyframe::Keyframe(Project &project, Sequence* seq, QDomElement &node):
-  QObject(NULL), //lol
+  QObject(nullptr), //lol
   QGraphicsItem(seq),
   m_sequence(seq),
   m_project(&project),
@@ -27,7 +27,7 @@ Keyframe::Keyframe(Project &project, Sequence* seq, QDomElement &node):
 }
 
 Keyframe::Keyframe(qint64 rel_frame, Project &project, Sequence* seq, QDomElement &node):
-  QObject(NULL), //lol
+  QObject(nullptr), //lol
   QGraphicsItem(seq),
   m_sequence(seq),
   m_project(&project),

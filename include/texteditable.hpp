@@ -22,7 +22,7 @@ public:
 
   //Is the object buildable
   virtual bool buildable() const {return false;}
-  inline virtual Renderer* getRenderer() const {return NULL;}
+  inline virtual Renderer* getRenderer() const {return nullptr;}
 
 public slots:
   //Return true is the file is loaded or created (not if it build correctly)

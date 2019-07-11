@@ -50,7 +50,7 @@ void eThread::Start(eInt flags)
 {
     eASSERT(!Handle);
     const eU32 tf = (flags&eTHCF_SUSPENDED ? CREATE_SUSPENDED : 0);
-    Handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadTrunk, this, tf, (LPDWORD)&Tid);
+    Handle = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)ThreadTrunk, this, tf, (LPDWORD)&Tid);
     eASSERT(Handle);
     SetPriority((eThreadPriority)(flags&(~eTHCF_SUSPENDED)));
 

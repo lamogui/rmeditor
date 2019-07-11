@@ -18,18 +18,18 @@
 #include "timelinewidget.hpp"
 
 Sequence::Sequence(Project &project, DemoTimeline &timeline, QDomElement &node, qreal height):
-  QGraphicsRectItem(NULL),
+  QGraphicsRectItem(nullptr),
   m_node(node),
   m_project(&project),
   m_timeline(&timeline),
-  m_scene(NULL)
+  m_scene(nullptr)
 {
   setRect(QRectF(10,10,10,height)); //ugly
   load();
 }
 
 Sequence::Sequence(Project& project, DemoTimeline &timeline, QDomElement node, Scene &scene, int start, int length, qreal height):
-  QGraphicsRectItem(NULL),
+  QGraphicsRectItem(nullptr),
   m_node(node),
   m_project(&project),
   m_timeline(&timeline),
@@ -312,8 +312,8 @@ void Sequence::keyframePositionChanged(qint64 previous_frame, Keyframe* keyframe
 
 void Sequence::setCamera(qint64 relative_frame, Camera &cam) const
 {
-  CameraKeyframe* begin = NULL;
-  CameraKeyframe* end = NULL;
+  CameraKeyframe* begin = nullptr;
+  CameraKeyframe* end = nullptr;
 
   QMap<qint64,CameraKeyframe*>::ConstIterator it;
   for (it = m_cameraKeyframes.constBegin(); it != m_cameraKeyframes.constEnd(); ++it)
@@ -358,7 +358,7 @@ void Sequence::setCamera(qint64 relative_frame, Camera &cam) const
 void Sequence::insertCameraKeyframe(qint64 rel_frame, const QVector3D &pos, const QQuaternion &rot)
 {
   QMap<qint64,CameraKeyframe*>::iterator it = m_cameraKeyframes.find(rel_frame);
-  CameraKeyframe* keyframe = (it != m_cameraKeyframes.end()) ? it.value() : NULL;
+  CameraKeyframe* keyframe = (it != m_cameraKeyframes.end()) ? it.value() : nullptr;
   if (keyframe)
   {
     keyframe->setPosition(pos);

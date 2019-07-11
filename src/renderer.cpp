@@ -8,7 +8,7 @@ Renderer::Renderer(size_t w, size_t h, QObject *parent):
   QObject(parent),
   QOpenGLFunctions(QOpenGLContext::currentContext()),
   m_fbo(),
-  m_camera(NULL)
+  m_camera(nullptr)
 {
   m_fbo.setSize(w,h);
 }

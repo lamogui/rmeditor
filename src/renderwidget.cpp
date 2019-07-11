@@ -21,7 +21,7 @@
 
 RenderWidget::RenderWidget(QWidget *parent) :
   QGLWidget(parent),
-  m_renderer(NULL),
+  m_renderer(nullptr),
   m_captureMouse(false),
   m_onlyShowTexture(false)
 {
@@ -48,7 +48,7 @@ RenderWidget::~RenderWidget()
 {
   if (m_renderer)
   {
-    m_renderer->attachedWidget(NULL);
+    m_renderer->attachedWidget(nullptr);
   }
 
     Fast2DQuadFree();
@@ -216,7 +216,7 @@ void RenderWidget::setRenderer(Renderer *renderer)
   if (m_renderer)
   {
     disconnect(m_renderer,SIGNAL(destroyed(QObject*)),this,SLOT(onRendererDestroy()));
-    m_renderer->attachedWidget(NULL);
+    m_renderer->attachedWidget(nullptr);
   }
   m_renderer = renderer;
   if (m_renderer)
@@ -228,7 +228,7 @@ void RenderWidget::setRenderer(Renderer *renderer)
 
 void RenderWidget::onRendererDestroy()
 {
-  m_renderer = NULL;
+  m_renderer = nullptr;
 }
 
 void RenderWidget::keyPressEvent(QKeyEvent *event)
@@ -259,7 +259,7 @@ Camera* RenderWidget::camera() const
   {
     return m_renderer->camera();
   }
-  return NULL;
+  return nullptr;
 }
 
 void RenderWidget::startUpdateLoop()

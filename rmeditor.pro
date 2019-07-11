@@ -42,6 +42,7 @@ HEADERS += \
     include/fbo.hpp \
     include/ffmpegencoder.hpp \
     include/framework.hpp \
+    include/giftexture.hpp \
     include/highlighter.hpp \
     include/keyframe.hpp \
     include/logdockwidget.hpp \
@@ -49,7 +50,6 @@ HEADERS += \
     include/mainwindow.hpp \
     include/music.hpp \
     include/nodefile.hpp \
-    include/player.hpp \
     include/project.hpp \
     include/renderer.hpp \
     include/renderwidget.hpp \
@@ -75,7 +75,8 @@ include/threading.hpp \
 include/tf4.hpp \
 include/tf4fx.hpp \
 include/tf4player.hpp \
-    include/tunefish4music.hpp
+    include/tunefish4music.hpp \
+include/gif.h
 
 SOURCES += \
     src/camera.cpp \
@@ -84,6 +85,7 @@ SOURCES += \
     src/fast2dquad.cpp \
     src/fbo.cpp \
     src/ffmpegencoder.cpp \
+    src/giftexture.cpp \
     src/highlighter.cpp \
     src/keyframe.cpp \
     src/logdockwidget.cpp \
@@ -92,7 +94,6 @@ SOURCES += \
     src/mainwindow.cpp \
     src/music.cpp \
     src/nodefile.cpp \
-    src/player.cpp \
     src/project.cpp \
     src/renderer.cpp \
     src/renderwidget.cpp \
@@ -116,7 +117,8 @@ src/threading.cpp \
 src/tf4.cpp \
 src/tf4fx.cpp \
 src/tf4player.cpp \
-    src/tunefish4music.cpp
+    src/tunefish4music.cpp \
+src/gif.c
 
 FORMS += \
     ui/editorwidget.ui \

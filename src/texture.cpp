@@ -64,7 +64,7 @@ bool Texture2D::load(const std::string &path)
 
     if( !b.load( path.c_str() ) )
     {
-        QMessageBox::critical(NULL, "Error", QString(QString("Can't load image ")+path.c_str()) );
+        QMessageBox::critical(nullptr, "Error", QString(QString("Can't load image ")+path.c_str()) );
         return false;
     }
     t = QGLWidget::convertToGLFormat( b );

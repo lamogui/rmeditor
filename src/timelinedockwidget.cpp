@@ -9,7 +9,7 @@
 TimelineDockWidget::TimelineDockWidget(QWidget *parent):
   QDockWidget(parent),
   ui(new Ui::TimelineDockWidget),
-  m_project(NULL)
+  m_project(nullptr)
 {
     ui->setupUi(this);
     connect(ui->timelineView,SIGNAL(rendererChanged(Renderer*)),this,SLOT(emitRendererChanged(Renderer*)));
@@ -36,7 +36,7 @@ void TimelineDockWidget::setProject(Project *project)
   }
   else
   {
-    getTimelineWidget()->setTimeline(NULL);
+    getTimelineWidget()->setTimeline(nullptr);
     this->setEnabled(false);
   }
 }

@@ -21,7 +21,7 @@ Renderer* Scene::getRenderer() const
 
 Scene::~Scene()
 {
-  m_sceneRenderer->setCamera(NULL);
+  m_sceneRenderer->setCamera(nullptr);
 }
 
 

@@ -9,12 +9,13 @@
 #include "scene.hpp"
 #include "shaderminifier.hpp"
 #include "tunefish4music.hpp"
+#include "giftexture.hpp"
 
 
 Project::Project(const QDir &dir, const QString &filename, LogWidget &log, QObject *parent):
   TextEditable(filename, QDomNode() ,log,parent),
-  m_music(NULL),
-  m_demoTimeline(NULL),
+  m_music(nullptr),
+  m_demoTimeline(nullptr),
   m_dir(dir),
   m_log(&log),
   m_textUpdateTimer(new QTimer(this))
@@ -54,15 +55,16 @@ void Project::resetProject()
   m_textUpdateTimer->stop();
   if (m_demoTimeline)
   {
-    emit demoTimelineChanged(NULL);
+    emit demoTimelineChanged(nullptr);
     delete m_demoTimeline;
   }
-  m_demoTimeline = NULL;
+  m_demoTimeline = nullptr;
   //m_text.clear();
   m_node = QDomNode();
   m_document.clear();
   //emit objectTextChanged(m_text);
 
+  // thoses are useles since we prices the parent...
   QList<QString> keys = m_rmScenes.keys();
   foreach (QString key, keys)
   {
@@ -75,13 +77,19 @@ void Project::resetProject()
     delete m_frameworks[key];
   }
   m_frameworks.clear();
+  keys = m_gifs.keys();
+  foreach (QString key, keys)
+  {
+    delete m_gifs[key];
+  }
+  m_gifs.clear();
 
 
   if (m_music)
   {
     delete m_music;
   }
-  m_music = NULL;
+  m_music = nullptr;
 
 }
 
@@ -170,6 +178,12 @@ bool Project::build(const QString &text)
           buildSuccess = false;
         }
       }
+      else if (element.tagName() == "resources")
+      {
+          if (!parseTagResources(node)){
+              buildSuccess = false;
+          }
+      }
       else if (element.tagName() == "timeline")
       {
         if (!parseTagTimeline(node))
@@ -255,7 +269,7 @@ bool Project::parseTagScenes(QDomNode node)
       }
       else
       {
-        Framework* fw=NULL;
+        Framework* fw=nullptr;
         if (!framework.isEmpty())
         {
           auto it = m_frameworks.find(framework);
@@ -277,6 +291,52 @@ bool Project::parseTagScenes(QDomNode node)
     element = element.nextSiblingElement();
   }
   return true;
+}
+
+bool Project::parseTagResources(QDomNode node)
+{
+    QDomElement element = node.firstChildElement();
+    while (!element.isNull())
+    {
+      if (element.tagName() == "texture")
+      {
+        QString filename = element.attribute("file");
+        QString name = element.attribute("name", filename.section(".",0,-2));
+        element.setAttribute("name",name);
+        if (m_gifs.contains(name))
+        {
+          emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
+                     "(" + element.nodeName() +  ") duplicate texture '" + name + "'");
+          return false;
+        }
+        else if (filename.isEmpty())
+        {
+          emit warning(QString("[") + fileName() + "]" + " warning texture without filename line " + QString::number(element.lineNumber()));
+        }
+        else
+        {
+            QString ext = filename.section(".",-1);
+            element.setAttribute("name",name);
+          emit info(QString("[") + fileName() + "]" + " loading texture '" + name + "' (file: " + filename + ")");
+
+            if (ext == "gif")
+            {
+                m_gifs[name] = new Gif(name, filename,element,*m_log,this);
+              return m_gifs[name] != nullptr;
+            }
+            else
+            {
+              emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
+                        "(" + element.nodeName() +  ")  '" + filename + "' unsupported files type '" + ext + "'");
+              return false;
+            }
+
+
+        }
+      }
+      element = element.nextSiblingElement();
+    }
+    return true;
 }
 
 bool Project::parseTagMusic(QDomNode node)
@@ -311,7 +371,7 @@ bool Project::parseTagMusic(QDomNode node)
     return false;
   }
 
-  if (ext == "tf4m")
+  if (ext == "tfm")
   {
     m_music = new Tunefish4Music(filename,length,node,*m_log,this);
     emit info(QString("[") + fileName() + "]" + " loading music '" + name + "' (file: " + filename + ")");
@@ -368,7 +428,7 @@ Scene* Project::getRayMarchScene(const QString& name) const
   {
     return it.value();
   }
-  return NULL;
+  return nullptr;
 }
 
 
@@ -380,7 +440,7 @@ Framework* Project::getFramework(const QString& name) const
   {
     return it.value();
   }
-  return NULL;
+  return nullptr;
 }
 
 QString Project::getDefaultProjectText()

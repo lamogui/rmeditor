@@ -16,7 +16,7 @@ class Renderer : public QObject, public QOpenGLFunctions
   Q_OBJECT
 
 public:
-  Renderer(size_t w, size_t h, QObject* parent=NULL);
+  Renderer(size_t w, size_t h, QObject* parent=nullptr);
   virtual ~Renderer();
 
 
@@ -27,7 +27,7 @@ public:
   inline void setCamera(Camera* c) { m_camera = c; }
   inline Camera* camera() const  { return m_camera; }
 
-  //Called by RenderWidget, widget is NULL when detached
+  //Called by RenderWidget, widget is nullptr when detached
   virtual void attachedWidget(RenderWidget* widget) { (void) widget; }
 
 
@@ -51,7 +51,7 @@ class Scene;
 class SceneRenderer : public Renderer
 {
 public:
-  SceneRenderer(Scene& scene, size_t w, size_t h, QObject *parent=NULL);
+  SceneRenderer(Scene& scene, size_t w, size_t h, QObject *parent=nullptr);
   virtual void attachedWidget(RenderWidget* widget);
 
 protected:

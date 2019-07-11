@@ -37,14 +37,14 @@ TextEditor::TextEditor(TextEditable &textObject, QWidget *parent) :
 
 
     m_timer->setSingleShot(true);
-    if (dynamic_cast<FragmentShaderCode*>(m_object) != NULL)
+    if (dynamic_cast<FragmentShaderCode*>(m_object) != nullptr)
     {
       m_highlighter->defineGLSLFragmentShaderRules();
       m_timer->setInterval(1000);  //1 second because we want see our result as fast as possible
       connect(m_timer, SIGNAL(timeout()), this, SLOT(build()));
       connect(this, SIGNAL(textChanged()), this, SLOT(resetTimer()));
     }
-    else if (dynamic_cast<Project*>(m_object) != NULL)
+    else if (dynamic_cast<Project*>(m_object) != nullptr)
     {
       m_highlighter->defineXMLRule();
     }
@@ -174,7 +174,7 @@ void TextEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 
 void TextEditor::onDestroyObject(QObject *obj)
 {
-  //Q_ASSERT(dynamic_cast<TextEditable*>(obj)!=NULL);
+  //Q_ASSERT(dynamic_cast<TextEditable*>(obj)!=nullptr);
   delete this;
 }
 
