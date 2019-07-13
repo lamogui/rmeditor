@@ -14,14 +14,15 @@
 #include <QMenu>
 #include <QTextStream>
 #include <QTimer>
+#include <QtMath>
 
 
 DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogWidget &log):
   Timeline(*(project.music()),2*60.0,fps,log),
   m_node(node),
   m_trackHeight(60.0),
-  m_project(&project),
-  m_renderer(new DemoRenderer(*this,1280,720))
+  m_project(project),
+  m_renderer(new DemoRenderer(project, *this,1280,720))
 {
   m_renderer->setCamera(&m_camera);
   load();
@@ -50,7 +51,7 @@ void DemoTimeline::load()
     }
     else
     {
-      emit warning(QString("[") + m_project->fileName() + "]" + " <timeline> warning at line " + QString::number(element.lineNumber()) +
+      emit warning(QString("[") + m_project.fileName() + "]" + " <timeline> warning at line " + QString::number(element.lineNumber()) +
                    + " unknown tag name '" + element.tagName() + "' ignoring the block");
     }
     element = element.nextSiblingElement();
@@ -65,13 +66,13 @@ bool DemoTimeline::parseTrackNode(QDomElement& node)
   {
     if (element.tagName() == "sequence")
     {
-      Sequence* seq = new Sequence(*m_project,*this,element,m_trackHeight);
+      Sequence* seq = new Sequence(m_project,*this,element,m_trackHeight);
       addSequence(seq);
 
     }
     else
     {
-        emit warning(QString(QString("[") + m_project->fileName() + "] <timeline> warning at line " + QString::number(element.lineNumber()) +
+        emit warning(QString(QString("[") + m_project.fileName() + "] <timeline> warning at line " + QString::number(element.lineNumber()) +
                      + " unknown tag name '" + element.tagName() + "' ignoring the block"));
     }
     element = element.nextSiblingElement();
@@ -184,7 +185,7 @@ void DemoTimeline::insertCameraKeyframe(Camera *cam)
 {
   if (cam)
   {
-    insertCameraKeyframe(currentFrame(),cam->position(),cam->rotation());
+    insertCameraKeyframe(currentFrame(),cam->position(),cam->rotation(), cam->fov());
   }
 }
 
@@ -192,22 +193,22 @@ void DemoTimeline::insertCameraKeyframe(qint64 frame, Camera *cam)
 {
   if (cam)
   {
-    insertCameraKeyframe(frame,cam->position(),cam->rotation());
+    insertCameraKeyframe(frame,cam->position(),cam->rotation(), cam->fov());
   }
 }
 
-void DemoTimeline::insertCameraKeyframe(const QVector3D& pos, const QQuaternion& rot)
+void DemoTimeline::insertCameraKeyframe(const QVector3D& pos, const QQuaternion& rot, float fov)
 {
-  insertCameraKeyframe(currentFrame(),pos,rot);
+  insertCameraKeyframe(currentFrame(),pos,rot, fov);
 }
 
 
-void DemoTimeline::insertCameraKeyframe(qint64 frame, const QVector3D &pos, const QQuaternion &rot)
+void DemoTimeline::insertCameraKeyframe(qint64 frame, const QVector3D &pos, const QQuaternion &rot, float fov)
 {
   Sequence* seq = isInsideSequence(frame);
   if (seq)
   {
-    seq->insertCameraKeyframe(frame-seq->startFrame(),pos,rot);
+    seq->insertCameraKeyframe(frame-seq->startFrame(),pos,rot, fov);
   }
   else
   {
@@ -262,14 +263,14 @@ void DemoTimeline::deleteSequence(Sequence* seq)
   m_node.firstChildElement("track").removeChild(seq->node()).clear();
   delete it.value();
   m_sequences.erase(it);
-  m_project->notifyDocumentChanged();
+  m_project.notifyDocumentChanged();
 }
 
 void DemoTimeline::addSequenceAction(QAction *action)
 {
-  QDomElement e = m_project->document().createElement("sequence");
+  QDomElement e = m_project.document().createElement("sequence");
   e = m_node.firstChildElement("track").appendChild(e).toElement();
-  Sequence* seq = new Sequence(*m_project,*this,e,*(m_project->getRayMarchScene(action->text())),m_mousePressPos.x(),600,m_trackHeight);
+  Sequence* seq = new Sequence(m_project,*this,e,*(m_project.getRayMarchScene(action->text())),m_mousePressPos.x(),600,m_trackHeight);
   addSequence(seq);
 }
 
@@ -281,7 +282,7 @@ void DemoTimeline::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
   QMenu addSequenceMenu;
   addSequenceMenu.setTitle(tr("Add sequence"));
 
-  QMap<QString,Scene*> scenes = m_project->rayMarchScenes();
+  QMap<QString,Scene*> scenes = m_project.rayMarchScenes();
   QMap<QString,Scene*>::const_iterator it = scenes.constBegin();
   for (;it != scenes.constEnd(); it++)
   {
@@ -409,10 +410,11 @@ void DemoTimeline::exportSources(const QDir &dir) const
   QString cam_rot_y = "const float cam_rot_y[" + cam_keyframe_count_str + "]";
   QString cam_rot_z = "const float cam_rot_z[" + cam_keyframe_count_str + "]";
   QString cam_rot_w = "const float cam_rot_w[" + cam_keyframe_count_str + "]";
+  QString cam_fov = "const float cam_fov[" + cam_keyframe_count_str + "]";
 
   QList<QString*> cam_vars;
   cam_vars << &cam_frame << &cam_pos_x << &cam_pos_y << &cam_pos_z
-           << &cam_rot_x << &cam_rot_y << &cam_rot_z << &cam_rot_w;
+           << &cam_rot_x << &cam_rot_y << &cam_rot_z << &cam_rot_w << &cam_fov;
   foreach (QString* var, cam_vars)
   {
     cameras_header_code << "extern " << *var << ";\n";
@@ -429,7 +431,7 @@ void DemoTimeline::exportSources(const QDir &dir) const
   for (it = m_sequences.constBegin(); it != m_sequences.constEnd(); it++)
   {
     QString comma = ",";
-    if (it == m_sequences.constEnd() - 1)
+    if (it+1 == m_sequences.constEnd())
     {
       comma = "";
     }
@@ -453,6 +455,8 @@ void DemoTimeline::exportSources(const QDir &dir) const
       cam_rot_y += "   " + QString::number(key_it.value()->rotation().y()) + comma + "\n";
       cam_rot_z += "   " + QString::number(key_it.value()->rotation().z()) + comma + "\n";
       cam_rot_w += "   " + QString::number(key_it.value()->rotation().scalar()) + comma + "\n";
+
+      cam_fov += "   " + QString::number(qDegreesToRadians(key_it.value()->fov())) + comma + "\n";
     }
     current_keyframe += cam_keyframes.size();
   }
@@ -481,9 +485,10 @@ void DemoTimeline::exportSources(const QDir &dir) const
 */
 
 
-DemoRenderer::DemoRenderer(DemoTimeline &timeline, size_t w, size_t h):
+DemoRenderer::DemoRenderer(Project& project, DemoTimeline &timeline, size_t w, size_t h):
   Renderer(w,h,&timeline),
-  m_timeline(&timeline)
+  m_project(project),
+  m_timeline(timeline)
 {
 
 }
@@ -492,45 +497,13 @@ void DemoRenderer::glRender()
 {
   m_fbo.enable();
 
-  qint64 frame = m_timeline->currentFrame();
-  Sequence* current_sequence = m_timeline->isInsideSequence(frame);
+  qint64 frame = m_timeline.currentFrame();
+  Sequence* current_sequence = m_timeline.isInsideSequence(frame);
 
   if (current_sequence && current_sequence->glScene())
   {
-    Scene* scene = current_sequence->glScene();
-    scene->getShader().enable();
-
-
-    m_timeline->music()->updateTextures();
-
-    glActiveTexture(GL_TEXTURE0 + 0);
-    m_timeline->music()->noteVelocityTex().bind();
-    scene->getShader().sendi("notes_velocity",0);
-
-    glActiveTexture(GL_TEXTURE1);
-    m_timeline->music()->maxNoteVelocityTex().bind();
-    scene->getShader().sendi("max_notes_velocity",1);
-
-    if (m_camera)
-    {
-      scene->getShader().sendf("cam_position",m_camera->position().x(),m_camera->position().y(), m_camera->position().z());
-      scene->getShader().sendf("cam_rotation",m_camera->rotation().x(),m_camera->rotation().y(), m_camera->rotation().z(), m_camera->rotation().scalar());
-    }
-    else
-    {
-      scene->getShader().sendf("cam_rotation",0.f,0.f,0.f,1.f);
-    }
-
-    scene->getShader().sendf("xy_scale_factor",(float)m_fbo.getSizeX()/(float)m_fbo.getSizeY());
-    scene->getShader().sendf("sequence_time",(float)m_timeline->music()->getTime() - (float)current_sequence->startFrame()/m_timeline->framerate());
-    scene->getShader().sendi("sequence_id",m_timeline->sequenceID(frame));
-    scene->getShader().sendf("track_time",(float) m_timeline->music()->getTime());
-    Fast2DQuadDraw();
-
-    glActiveTexture(GL_TEXTURE0+0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    scene->getShader().disable();
+      float track_time = m_timeline.music() ? m_timeline.music()->getTime() : 0.0f;
+    SceneRenderer::glRenderScene(*this, m_project, *(current_sequence->glScene()), m_camera, track_time, track_time - (static_cast<float>(current_sequence->startFrame())/ m_timeline.framerate()));
   }
   else
   {

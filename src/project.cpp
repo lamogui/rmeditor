@@ -64,7 +64,6 @@ void Project::resetProject()
   m_document.clear();
   //emit objectTextChanged(m_text);
 
-  // thoses are useles since we prices the parent...
   QList<QString> keys = m_rmScenes.keys();
   foreach (QString key, keys)
   {
@@ -83,6 +82,7 @@ void Project::resetProject()
     delete m_gifs[key];
   }
   m_gifs.clear();
+  m_textures.clear();
 
 
   if (m_music)
@@ -125,9 +125,10 @@ QString Project::nodeTypeToString(QDomNode::NodeType type)
       return QString("Base");
     case QDomNode::CharacterDataNode:
       return QString("Character Data");
-    default:
-      return QString("Unknow");
+    //default: //Removed because it cause a warning with qt creator !
+    //  return QString("Unknow");
   }
+  return QString("Unknow");
 }
 
 bool Project::build(const QString &text)
@@ -283,7 +284,7 @@ bool Project::parseTagScenes(QDomNode node)
         }
 
         emit info(QString("[") + fileName() + "]" + " loading scene '" + name + "' (file: " + filename + ")");
-        m_rmScenes[name] = new Scene(filename,element,fw,*m_log,this);
+        m_rmScenes[name] = new Scene(filename,element, *this,fw,*m_log,this);
         m_rmScenes[name]->setObjectName(name);
         emit appendTextEditable(m_rmScenes[name]);
       }
@@ -303,7 +304,7 @@ bool Project::parseTagResources(QDomNode node)
         QString filename = element.attribute("file");
         QString name = element.attribute("name", filename.section(".",0,-2));
         element.setAttribute("name",name);
-        if (m_gifs.contains(name))
+        if (m_textures.contains(name))
         {
           emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
                      "(" + element.nodeName() +  ") duplicate texture '" + name + "'");
@@ -322,7 +323,8 @@ bool Project::parseTagResources(QDomNode node)
             if (ext == "gif")
             {
                 m_gifs[name] = new Gif(name, filename,element,*m_log,this);
-              return m_gifs[name] != nullptr;
+                m_textures[name] = &(m_gifs[name]->texture());
+              return true;
             }
             else
             {
@@ -374,9 +376,12 @@ bool Project::parseTagMusic(QDomNode node)
   if (ext == "tfm")
   {
     m_music = new Tunefish4Music(filename,length,node,*m_log,this);
+    addMusicTextures();
     emit info(QString("[") + fileName() + "]" + " loading music '" + name + "' (file: " + filename + ")");
     bool s =  m_music->load();
-    if (s) s = m_music->createRtAudioStream();
+    if (s) {
+        s = m_music->createRtAudioStream();
+    }
     return s;
   }
   else
@@ -386,7 +391,6 @@ bool Project::parseTagMusic(QDomNode node)
     return false;
   }
 
-  return true;
 }
 
 bool Project::parseTagTimeline(QDomNode node)
@@ -419,6 +423,12 @@ bool Project::parseTagTimeline(QDomNode node)
   return true;
 }
 
+void Project::addMusicTextures()
+{
+    Q_ASSERT(m_music);
+    m_textures["notes_velocity"] = &(m_music->noteVelocityTex());
+    m_textures["max_notes_velocity"] = &(m_music->maxNoteVelocityTex());
+}
 
 Scene* Project::getRayMarchScene(const QString& name) const
 {
@@ -481,6 +491,7 @@ void Project::exportAsLinuxDemo(const QDir &dir) const
   emit info(QString("[") + fileName() + "]" + tr("building linux project into directory: ") + dir.path());
   exportFrameworkSources(dir);
   exportScenesSources(dir);
+  exportGifsSources(dir);
   if (m_demoTimeline)
   {
     m_demoTimeline->exportSources(dir);
@@ -503,7 +514,6 @@ void Project::exportFrameworkSources(const QDir &dir) const
 
   source_code << ShaderMinifier::generatedSourceString();
   header_code << ShaderMinifier::generatedHeaderString();
-
   source_code << "#include \"frameworks.hpp\"\n\n";
 
   header_code << "#ifndef FRAMEWORKS_H\n";
@@ -550,6 +560,9 @@ void Project::exportScenesSources(const QDir &dir) const
   header_code << "#ifndef SCENES_H\n";
   header_code << "#define SCENES_H\n\n";
   header_code << "#include \"frameworks.hpp\"\n";
+#ifdef _WIN32
+  header_code << "#include <Windows.h>\n\n";
+#endif
   header_code << "#include <GL/gl.h>\n\n";
   header_code << "#define " << scenes_count_str << " " << QString::number(m_rmScenes.size()) << "\n\n";
 
@@ -565,27 +578,8 @@ void Project::exportScenesSources(const QDir &dir) const
   for  (it = m_rmScenes.constBegin(); it !=m_rmScenes.constEnd(); it++)
   {
     ShaderMinifier minifier(*m_log);
-
-
-
-    /*if (it.value()->framework())
-    {
-      header_code << "extern const char* fs_" << it.value()->objectName() << "_brut;\n";
-      //header_code << "extern const unsigned int fs_" << it.value()->objectName() << "_brut_len;\n";
-
-      header_code << "extern char* fs_" << it.value()->objectName() << ";\n";
-      //header_code << "extern unsigned int fs_" << it.value()->objectName() << "_len;\n";
-
-      source_code << "char* fs_" << it.value()->objectName() << " = 0;\n";
-      //source_code << "unsigned int fs_" << it.value()->objectName() << "_len=" + + ";\n";
-
-      minifier.cFormatedShaderCode(it.value()->objectName(),QString("fs_") + it.value()->objectName() + "_brut",it.value()->minifiedShaderCode(minifier));
-    }
-    else*/
     {
       header_code << "extern const char* const fs_" << it.value()->objectName() << ";\n";
-      //header_code << "extern const unsigned int fs_" << it.value()->objectName() << "_len;\n";
-
       source_code << it.value()->cFormatedShaderCode(minifier);
     }
 
@@ -593,7 +587,7 @@ void Project::exportScenesSources(const QDir &dir) const
     source_code << "GLuint fs_" << it.value()->objectName() << "_program;\n";
 
     QString comma = ",";
-    if (it == m_rmScenes.constEnd() - 1)
+    if (it+1 == m_rmScenes.constEnd())
     {
       comma = "";
     }
@@ -620,6 +614,164 @@ void Project::exportScenesSources(const QDir &dir) const
 
   header_code.flush();
   source_code.flush();
+}
+
+void Project::exportGifsSources(const QDir& dir) const
+{
+    QFile header(dir.absoluteFilePath("gifs.hpp"));
+    QFile source(dir.absoluteFilePath("gifs.cpp"));
+
+    if (!header.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate) || !source.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+    {
+      emit error(tr("error: cannot open files for writing"));
+      return;
+    }
+
+    QTextStream header_code(&header);
+    QTextStream source_code(&source);
+
+    source_code << ShaderMinifier::generatedSourceString();
+    header_code << ShaderMinifier::generatedHeaderString();
+
+    source_code << "#include \"gifs.hpp\"\n\n";
+
+    QString gifs_count_str = "GIFS_COUNT";
+
+    header_code << "#ifndef GIFS_H\n";
+    header_code << "#define GIFS_H\n\n";
+#ifdef _WIN32
+  header_code << "#include <Windows.h>\n\n";
+#endif
+  header_code << "#include <GL/gl.h>\n\n";
+
+    header_code << "#define " << gifs_count_str << " " << QString::number(m_gifs.size()) << "\n\n";
+
+    QString gifs_palettes = " unsigned char*  gifs_palettes[" +  gifs_count_str + "]";
+    QString gifs_names = " char* gifs_names[" +  gifs_count_str + "]";
+    QString gifs_images = " unsigned char*  gifs_images[" +  gifs_count_str + "]";
+    QString gifs_images_width = " unsigned int  gifs_images_width[" +  gifs_count_str + "]";
+    QString gifs_images_height = " unsigned int  gifs_images_height[" +  gifs_count_str + "]";
+    QString gifs_textures = "GLuint gifs_textures[" +  gifs_count_str + "]";
+
+    header_code << "extern " << gifs_palettes << ";\n";
+    header_code << "extern " << gifs_names << ";\n";
+    header_code << "extern " << gifs_images << ";\n";
+    header_code << "extern " << gifs_images_width << ";\n";
+    header_code << "extern " << gifs_images_height << ";\n";
+    header_code << "extern " << gifs_textures << ";\n";
+
+    gifs_palettes += "= {";
+    gifs_names += "= {";
+    gifs_images += "= {";
+    gifs_images_width += "= {";
+    gifs_images_height += "= {";
+    gifs_textures += ";";
+    QMap<QString,Gif*>::const_iterator it;
+    for  (it = m_gifs.constBegin(); it !=m_gifs.constEnd(); it++)
+    {
+
+        const gif* g = it.value()->data();
+        if (!g->images || g->images_count != 1) {
+            emit error("unsupported gif " + it.value()->fileName() + " with multiple images !");
+            return;
+        }
+        gif_image* f = f=g->images[0];
+        if (f->local_color_table_size && f->local_color_table) {
+            source_code << " unsigned char " << (it.key() + "_palette[" + QString::number(f->local_color_table_size<<2)+ "] = {");
+           const unsigned int size = f->local_color_table_size << 2;
+           unsigned i=0,j=0;
+           for (;i<size;i+=4)
+           {
+               source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
+               source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
+               source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
+               if (f->control->transparent_flag && f->control->transparent_color_index == (j-1) / 3)
+               {
+                  source_code << QString::number(static_cast<int>(0));
+               }
+               else {
+                  source_code << QString::number(static_cast<int>(255));
+               }
+
+               if (i+4 != size) {
+                source_code << ",";
+               }
+           }
+            source_code <<"};\n";
+        }
+        else if (g->global_color_table_size && g->global_color_table) {
+            source_code << " unsigned char " << (it.key() + "_palette[" + QString::number(g->global_color_table_size<<2)+ "] = {");
+           const unsigned int size = g->global_color_table_size << 2;
+           unsigned i=0,j=0;
+           for (;i<size;i+=4)
+           {
+               source_code << QString::number(static_cast<int>(g->global_color_table[j++])) + ",";
+               source_code << QString::number(static_cast<int>(g->global_color_table[j++])) + ",";
+               source_code << QString::number(static_cast<int>(g->global_color_table[j++])) + ",";
+               if (f->control->transparent_flag && f->control->transparent_color_index == (j-1) / 3)
+               {
+                  source_code << QString::number(static_cast<int>(0));
+               }
+               else {
+                  source_code << QString::number(static_cast<int>(255));
+               }
+               if (i+4 != size) {
+                source_code << ",";
+               }
+           }
+           source_code <<"};\n";
+        }
+        else {
+           emit error("unsupported gif " + it.value()->fileName() + " table shit error let's put a breakpoint your party is fucked up");
+        }
+
+        if (f->descriptor.left != 0 ||
+            f->descriptor.top != 0 ||
+            f->descriptor.width != g->screen_descriptor.width ||
+            f->descriptor.height != g->screen_descriptor.height)
+        {
+            emit error("unsupported sub image format ! put a breakpoint you are fucked up :)");
+            return ;
+        }
+
+        source_code << " unsigned char " << (it.key() + "_image [" + QString::number(g->screen_descriptor.width * g->screen_descriptor.height)  + "] = {");
+
+        for (int h = 0 ; h<g->screen_descriptor.height ; ++h )
+        {
+            for (int w =0; w < g->screen_descriptor.width ; ++w)
+            {
+                source_code << QString::number(static_cast<int>(f->pixels[w + g->screen_descriptor.width * (g->screen_descriptor.height - h - 1)]));
+                unsigned int k = w * h;
+                if (k + 1 != g->screen_descriptor.width * g->screen_descriptor.height)
+                    source_code << ",";
+            }
+        }
+        source_code << "};\n";
+
+
+        QString listComma = ",";
+        if (it + 1 == m_gifs.constEnd()) {
+            listComma = "";
+        }
+        gifs_palettes += it.key() + "_palette" + listComma;
+        gifs_names += "\"" + it.key() + "\"" + listComma;
+        gifs_images +=  it.key() + "_image" + listComma;
+        gifs_images_width += QString::number(g->screen_descriptor.width)+ listComma;
+        gifs_images_height += QString::number(g->screen_descriptor.height)+ listComma;
+
+    }
+
+    source_code << gifs_palettes << "};\n";
+    source_code << gifs_names << "};\n";
+    source_code << gifs_images << "};\n";
+    source_code << gifs_images_width << "};\n";
+    source_code << gifs_images_height << "};\n";
+    source_code << gifs_textures;// << "};\n";
+
+    header_code << "#endif\n";
+
+    header_code.flush();
+    source_code.flush();
 }
 
 

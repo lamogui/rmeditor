@@ -339,6 +339,7 @@ void Sequence::setCamera(qint64 relative_frame, Camera &cam) const
     QQuaternion q = QQuaternion::nlerp(begin->rotation(),end->rotation(),delta);
     cam.setPosition(p);
     cam.setRotation(q);
+    cam.setFov(begin->fov() * delta_inv + end->fov() * delta);
 
   }
   else if (begin)
@@ -355,7 +356,7 @@ void Sequence::setCamera(qint64 relative_frame, Camera &cam) const
   }
 }
 
-void Sequence::insertCameraKeyframe(qint64 rel_frame, const QVector3D &pos, const QQuaternion &rot)
+void Sequence::insertCameraKeyframe(qint64 rel_frame, const QVector3D &pos, const QQuaternion &rot, float fov)
 {
   QMap<qint64,CameraKeyframe*>::iterator it = m_cameraKeyframes.find(rel_frame);
   CameraKeyframe* keyframe = (it != m_cameraKeyframes.end()) ? it.value() : nullptr;
@@ -363,12 +364,13 @@ void Sequence::insertCameraKeyframe(qint64 rel_frame, const QVector3D &pos, cons
   {
     keyframe->setPosition(pos);
     keyframe->setRotation(rot);
+    keyframe->setFov(fov);
   }
   else
   {
     QDomElement e = m_project->document().createElement("keyframe");
     e = m_cameraNode.appendChild(e).toElement();
-    keyframe = new CameraKeyframe(rel_frame,*m_project,this,e,pos,rot);
+    keyframe = new CameraKeyframe(rel_frame,*m_project,this,e,pos,rot, fov);
     QObject::connect(keyframe,SIGNAL(requestFramePosition(qint64)),m_timeline,SLOT(requestFramePosition(qint64)));
     keyframe->setPos(keyframe->pos().x(), this->rect().height()-5);
     m_cameraKeyframes[keyframe->relativeFrame()] = keyframe;

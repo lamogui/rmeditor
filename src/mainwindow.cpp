@@ -59,6 +59,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionExport_as_video,SIGNAL(triggered()),this,SLOT(exportAsVideo()));
     connect(ui->actionExport_as_Linux_Demo,SIGNAL(triggered()),this,SLOT(exportAsLinuxDemo()));
     connect(ui->actionInsert_camera_keyframe,SIGNAL(triggered()),this,SLOT(insertCameraKeyframe()));
+
+    showFullScreen();
 }
 
 MainWindow::~MainWindow()

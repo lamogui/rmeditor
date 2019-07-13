@@ -44,7 +44,7 @@ public:
   inline Scene* glScene() { return m_scene; }
 
   void setCamera(qint64 relative_frame, Camera& cam) const;
-  void insertCameraKeyframe(qint64 rel_frame, const QVector3D& pos, const QQuaternion& rot);
+  void insertCameraKeyframe(qint64 rel_frame, const QVector3D& pos, const QQuaternion& rot, float fov);
 
   typedef enum
   {

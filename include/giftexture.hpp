@@ -15,6 +15,8 @@ public:
     virtual ~Gif();
 
     Texture2D& texture() {return m_texture;}
+    gif* data() {return m_data;}
+    const gif* data() const {return m_data;}
 
 public slots:
     void fileChanged(const QString& filename);

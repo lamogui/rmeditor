@@ -20,12 +20,13 @@ class Sequence;
 class DemoRenderer : public Renderer
 {
 public:
-  DemoRenderer(DemoTimeline&  timeline, size_t w, size_t h);
+  DemoRenderer(Project& project, DemoTimeline&  timeline, size_t w, size_t h);
 
 protected:
   virtual void glRender();
 
-  DemoTimeline* m_timeline;
+  Project& m_project;
+  DemoTimeline& m_timeline;
 
 
 };
@@ -60,8 +61,8 @@ public slots:
   inline void updateCamera(qint64 frame) { updateCamera(frame,m_camera); }
   inline void updateCamera() { updateCamera(currentFrame(),m_camera); }
 
-  void insertCameraKeyframe(qint64 frame, const QVector3D& pos, const QQuaternion& rot);
-  void insertCameraKeyframe(const QVector3D& pos, const QQuaternion& rot);
+  void insertCameraKeyframe(qint64 frame, const QVector3D& pos, const QQuaternion& rot, float fov);
+  void insertCameraKeyframe(const QVector3D& pos, const QQuaternion& rot, float fov);
   void insertCameraKeyframe(qint64 frame, Camera* cam);
   void insertCameraKeyframe(Camera* cam);
 
@@ -89,7 +90,7 @@ protected:
   QDomElement m_node;
   Camera m_camera;
   double m_trackHeight;
-  Project* m_project;
+  Project& m_project;
   DemoRenderer* m_renderer;
   QMap<qint64, Sequence*> m_sequences;
   QPointF m_mousePressPos;

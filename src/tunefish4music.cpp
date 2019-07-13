@@ -79,6 +79,8 @@ bool Tunefish4Music::load()
       return false;
   }
 
+  emit info("[" + fileName() + "] Tunefish4 song loaded number of instruments: " + QString::number(instrumentCount()));
+
   m_noteVelocityBuffer.clear();
   m_noteVelocityBuffer.resize(TF_NUMFREQS * instrumentCount());
   m_noteVelocityTex.create(TF_NUMFREQS,instrumentCount(),(const GLvoid*) m_noteVelocityBuffer.data(),GL_R32F,GL_RED, GL_FLOAT);

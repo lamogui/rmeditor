@@ -6,12 +6,12 @@
 
 class Framework;
 class SceneRenderer;
-
+class Project;
 
 class Scene : public FragmentShaderCode
 {
 public:
-  Scene(const QString& filename, QDomNode node, Framework* framework, LogWidget& log,QObject* parent);
+  Scene(const QString& filename, QDomNode node, Project& project, Framework* framework, LogWidget& log,QObject* parent);
   virtual ~Scene();
 
   virtual Renderer* getRenderer() const;

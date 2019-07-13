@@ -16,6 +16,7 @@ class Framework;
 class Scene;
 class Timeline;
 class Gif;
+class Texture2D;
 
 class Project : public TextEditable
 {
@@ -32,6 +33,7 @@ class Project : public TextEditable
     Framework *getFramework(const QString& name) const;
     inline const QMap<QString,Scene*>& rayMarchScenes() const {return m_rmScenes;}
     inline const QMap<QString,Framework*>& frameworks() const {return m_frameworks;}
+    inline const QMap<QString, Texture2D*>& textures() const {return m_textures; }
     static QString nodeTypeToString(QDomNode::NodeType type);
 
 
@@ -46,7 +48,7 @@ class Project : public TextEditable
 
     void exportFrameworkSources(const QDir& dir) const;
     void exportScenesSources(const QDir& dir) const;
-
+    void exportGifsSources(const QDir& dir) const;
 
   public slots:
     void resetProject();
@@ -70,9 +72,12 @@ class Project : public TextEditable
     bool parseTagTimeline(QDomNode node);
     bool parseTagResources(QDomNode node);
 
+    void addMusicTextures();
+
     QMap<QString,Scene*> m_rmScenes;
     QMap<QString,Framework*> m_frameworks;
     QMap<QString, Gif*> m_gifs;
+    QMap<QString, Texture2D* > m_textures;
 
     Music* m_music;
     DemoTimeline* m_demoTimeline;

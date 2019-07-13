@@ -9,11 +9,14 @@
 
 class RenderWidget;
 class Camera;
-
+class Project;
+class Scene;
 
 class Renderer : public QObject, public QOpenGLFunctions
 {
   Q_OBJECT
+
+    friend class SceneRenderer;
 
 public:
   Renderer(size_t w, size_t h, QObject* parent=nullptr);
@@ -46,18 +49,19 @@ protected:
   Camera* m_camera;
 };
 
-class Scene;
-
 class SceneRenderer : public Renderer
 {
 public:
-  SceneRenderer(Scene& scene, size_t w, size_t h, QObject *parent=nullptr);
+  SceneRenderer(Project& project, Scene& scene, size_t w, size_t h, QObject *parent=nullptr);
   virtual void attachedWidget(RenderWidget* widget);
+
+  static void glRenderScene(Renderer& renderer, Project& project, Scene& scene, const Camera* camera, float track_time, float sequence_time);
 
 protected:
   virtual void glRender();
 
-  Scene* m_scene;
+  Scene& m_scene;
+  Project& m_project;
   QTime m_sequenceTime;
 };
 

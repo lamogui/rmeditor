@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <rmdemo>
-  <music file="music.tf4m" name="music" length="95.0"/>
+  <music file="music.tfm" name="music" length="95.0"/>
   <frameworks>
     <framework file="fractal.glsl" name="fractal"/>
   </frameworks>

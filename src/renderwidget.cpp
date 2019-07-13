@@ -82,33 +82,43 @@ void RenderWidget::paintGL()
         if (m_renderer->camera() && !m_keysPressed.empty())
         {
           QVector3D delta;
-          if (m_keysPressed.contains(Qt::Key_Up))
+          float fov_delta = 0.0f;
+          if (m_keysPressed.contains(Qt::Key_Up) || m_keysPressed.contains(Qt::Key_Z))
           {
             delta += QVector3D(0,0,1);
           }
-          if (m_keysPressed.contains(Qt::Key_Down))
+          if (m_keysPressed.contains(Qt::Key_Down) || m_keysPressed.contains(Qt::Key_S))
           {
             delta += QVector3D(0,0,-1);
           }
-          if (m_keysPressed.contains(Qt::Key_Left))
+          if (m_keysPressed.contains(Qt::Key_Left) || m_keysPressed.contains(Qt::Key_Q))
           {
             delta += QVector3D(-1,0,0);
           }
-          if (m_keysPressed.contains(Qt::Key_Right))
+          if (m_keysPressed.contains(Qt::Key_Right)|| m_keysPressed.contains(Qt::Key_D))
           {
             delta += QVector3D(1,0,0);
           }
-          if (m_keysPressed.contains(Qt::Key_PageUp))
+          if (m_keysPressed.contains(Qt::Key_PageUp) || m_keysPressed.contains(Qt::Key_Plus))
           {
             delta += QVector3D(0,1,0);
           }
-          if (m_keysPressed.contains(Qt::Key_PageDown))
+          if (m_keysPressed.contains(Qt::Key_PageDown) || m_keysPressed.contains(Qt::Key_Minus) )
           {
             delta += QVector3D(0,-1,0);
           }
+          if (m_keysPressed.contains(Qt::Key_C)  )
+          {
+            fov_delta += 5.0f;
+          }
+          if (m_keysPressed.contains(Qt::Key_V)  )
+          {
+            fov_delta -= 5.0f;
+          }
           m_renderer->camera()->translateRelative(delta*0.02f);
+          m_renderer->camera()->setFov(qMax(qMin(180.0f,  m_renderer->camera()->fov() + fov_delta),30.0f));
         }
-        m_renderer->glRender(this->width(),this->height());
+        m_renderer->glRender(static_cast<size_t>(this->width()),static_cast<size_t>(this->height()));
       }
 
       QOpenGLFunctions gl(QOpenGLContext::currentContext());
@@ -238,7 +248,15 @@ void RenderWidget::keyPressEvent(QKeyEvent *event)
       event->key() == Qt::Key_Left ||
       event->key() == Qt::Key_Right ||
       event->key() == Qt::Key_PageUp ||
-      event->key() == Qt::Key_PageDown)
+      event->key() == Qt::Key_PageDown ||
+      event->key() == Qt::Key_Plus ||
+          event->key() == Qt::Key_Minus ||
+          event->key() == Qt::Key_Z ||
+          event->key() == Qt::Key_Q ||
+          event->key() == Qt::Key_S ||
+          event->key() == Qt::Key_D ||
+          event->key() == Qt::Key_C ||
+          event->key() == Qt::Key_V)
   {
     m_keysPressed.insert((Qt::Key)event->key());
   }

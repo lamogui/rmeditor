@@ -18,8 +18,8 @@ INCLUDEPATH += \
     $$PWD/dependencies/rtaudio/
 
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/lib/rtaudio_static.lib
-else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/lib/librtaudio_static.a
+#win32:!win32-g++: PRE_TARGETDEPS += $$PWD/lib/rtaudio_static.lib
+#else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/lib/librtaudio_static.a
 
 release:DEFINES += \
     eRELEASE
@@ -30,8 +30,8 @@ debug:DEFINES += \
 win32: DEFINES += \
     eWIN32
 
-unix: DEFINES += \
-    eDEBUG
+#unix: DEFINES += \
+#    eDEBUG
 
 
 HEADERS += \

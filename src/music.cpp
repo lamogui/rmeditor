@@ -40,6 +40,11 @@ int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int n
   if (music->m_playing)
   {
     music->processAudio(outputBuffer,nBufferFrames,streamTime,status);
+    //for (int i = 0; i < nBufferFrames; i++)
+    //{
+    //    reinterpret_cast<short*>(outputBuffer)[i*2] = sin(static_cast<float>(i)/static_cast<float>(nBufferFrames)) * 16000;
+    //    reinterpret_cast<short*>(outputBuffer)[i*2+1] = cos(static_cast<float>(i)/static_cast<float>(nBufferFrames)) * 16000;
+    //}
   }
   else
   {
