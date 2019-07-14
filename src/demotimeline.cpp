@@ -388,12 +388,13 @@ void DemoTimeline::exportSources(const QDir &dir) const
 
   //Sequences variables
   QString seq_start_frame = "const " + unsigned_int_type + " seq_start_frame[" + seq_count_str + "]";
+  QString seq_frame_count = "const " + unsigned_int_type + " seq_frame_count[" + seq_count_str + "]";
   QString seq_shader = "const GLuint* seq_shader[" + seq_count_str + "]";
   QString seq_start_cam_keyframe = "const " + unsigned_int_type + " seq_start_cam_keyframe[" + seq_count_str + "]";
   QString seq_cam_keyframe_count = "const " + unsigned_int_type + " seq_cam_keyframe_count[" + seq_count_str + "]";
 
   QList<QString*> seq_vars;
-  seq_vars << &seq_start_frame << &seq_shader << &seq_start_cam_keyframe << &seq_cam_keyframe_count;
+  seq_vars << &seq_start_frame << &seq_shader << &seq_start_cam_keyframe << &seq_cam_keyframe_count << &seq_frame_count;
   foreach (QString* var, seq_vars)
   {
     sequences_header_code << "extern " << *var << ";\n";
@@ -439,6 +440,7 @@ void DemoTimeline::exportSources(const QDir &dir) const
     QMap<qint64, CameraKeyframe*> cam_keyframes = it.value()->cameraKeyframes();
 
     seq_start_frame += "   " + QString::number(it.value()->startFrame()) + comma + "\n";
+    seq_frame_count += "   " + QString::number(it.value()->length()) + comma + "\n";
     seq_shader += "   &fs_" + it.value()->glScene()->objectName() + "_program" + comma + "\n";
     seq_start_cam_keyframe += "   " + QString::number(current_keyframe) + comma + "\n";
     seq_cam_keyframe_count += "   " + QString::number(cam_keyframes.size()) + comma + "\n";

@@ -324,7 +324,6 @@ bool Project::parseTagResources(QDomNode node)
             {
                 m_gifs[name] = new Gif(name, filename,element,*m_log,this);
                 m_textures[name] = &(m_gifs[name]->texture());
-              return true;
             }
             else
             {
@@ -682,14 +681,20 @@ void Project::exportGifsSources(const QDir& dir) const
            unsigned i=0,j=0;
            for (;i<size;i+=4)
            {
-               source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
-               source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
-               source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
-               if (f->control->transparent_flag && f->control->transparent_color_index == (j-1) / 3)
+
+               if (f->control && f->control->transparent_flag && f->control->transparent_color_index == (j-1) / 3)
                {
-                  source_code << QString::number(static_cast<int>(0));
+                   source_code << QString::number(static_cast<int>(0))+ ",";
+                   source_code << QString::number(static_cast<int>(0))+ ",";
+                   source_code << QString::number(static_cast<int>(0))+ ",";
+
+                  source_code << QString::number(static_cast<int>(0)); // TODO do this operation in the player...
+                  j+=3;
                }
                else {
+                   source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
+                   source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
+                   source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
                   source_code << QString::number(static_cast<int>(255));
                }
 
@@ -708,7 +713,7 @@ void Project::exportGifsSources(const QDir& dir) const
                source_code << QString::number(static_cast<int>(g->global_color_table[j++])) + ",";
                source_code << QString::number(static_cast<int>(g->global_color_table[j++])) + ",";
                source_code << QString::number(static_cast<int>(g->global_color_table[j++])) + ",";
-               if (f->control->transparent_flag && f->control->transparent_color_index == (j-1) / 3)
+               if (f->control && f->control->transparent_flag && f->control->transparent_color_index == (j-1) / 3)
                {
                   source_code << QString::number(static_cast<int>(0));
                }

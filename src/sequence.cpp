@@ -162,20 +162,9 @@ void Sequence::renderImages()
     FBO fbo(4*height/3,height);
     fbo.enable();
 
-    m_scene->getShader().enable();
-
     Camera cam;
     this->setCamera(0,cam);
-
-    m_scene->getShader().sendf("cam_rotation",cam.rotation().x(),cam.rotation().y(),cam.rotation().z(),cam.rotation().scalar());
-    m_scene->getShader().sendf("cam_position",cam.position().x(),cam.position().y(),cam.position().z());
-
-    m_scene->getShader().sendf("xy_scale_factor",(float)fbo.getSizeX()/(float)fbo.getSizeY());
-    m_scene->getShader().sendf("sequence_time",0.f);
-    m_scene->getShader().sendf("track_time",(float)this->pos().x()/m_timeline->framerate());
-
-    Fast2DQuadDraw();
-    m_scene->getShader().disable();
+    SceneRenderer::glRenderScene(*m_timeline->getRenderer(), *m_project, *m_scene, &cam, (float)this->pos().x()/m_timeline->framerate(), 0.0f);
 
     m_preview = fbo.getImage();
 

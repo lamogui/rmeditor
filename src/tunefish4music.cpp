@@ -89,7 +89,7 @@ bool Tunefish4Music::load()
   m_maxNoteVelocityBuffer.resize( instrumentCount());
   m_maxNoteVelocityTex.create(1,instrumentCount(),(const GLvoid*) m_maxNoteVelocityBuffer.data(),GL_R32F,GL_RED, GL_FLOAT);
   memset((void*)m_maxNoteVelocityBuffer.data(),0,m_maxNoteVelocityBuffer.size()*sizeof(float));
-
+ memset((void*)m_noteVelocityBuffer.data(),0,m_noteVelocityBuffer.size()*sizeof(float));
     return true;
 }
 
@@ -114,9 +114,14 @@ void Tunefish4Music::setPosition(double time)
 void Tunefish4Music::updateTextures()
 {
 
-  memset((void*)m_noteVelocityBuffer.data(),0,m_noteVelocityBuffer.size()*sizeof(float));
+
   for (size_t i =0 ; i < instrumentCount(); i++)
   {
+      for (size_t j = 0; j < TF_NUMFREQS; ++j)
+              {
+                m_noteVelocityBuffer[TF_NUMFREQS * i + j] = m_noteVelocityBuffer[TF_NUMFREQS * i + j] * .9f;
+              }
+
     for (size_t k = 0; k < TF_MAXVOICES; k++)
     {
       if (m_player.synth.instr[i]->voice[k].noteIsOn)
