@@ -152,10 +152,7 @@ void RenderWidget::initializeGL()
 void RenderWidget::paintGL()
 {
   QSharedPointer<Renderer> renderer = currentRenderer.lock();
-  if (renderer)
-  {
-    if (!onlyShowTexture)
-    {
+    if (m_renderer)    {
       if (renderer->hasDynamicCamera() && !keysPressed.empty())
       {
         jassert(renderer->getCurrentCamera());
@@ -163,28 +160,43 @@ void RenderWidget::paintGL()
         if (keysPressed.contains(Qt::Key_Up))
         {
           delta += QVector3D(0, 0, 1);
+          float fov_delta = 0.0f;
+          if (m_keysPressed.contains(Qt::Key_Up) || m_keysPressed.contains(Qt::Key_Z))
+          {
+            delta += QVector3D(0,0,1);
+          }
+          if (m_keysPressed.contains(Qt::Key_Down) || m_keysPressed.contains(Qt::Key_S))
+          {
+            delta += QVector3D(0,0,-1);
+          }
+          if (m_keysPressed.contains(Qt::Key_Left) || m_keysPressed.contains(Qt::Key_Q))
+          {
+            delta += QVector3D(-1,0,0);
+          }
+          if (m_keysPressed.contains(Qt::Key_Right)|| m_keysPressed.contains(Qt::Key_D))
+          {
+            delta += QVector3D(1,0,0);
+          }
+          if (m_keysPressed.contains(Qt::Key_PageUp) || m_keysPressed.contains(Qt::Key_Plus))
+          {
+            delta += QVector3D(0,1,0);
+          }
+          if (m_keysPressed.contains(Qt::Key_PageDown) || m_keysPressed.contains(Qt::Key_Minus) )
+          {
+            delta += QVector3D(0,-1,0);
+          }
+          if (m_keysPressed.contains(Qt::Key_C)  )
+          {
+            fov_delta += 5.0f;
+          }
+          if (m_keysPressed.contains(Qt::Key_V)  )
+          {
+            fov_delta -= 5.0f;
+          }
+          m_renderer->camera()->translateRelative(delta*0.02f);
+          m_renderer->camera()->setFov(qMax(qMin(180.0f,  m_renderer->camera()->fov() + fov_delta),30.0f));
         }
-        if (keysPressed.contains(Qt::Key_Down))
-        {
-          delta += QVector3D(0, 0, -1);
-        }
-        if (keysPressed.contains(Qt::Key_Left))
-        {
-          delta += QVector3D(-1, 0, 0);
-        }
-        if (keysPressed.contains(Qt::Key_Right))
-        {
-          delta += QVector3D(1, 0, 0);
-        }
-        if (keysPressed.contains(Qt::Key_PageUp))
-        {
-          delta += QVector3D(0, 1, 0);
-        }
-        if (keysPressed.contains(Qt::Key_PageDown))
-        {
-          delta += QVector3D(0, -1, 0);
-        }
-        renderer->getCurrentCamera()->translateRelative(delta*0.02f);
+        m_renderer->glRender(static_cast<size_t>(this->width()),static_cast<size_t>(this->height()));
       }
       render->render(*renderFunctions, *renderer);
     }
@@ -222,28 +234,28 @@ void RenderWidget::mousePressEvent(QMouseEvent* event)
 {
   if (event->button() == Qt::RightButton)
   {
-    captureMouse = true;
+    m_captureMouse = true;
   }
   QWidget::mousePressEvent(event);
-  previousMousePos = event->screenPos();
+  m_previousMousePos = event->screenPos();
 }
 
 void RenderWidget::mouseReleaseEvent(QMouseEvent* event)
 {
   if (event->button() == Qt::RightButton)
   {
-    captureMouse = false;
+    m_captureMouse = false;
   }
   QWidget::mouseReleaseEvent(event);
-  previousMousePos = event->screenPos();
+  m_previousMousePos = event->screenPos();
 }
 
 void RenderWidget::mouseMoveEvent(QMouseEvent* event)
 {
-  if (captureMouse)
+  if (m_captureMouse)
   {
-    float yaw = event->screenPos().x() - previousMousePos.x();
-    float pitch = event->screenPos().y() - previousMousePos.y();
+    float yaw = event->screenPos().x() - m_previousMousePos.x();
+    float pitch = event->screenPos().y() - m_previousMousePos.y();
     QSharedPointer<Renderer> renderer = currentRenderer.lock();
     if (renderer && renderer->hasDynamicCamera())
     {
@@ -251,7 +263,7 @@ void RenderWidget::mouseMoveEvent(QMouseEvent* event)
     }
   }
   QWidget::mouseMoveEvent(event);
-  previousMousePos = event->screenPos();
+  m_previousMousePos = event->screenPos();
 }
 
 void RenderWidget::wheelEvent(QWheelEvent* event)
@@ -286,9 +298,17 @@ void RenderWidget::keyPressEvent(QKeyEvent *event)
       event->key() == Qt::Key_Left ||
       event->key() == Qt::Key_Right ||
       event->key() == Qt::Key_PageUp ||
-      event->key() == Qt::Key_PageDown)
+      event->key() == Qt::Key_PageDown ||
+      event->key() == Qt::Key_Plus ||
+          event->key() == Qt::Key_Minus ||
+          event->key() == Qt::Key_Z ||
+          event->key() == Qt::Key_Q ||
+          event->key() == Qt::Key_S ||
+          event->key() == Qt::Key_D ||
+          event->key() == Qt::Key_C ||
+          event->key() == Qt::Key_V)
   {
-    keysPressed.insert((Qt::Key)event->key());
+    m_keysPressed.insert((Qt::Key)event->key());
   }
   else
   {
@@ -298,17 +318,17 @@ void RenderWidget::keyPressEvent(QKeyEvent *event)
 
 void RenderWidget::keyReleaseEvent(QKeyEvent *event)
 {
-  keysPressed.remove((Qt::Key)event->key());
+  m_keysPressed.remove((Qt::Key)event->key());
 }
 
 void RenderWidget::startUpdateLoop()
 {
-   updateTimer.start(10);
+   m_updateTimer.start(10);
 }
 
 void RenderWidget::stopUpdateLoop()
 {
-  updateTimer.stop();
+  m_updateTimer.stop();
 }
 
 void RenderWidget::setCurrentRenderer(const QWeakPointer<Renderer>& renderer)

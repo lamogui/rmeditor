@@ -8,11 +8,6 @@
 #include <QMessageBox>
 #include "classmanager.hpp"
 
-#ifdef MSVC_STATIC
-  #include <QtPlugin>
-  Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
-#endif // MSVC_STATIC
-
 int main(int argc, char *argv[])
 {
   ClassManager::get()->initalizeClasses();

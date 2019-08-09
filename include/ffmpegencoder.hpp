@@ -1,6 +1,9 @@
 ﻿#ifndef FFMPEGENCODER_HPP
 #define FFMPEGENCODER_HPP
 
+#if defined(_WIN32)
+#include <windows.h> // fix windows kit opengl header compile error
+#endif
 #include <QImage>
 #include <QTcpSocket>
 #include <QThread>

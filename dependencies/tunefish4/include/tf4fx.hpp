@@ -22,6 +22,8 @@
 #ifndef TF4FX_HPP
 #define TF4FX_HPP
 
+#include "system.hpp"
+
 struct eTfLfo;
 struct eTfSynth;
 struct eTfInstrument;

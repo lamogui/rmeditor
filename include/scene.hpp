@@ -9,6 +9,7 @@
 class RaymarchingScene : public QuadFragmentShaderCode
 {
   Q_OBJECT
+class Project;
 
 public:
   Q_INVOKABLE RaymarchingScene(QObject* parent = nullptr);
@@ -41,7 +42,7 @@ protected:
   // ReferencedQuadFragmentShaderRenderer
   void configureUniforms(ShaderProgram& program) override;
 
-  QWeakPointer<Camera> currentCamera;
+  QWeakPointer<Camera> m_currentCamera;
 
 private:
   typedef ReferencedQuadFragmentShaderRenderer BaseClass;

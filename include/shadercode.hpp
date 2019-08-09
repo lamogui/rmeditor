@@ -33,8 +33,7 @@ protected:
   QString shaderCode;
 
 private:
-  //QPointer<GLSLShaderCode> framework;
   DECLARE_PROPERTY_REFERENCE(QPointer<GLSLShaderCode>, framework, Framework)
 };
 
-#endif // !SHADERCODE_HPP
+#endif // SCENE_H

@@ -11,16 +11,17 @@
 DemoTimelineRenderer::DemoTimelineRenderer(DemoTimeline&  timeline, const QSize& initialSize)
   : Renderer(),  timeline(timeline)
 {
+#include <QtMath>
 
 }
 
 DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogWidget &log):
   Timeline(*(project.getMusic()),2*60.0,fps,log),
-  camera(new Camera),
-  node(node),
-  trackHeight(60.0),
-  project(&project),
-  render(new DemoRender(*this,QSize(1280,720)))
+  m_camera(new Camera),
+  m_node(node),
+  m_trackHeight(60.0),
+  m_project(&project),
+  m_render(new DemoRender(*this,QSize(1280,720)))
 {
   render->getCamera() = camera;
   load();
@@ -112,7 +113,7 @@ void DemoTimeline::insertCameraKeyframe(Camera *cam)
 {
   if (cam)
   {
-    insertCameraKeyframe(currentFrame(),cam->getPosition(),cam->getRotation());
+    insertCameraKeyframe(currentFrame(),cam->position(),cam->rotation(), cam->fov());
   }
 }
 
@@ -120,22 +121,22 @@ void DemoTimeline::insertCameraKeyframe(qint64 frame, Camera *cam)
 {
   if (cam)
   {
-    insertCameraKeyframe(frame,cam->getPosition(),cam->getRotation());
+    insertCameraKeyframe(frame,cam->position(),cam->rotation(), cam->fov());
   }
 }
 
-void DemoTimeline::insertCameraKeyframe(const QVector3D& pos, const QQuaternion& rot)
+void DemoTimeline::insertCameraKeyframe(const QVector3D& pos, const QQuaternion& rot, float fov)
 {
-  insertCameraKeyframe(currentFrame(),pos,rot);
+  insertCameraKeyframe(currentFrame(),pos,rot, fov);
 }
 
 
-void DemoTimeline::insertCameraKeyframe(qint64 frame, const QVector3D &pos, const QQuaternion &rot)
+void DemoTimeline::insertCameraKeyframe(qint64 frame, const QVector3D &pos, const QQuaternion &rot, float fov)
 {
   Sequence* seq = isInsideSequence(frame);
   if (seq)
   {
-    seq->insertCameraKeyframe(frame-seq->startFrame(),pos,rot);
+    seq->insertCameraKeyframe(frame-seq->startFrame(),pos,rot, fov);
   }
   else
   {
@@ -168,15 +169,15 @@ void DemoTimeline::deleteItems(const QList<QGraphicsItem *> items)
   foreach (QGraphicsItem* item, items)
   {
     Sequence* seq = dynamic_cast<Sequence*>(item);
-    CameraKeyframe* cakey = dynamic_cast<CameraKeyframe*>(item);
+    CameraKeyframe* cam_key = dynamic_cast<CameraKeyframe*>(item);
 
     if (seq)
     {
       deleteSequence(seq);
     }
-    else if (cakey)
+    else if (cam_key)
     {
-      cakey->getSequence()->deleteCameraKeyframe(cakey);
+      cam_key->sequence()->deleteCameraKeyframe(cam_key);
     }
     else
     {
@@ -188,30 +189,30 @@ void DemoTimeline::deleteItems(const QList<QGraphicsItem *> items)
 
 void DemoTimeline::deleteSequence(Sequence* seq)
 {
-  QMap<qint64,Sequence*>::iterator it = sequences.find(seq->startFrame());
-  node.firstChildElement("track").removeChild(seq->getNode()).clear();
+  QMap<qint64,Sequence*>::iterator it = m_sequences.find(seq->startFrame());
+  m_node.firstChildElement("track").removeChild(seq->node()).clear();
   delete it.value();
-  sequences.erase(it);
-  project->notifyDocumentChanged();
+  m_sequences.erase(it);
+  m_project.notifyDocumentChanged();
 }
 
 void DemoTimeline::addSequenceAction(QAction *action)
 {
-  QDomElement e = project->getDocument().createElement("sequence");
-  e = node.firstChildElement("track").appendChild(e).toElement();
-  Sequence* seq = new Sequence(*project,*this,e,*(project->getRayMarchScene(action->text())),mousePressPos.x(),600,trackHeight);
+  QDomElement e = m_project.document().createElement("sequence");
+  e = m_node.firstChildElement("track").appendChild(e).toElement();
+  Sequence* seq = new Sequence(m_project,*this,e,*(m_project.getRayMarchScene(action->text())),m_mousePressPos.x(),600,m_trackHeight);
   addSequence(seq);
 }
 
 void DemoTimeline::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
-  mousePressPos = event->scenePos();
+  m_mousePressPos = event->scenePos();
 
   QMenu contextMenu;
   QMenu addSequenceMenu;
   addSequenceMenu.setTitle(tr("Add sequence"));
 
-  QMap<QString,Scene*> scenes = project->rayMarchScenes();
+  QMap<QString,Scene*> scenes = m_project.rayMarchScenes();
   QMap<QString,Scene*>::const_iterator it = scenes.constBegin();
   for (;it != scenes.constEnd(); it++)
   {
@@ -226,8 +227,8 @@ void DemoTimeline::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 
 qint64 DemoTimeline::maxSequenceLengthBeforeOverlap(Sequence* seq) const
 {
-  QMap<qint64, Sequence*>::const_iterator it = sequences.constFind(seq->startFrame());
-  if (it != sequences.constEnd() && (it+1) != sequences.constEnd())
+  QMap<qint64, Sequence*>::const_iterator it = m_sequences.constFind(seq->startFrame());
+  if (it != m_sequences.constEnd() && (it+1) != m_sequences.constEnd())
   {
     return (it+1).value()->startFrame()-seq->startFrame();
   }
@@ -286,12 +287,12 @@ void DemoTimeline::exportSources(const QDir &dir) const
   }
 
   QString seq_count_str = "SEQUENCES_COUNT";
-  qint64 cakeyframe_count = 0;
-  for (it = sequences.constBegin(); it != sequences.constEnd(); it++)
+  qint64 cam_keyframe_count = 0;
+  for (it = m_sequences.constBegin(); it != m_sequences.constEnd(); it++)
   {
-     cakeyframe_count += it.value()->getCameraKeyframes().size();
+     cam_keyframe_count += it.value()->cameraKeyframes().size();
   }
-  QString cakeyframe_count_str =  "CAMERA_KEYFRAMES_COUNT";
+  QString cam_keyframe_count_str =  "CAMERA_KEYFRAMES_COUNT";
 
 
   //Camera preprocessor
@@ -301,7 +302,7 @@ void DemoTimeline::exportSources(const QDir &dir) const
   cameras_header_code << ShaderMinifier::generatedHeaderString();
   cameras_header_code << "#ifndef CAMERAS_H\n";
   cameras_header_code << "#define CAMERAS_H\n\n";
-  cameras_header_code << "#define " << cakeyframe_count_str  <<"  " << QString::number(getFramerate()) + "\n\n";
+  cameras_header_code << "#define " << cam_keyframe_count_str  <<"  " << QString::number(framerate()) + "\n\n";
 
   //sequences preprocessor
   sequences_source_code << ShaderMinifier::generatedSourceString();
@@ -312,18 +313,19 @@ void DemoTimeline::exportSources(const QDir &dir) const
   sequences_header_code << "#define SEQUENCES_H\n\n";
   sequences_header_code << "#include \"cameras.hpp\"\n";
   sequences_header_code << "#include \"scenes.hpp\"\n\n";
-  sequences_header_code << "#define " << seq_count_str + " " << QString::number(sequences.size()) << "\n";
-  sequences_header_code << "#define FRAMERATE " << QString::number(getFramerate()) << "\n\n";
+  sequences_header_code << "#define " << seq_count_str + " " << QString::number(m_sequences.size()) << "\n";
+  sequences_header_code << "#define FRAMERATE " << QString::number(framerate()) << "\n\n";
 
 
   //Sequences variables
   QString seq_start_frame = "const " + unsigned_int_type + " seq_start_frame[" + seq_count_str + "]";
+  QString seq_frame_count = "const " + unsigned_int_type + " seq_frame_count[" + seq_count_str + "]";
   QString seq_shader = "const GLuint* seq_shader[" + seq_count_str + "]";
-  QString seq_start_cakeyframe = "const " + unsigned_int_type + " seq_start_cakeyframe[" + seq_count_str + "]";
-  QString seq_cakeyframe_count = "const " + unsigned_int_type + " seq_cakeyframe_count[" + seq_count_str + "]";
+  QString seq_start_cam_keyframe = "const " + unsigned_int_type + " seq_start_cam_keyframe[" + seq_count_str + "]";
+  QString seq_cam_keyframe_count = "const " + unsigned_int_type + " seq_cam_keyframe_count[" + seq_count_str + "]";
 
   QList<QString*> seq_vars;
-  seq_vars << &seq_start_frame << &seq_shader << &seq_start_cakeyframe << &seq_cakeyframe_count;
+  seq_vars << &seq_start_frame << &seq_shader << &seq_start_cam_keyframe << &seq_cam_keyframe_count << &seq_frame_count;
   foreach (QString* var, seq_vars)
   {
     sequences_header_code << "extern " << *var << ";\n";
@@ -332,19 +334,20 @@ void DemoTimeline::exportSources(const QDir &dir) const
 
 
   //Camera variables
-  QString caframe = "const " + unsigned_int_type + " caframe[" + cakeyframe_count_str + "]";
-  QString capos_x = "const float capos_x[" + cakeyframe_count_str + "]";
-  QString capos_y = "const float capos_y[" + cakeyframe_count_str + "]";
-  QString capos_z = "const float capos_z[" + cakeyframe_count_str + "]";
-  QString carot_x = "const float carot_x[" + cakeyframe_count_str + "]";
-  QString carot_y = "const float carot_y[" + cakeyframe_count_str + "]";
-  QString carot_z = "const float carot_z[" + cakeyframe_count_str + "]";
-  QString carot_w = "const float carot_w[" + cakeyframe_count_str + "]";
+  QString cam_frame = "const " + unsigned_int_type + " cam_frame[" + cam_keyframe_count_str + "]";
+  QString cam_pos_x = "const float cam_pos_x[" + cam_keyframe_count_str + "]";
+  QString cam_pos_y = "const float cam_pos_y[" + cam_keyframe_count_str + "]";
+  QString cam_pos_z = "const float cam_pos_z[" + cam_keyframe_count_str + "]";
+  QString cam_rot_x = "const float cam_rot_x[" + cam_keyframe_count_str + "]";
+  QString cam_rot_y = "const float cam_rot_y[" + cam_keyframe_count_str + "]";
+  QString cam_rot_z = "const float cam_rot_z[" + cam_keyframe_count_str + "]";
+  QString cam_rot_w = "const float cam_rot_w[" + cam_keyframe_count_str + "]";
+  QString cam_fov = "const float cam_fov[" + cam_keyframe_count_str + "]";
 
-  QList<QString*> cavars;
-  cavars << &caframe << &capos_x << &capos_y << &capos_z
-           << &carot_x << &carot_y << &carot_z << &carot_w;
-  foreach (QString* var, cavars)
+  QList<QString*> cam_vars;
+  cam_vars << &cam_frame << &cam_pos_x << &cam_pos_y << &cam_pos_z
+           << &cam_rot_x << &cam_rot_y << &cam_rot_z << &cam_rot_w << &cam_fov;
+  foreach (QString* var, cam_vars)
   {
     cameras_header_code << "extern " << *var << ";\n";
     *var += " = {\n";
@@ -357,42 +360,45 @@ void DemoTimeline::exportSources(const QDir &dir) const
   qint64 current_keyframe = 0;
 
   //OK now fill our tables
-  for (it = sequences.constBegin(); it != sequences.constEnd(); it++)
+  for (it = m_sequences.constBegin(); it != m_sequences.constEnd(); it++)
   {
     QString comma = ",";
-    if (it == sequences.constEnd() - 1)
+    if (it+1 == m_sequences.constEnd())
     {
       comma = "";
     }
 
-    QMap<qint64, CameraKeyframe*> cakeyframes = it.value()->getCameraKeyframes();
+    QMap<qint64, CameraKeyframe*> cam_keyframes = it.value()->cameraKeyframes();
 
     seq_start_frame += "   " + QString::number(it.value()->startFrame()) + comma + "\n";
+    seq_frame_count += "   " + QString::number(it.value()->length()) + comma + "\n";
     seq_shader += "   &fs_" + it.value()->glScene()->objectName() + "_program" + comma + "\n";
-    seq_start_cakeyframe += "   " + QString::number(current_keyframe) + comma + "\n";
-    seq_cakeyframe_count += "   " + QString::number(cakeyframes.size()) + comma + "\n";
+    seq_start_cam_keyframe += "   " + QString::number(current_keyframe) + comma + "\n";
+    seq_cam_keyframe_count += "   " + QString::number(cam_keyframes.size()) + comma + "\n";
 
     QMap<qint64, CameraKeyframe*>::const_iterator key_it;
-    for (key_it = cakeyframes.constBegin(); key_it != cakeyframes.constEnd(); key_it++)
+    for (key_it = cam_keyframes.constBegin(); key_it != cam_keyframes.constEnd(); key_it++)
     {
-      caframe += "   " + QString::number(key_it.value()->relativeFrame()) + comma + "\n";
-      capos_x += "   " + QString::number(key_it.value()->getPosition().x()) + comma + "\n";
-      capos_y += "   " + QString::number(key_it.value()->getPosition().y()) + comma + "\n";
-      capos_z += "   " + QString::number(key_it.value()->getPosition().z()) + comma + "\n";
+      cam_frame += "   " + QString::number(key_it.value()->relativeFrame()) + comma + "\n";
+      cam_pos_x += "   " + QString::number(key_it.value()->position().x()) + comma + "\n";
+      cam_pos_y += "   " + QString::number(key_it.value()->position().y()) + comma + "\n";
+      cam_pos_z += "   " + QString::number(key_it.value()->position().z()) + comma + "\n";
 
-      carot_x += "   " + QString::number(key_it.value()->getRotation().x()) + comma + "\n";
-      carot_y += "   " + QString::number(key_it.value()->getRotation().y()) + comma + "\n";
-      carot_z += "   " + QString::number(key_it.value()->getRotation().z()) + comma + "\n";
-      carot_w += "   " + QString::number(key_it.value()->getRotation().scalar()) + comma + "\n";
+      cam_rot_x += "   " + QString::number(key_it.value()->rotation().x()) + comma + "\n";
+      cam_rot_y += "   " + QString::number(key_it.value()->rotation().y()) + comma + "\n";
+      cam_rot_z += "   " + QString::number(key_it.value()->rotation().z()) + comma + "\n";
+      cam_rot_w += "   " + QString::number(key_it.value()->rotation().scalar()) + comma + "\n";
+
+      cam_fov += "   " + QString::number(qDegreesToRadians(key_it.value()->fov())) + comma + "\n";
     }
-    current_keyframe += cakeyframes.size();
+    current_keyframe += cam_keyframes.size();
   }
 
   foreach (QString* var, seq_vars)
   {
     sequences_source_code << *var << "};\n";
   }
-  foreach (QString* var, cavars)
+  foreach (QString* var, cam_vars)
   {
     cameras_source_code << *var << "};\n";
   }
@@ -414,7 +420,8 @@ void DemoTimeline::exportSources(const QDir &dir) const
 /*
 DemoRender::DemoRender(DemoTimeline &timeline, const QSize& initialSize):
   Render(initialSize,&timeline),
-  timeline(&timeline)
+  m_project(project),
+  m_timeline(timeline)
 {
 
 }
@@ -428,46 +435,19 @@ void DemoRender::glRender()
 {
   fbo.enable();
 
-  qint64 frame = timeline->currentFrame();
-  Sequence* current_sequence = timeline->isInsideSequence(frame);
+  qint64 frame = m_timeline.currentFrame();
+  Sequence* current_sequence = m_timeline.isInsideSequence(frame);
 
   if (current_sequence && current_sequence->glScene())
   {
-    Scene* scene = current_sequence->glScene();
-    scene->getShader().enable();
-
-
-    timeline->getMusic()->updateTextures();
-
-    glActiveTexture(GL_TEXTURE0 + 0);
-    timeline->getMusic()->getNoteVelocityTex().bind();
-    scene->getShader().sendi("notes_velocity",0);
-
-    if (camera)
-    {
-      scene->getShader().sendf("cam_position",camera->getPosition().x(),camera->getPosition().y(), camera->getPosition().z());
-      scene->getShader().sendf("cam_rotation",camera->getRotation().x(),camera->getRotation().y(), camera->getRotation().z(), camera->getRotation().scalar());
-    }
-    else
-    {
-      scene->getShader().sendf("cam_rotation",0.f,0.f,0.f,1.f);
-    }
-
-    scene->getShader().sendf("xy_scale_factor",(float)fbo.getSizeX()/(float)fbo.getSizeY());
-    scene->getShader().sendf("sequence_time",(float)timeline->getMusic()->getPosition() - (float)current_sequence->startFrame()/timeline->getFramerate());
-    scene->getShader().sendf("track_time",(float) timeline->getMusic()->getPosition());
-    Fast2DQuadDraw();
-
-    glActiveTexture(GL_TEXTURE0+0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    scene->getShader().disable();
+      float track_time = m_timeline.music() ? m_timeline.music()->getTime() : 0.0f;
+    SceneRenderer::glRenderScene(*this, m_project, *(current_sequence->glScene()), m_camera, track_time, track_time - (static_cast<float>(current_sequence->startFrame())/ m_timeline.framerate()));
   }
   else
   {
     glClear(GL_COLOR_BUFFER_BIT);
   }
-  fbo.disable();
+  m_fbo.disable();
 }
 
 */

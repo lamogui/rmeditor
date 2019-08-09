@@ -1,4 +1,4 @@
-
+﻿
 #ifndef RMEDITOR_RENDERER_HPP
 #define RMEDITOR_RENDERER_HPP
 
@@ -9,12 +9,16 @@
 
 class Render;
 class Camera;
+class Project;
+class Scene;
 
 /*
 ** Renderer : class that know how to render a media using opengl
 */
 class Renderer 
 {
+    friend class SceneRenderer;
+
 public:
   Renderer();
   virtual ~Renderer() {}
@@ -56,8 +60,12 @@ protected:
   float noiseLvlTime;
   float noiseLvlSequenceTime;
 
+  FBO m_fbo;
+  Camera* m_camera;
 };
 
 
 
+  Scene* m_scene;
+  QTime m_sequenceTime;
 #endif // !RMEDITOR_RENDERER_HPP

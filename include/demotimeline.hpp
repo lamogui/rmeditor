@@ -14,7 +14,7 @@
 class DemoTimelineRenderer : public Renderer
 {
 public:
-  DemoTimelineRenderer(DemoTimeline&  timeline, const QSize& initialSize); // Timeline is the parent
+  DemoTimelineRenderer(Project& project, DemoTimeline&  timeline, const QSize& initialSize); // Timeline is the parent
 
   // Rendering
   void initializeGL(RenderFunctionsCache& gl) override;
@@ -22,8 +22,8 @@ public:
   void glRender(RenderFunctionsCache& gl, Render& render) override; 
 
 protected:
-  DemoTimeline& timeline; 
-};
+  Project& m_project;
+  DemoTimeline& m_timeline;};
 */
 
 
@@ -34,7 +34,7 @@ class DemoTimeline : public Timeline
 
 public:
   DemoTimeline(QObject* parentMusic);
-  ~DemoTimeline() override;
+  virtual ~DemoTimeline();
 
   void initializeGL(RenderFunctionsCache& cache);
   /*
@@ -44,19 +44,20 @@ public:
 
   qint64 addSequence(Sequence* seq); //Return the correct start frame of the seq
   Sequence* isInsideSequence(qint64 frame) const;
+  unsigned int sequenceID(qint64 frame) const;
 
   inline Render* getRender() override { return render; }
 
-  void updateTime() override;
+  virtual void updateTime();
   
 public slots:
   void updateCamera(qint64 frame, Camera& cam);
   inline void updateCamera(Camera& cam) { updateCamera(currentFrame(),cam);}
-  inline void updateCamera(qint64 frame) { updateCamera(frame,camera); }
-  inline void updateCamera() { updateCamera(currentFrame(),camera); }
+  inline void updateCamera(qint64 frame) { updateCamera(frame,m_camera); }
+  inline void updateCamera() { updateCamera(currentFrame(),m_camera); }
 
-  void insertCameraKeyframe(qint64 frame, const QVector3D& pos, const QQuaternion& rot);
-  void insertCameraKeyframe(const QVector3D& pos, const QQuaternion& rot);
+  void insertCameraKeyframe(qint64 frame, const QVector3D& pos, const QQuaternion& rot, float fov);
+  void insertCameraKeyframe(const QVector3D& pos, const QQuaternion& rot, float fov);
   void insertCameraKeyframe(qint64 frame, Camera* cam);
   void insertCameraKeyframe(Camera* cam);
 
@@ -73,18 +74,22 @@ protected slots:
   void trackRequestFramePosition(qint64 position);
   /*
 protected:
-  void keyReleaseEvent(QKeyEvent *keyEvent) override;
-  void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+  virtual void keyReleaseEvent(QKeyEvent *keyEvent);
+  virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
 
   void load();
-  bool correctStartFrame(Sequence* seq); //seq must not be in sequences !
+  bool correctStartFrame(Sequence* seq); //seq must not be in m_sequences !
 
 
   bool parseTrackNode(QDomElement& node);
 
-  QDomElement node;
-  QSharedPointer<Camera> camera;
-  QPointF mousePressPos;
+  QDomElement m_node;
+  Camera m_camera;
+  double m_trackHeight;
+  Project& m_project;
+  DemoRenderer* m_renderer;
+  QMap<qint64, Sequence*> m_sequences;
+  QPointF m_mousePressPos;
   */
 private:
   // properties

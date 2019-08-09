@@ -128,16 +128,16 @@ const QString& Project::getText() const
 #if 0
 Project::Project(const QDir &dir, const QString &filename, LogWidget &log, QObject *parent):
   TextEditable(filename, QDomNode() ,log,parent),
-  music(nullptr),
-  demoTimeline(nullptr),
-  dir(dir),
-  log(&log),
-  textUpdateTimer(new QTimer(this))
+  m_music(nullptr),
+  m_demoTimeline(nullptr),
+  m_dir(dir),
+  m_log(&log),
+  m_textUpdateTimer(new QTimer(this))
 {
   load();
-  textUpdateTimer->setSingleShot(true);
-  textUpdateTimer->setInterval(1000);
-  connect(textUpdateTimer,SIGNAL(timeout()),this,SLOT(computeText()));
+  m_textUpdateTimer->setSingleShot(true);
+  m_textUpdateTimer->setInterval(1000);
+  connect(m_textUpdateTimer,SIGNAL(timeout()),this,SLOT(computeText()));
 }
 
 Project::~Project()
@@ -147,68 +147,113 @@ Project::~Project()
 /*
 bool Project::needTextRefresh() const
 {
-  bool temp = needRefreshText;
-  needRefreshText = false;
+  bool temp = m_needRefreshText;
+  m_needRefreshText = false;
   return temp;
 }
 */
 
-const QString& Project::getText() const
+const QString& Project::text() const
 {
-  return text;
+  return m_text;
 }
 
 void Project::connectLog(LogWidget &log)
 {
-  this->log = &log;
+  m_log=&log;
   TextEditable::connectLog(log);
 }
 
 void Project::resetProject()
 {
-  textUpdateTimer->stop();
-  if (demoTimeline)
+  m_textUpdateTimer->stop();
+  if (m_demoTimeline)
   {
     emit demoTimelineChanged(nullptr);
-    delete demoTimeline;
+    delete m_demoTimeline;
   }
-  demoTimeline = nullptr;
-  //text.clear();
-  node = QDomNode();
-  document.clear();
-  //emit objectTextChanged(text);
+  m_demoTimeline = nullptr;
+  //m_text.clear();
+  m_node = QDomNode();
+  m_document.clear();
+  //emit objectTextChanged(m_text);
 
-  QList<QString> keys = rmScenes.keys();
+  QList<QString> keys = m_rmScenes.keys();
   foreach (QString key, keys)
   {
-    delete rmScenes[key];
+    delete m_rmScenes[key];
   }
-  rmScenes.clear();
-  keys = frameworks.keys();
+  m_rmScenes.clear();
+  keys = m_frameworks.keys();
   foreach (QString key, keys)
   {
-    delete frameworks[key];
+    delete m_frameworks[key];
   }
-  frameworks.clear();
-
-
-  if (music)
+  m_frameworks.clear();
+  keys = m_gifs.keys();
+  foreach (QString key, keys)
   {
-    delete music;
+    delete m_gifs[key];
   }
-  music = nullptr;
+  m_gifs.clear();
+  m_textures.clear();
 
+
+  if (m_music)
+  {
+    delete m_music;
+  }
+  m_music = nullptr;
+
+}
+
+QString Project::nodeTypeToString(QDomNode::NodeType type)
+{
+  switch (type)
+  {
+    case QDomNode::ElementNode:
+      return QString("Element");
+    case QDomNode::AttributeNode:
+      return QString("Attribute");
+    case QDomNode::TextNode:
+      return QString("Text");
+    case QDomNode::CDATASectionNode:
+      return QString("CDATA Section");
+    case QDomNode::EntityReferenceNode:
+      return QString("Entity Reference");
+    case QDomNode::EntityNode:
+      return QString("Entity");
+    case QDomNode::ProcessingInstructionNode:
+      return QString("Processing Instruction");
+    case QDomNode::CommentNode:
+      return QString("Comment");
+    case QDomNode::DocumentNode:
+      return QString("Document");
+    case QDomNode::DocumentTypeNode:
+      return QString("DocumentType");
+    case QDomNode::DocumentFragmentNode:
+      return QString("Document Fragment");
+    case QDomNode::NotationNode:
+      return QString("Notation");
+    case QDomNode::BaseNode:
+      return QString("Base");
+    case QDomNode::CharacterDataNode:
+      return QString("Character Data");
+    //default: //Removed because it cause a warning with qt creator !
+    //  return QString("Unknow");
+  }
+  return QString("Unknow");
 }
 
 bool Project::build(const QString &text)
 {
   resetProject();
-  this->text = text;
+  m_text = text;
   bool buildSuccess = true;
   QString errorMsg;
   int errorLine, errCol;
 
-  if (!document.setContent(text,&errorMsg,&errorLine,&errCol))
+  if (!m_document.setContent(text,&errorMsg,&errorLine,&errCol))
   {
     emit error(QString("[") + fileName() + "]" + QString(" XML Error at line ") +
                QString::number(errorLine) + " col " + QString::number(errCol) + " " + errorMsg);
@@ -216,8 +261,8 @@ bool Project::build(const QString &text)
   }
   else
   {
-    QDomNode node = document.documentElement().firstChild();
-    node = node;
+    QDomNode node = m_document.documentElement().firstChild();
+    m_node = node;
     while (!node.isNull())
     {
       QDomElement element = node.toElement();
@@ -248,6 +293,12 @@ bool Project::build(const QString &text)
           buildSuccess = false;
         }
       }
+      else if (element.tagName() == "resources")
+      {
+          if (!parseTagResources(node)){
+              buildSuccess = false;
+          }
+      }
       else if (element.tagName() == "timeline")
       {
         if (!parseTagTimeline(node))
@@ -263,7 +314,7 @@ bool Project::build(const QString &text)
       node = node.nextSibling();
     }
   }
-  //needRefreshText = true;
+  //m_needRefreshText = true;
 
   if (buildSuccess)
   {
@@ -283,7 +334,7 @@ bool Project::parseTagFrameworks(QDomNode node)
       QString filename = element.attribute("file");
       QString name = element.attribute("name", filename.section(".",0,-2));
       element.setAttribute("name",name);
-      if (frameworks.contains(name))
+      if (m_frameworks.contains(name))
       {
         emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
                    "(" + element.nodeName() +  ") duplicate framework '" + name + "'");
@@ -300,9 +351,9 @@ bool Project::parseTagFrameworks(QDomNode node)
       else
       {
         emit info(QString("[") + fileName() + "]" + " loading framework '" + name + "' (file: " + filename + ")");
-        frameworks[name] = new Framework(filename,element,*log,this);
-        frameworks[name]->setObjectName(name);
-        emit appendTextEditable(frameworks[name]);
+        m_frameworks[name] = new Framework(filename,element,*m_log,this);
+        m_frameworks[name]->setObjectName(name);
+        emit appendTextEditable(m_frameworks[name]);
       }
     }
     element = element.nextSiblingElement();
@@ -321,7 +372,7 @@ bool Project::parseTagScenes(QDomNode node)
       QString name = element.attribute("name", filename.section(".",0,-2));
       QString framework = element.attribute("framework","");
       element.setAttribute("name",name);
-      if (rmScenes.contains(name))
+      if (m_rmScenes.contains(name))
       {
         emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
                    "(" + element.nodeName() +  ") duplicate scene '" + name + "'");
@@ -336,8 +387,8 @@ bool Project::parseTagScenes(QDomNode node)
         Framework* fw=nullptr;
         if (!framework.isEmpty())
         {
-          auto it = frameworks.find(framework);
-          if (it==frameworks.end())
+          auto it = m_frameworks.find(framework);
+          if (it==m_frameworks.end())
           {
             emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
                        "(" + element.nodeName() +  ")  '" + name + "' need the framework '" + framework + "' loaded before");
@@ -347,9 +398,9 @@ bool Project::parseTagScenes(QDomNode node)
         }
 
         emit info(QString("[") + fileName() + "]" + " loading scene '" + name + "' (file: " + filename + ")");
-        rmScenes[name] = new Scene(filename,element,fw,*log,this);
-        rmScenes[name]->setObjectName(name);
-        emit appendTextEditable(rmScenes[name]);
+        m_rmScenes[name] = new Scene(filename,element, *this,fw,*m_log,this);
+        m_rmScenes[name]->setObjectName(name);
+        emit appendTextEditable(m_rmScenes[name]);
       }
     }
     element = element.nextSiblingElement();
@@ -357,10 +408,56 @@ bool Project::parseTagScenes(QDomNode node)
   return true;
 }
 
+bool Project::parseTagResources(QDomNode node)
+{
+    QDomElement element = node.firstChildElement();
+    while (!element.isNull())
+    {
+      if (element.tagName() == "texture")
+      {
+        QString filename = element.attribute("file");
+        QString name = element.attribute("name", filename.section(".",0,-2));
+        element.setAttribute("name",name);
+        if (m_textures.contains(name))
+        {
+          emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
+                     "(" + element.nodeName() +  ") duplicate texture '" + name + "'");
+          return false;
+        }
+        else if (filename.isEmpty())
+        {
+          emit warning(QString("[") + fileName() + "]" + " warning texture without filename line " + QString::number(element.lineNumber()));
+        }
+        else
+        {
+            QString ext = filename.section(".",-1);
+            element.setAttribute("name",name);
+          emit info(QString("[") + fileName() + "]" + " loading texture '" + name + "' (file: " + filename + ")");
+
+            if (ext == "gif")
+            {
+                m_gifs[name] = new Gif(name, filename,element,*m_log,this);
+                m_textures[name] = &(m_gifs[name]->texture());
+            }
+            else
+            {
+              emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
+                        "(" + element.nodeName() +  ")  '" + filename + "' unsupported files type '" + ext + "'");
+              return false;
+            }
+
+
+        }
+      }
+      element = element.nextSiblingElement();
+    }
+    return true;
+}
+
 bool Project::parseTagMusic(QDomNode node)
 {
   QDomElement element = node.toElement();
-  if (music)
+  if (m_music)
   {
     emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
               "(" + element.nodeName() +  ") multiple music !");
@@ -368,7 +465,12 @@ bool Project::parseTagMusic(QDomNode node)
   }
 
   QString filename = element.attribute("file");
+  QString name = element.attribute("name", filename.section(".",0,-2));
+  QString ext = filename.section(".",-1);
+  element.setAttribute("name",name);
   QString lstr = element.attribute("length","");
+
+
   bool lok = false;
   double length = lstr.toDouble(&lok);
   if (!lok)
@@ -384,25 +486,15 @@ bool Project::parseTagMusic(QDomNode node)
     return false;
   }
 
-#ifdef Q_OS_WIN32
-  if (filename=="4klang") // Special case for 4klang
+  if (ext == "tfm")
   {
-      music = new _4KlangMusic(filename,length,node,*log,this);
-      return music->load() && music->createRtAudioStream();
-  }
-#endif // Q_OS_WIN32
-
-  QString name = element.attribute("name", filename.section(".",0,-2));
-  QString ext = filename.section(".",-1);
-  element.setAttribute("name",name);
-
-  if (ext == "tf4m")
-  {
-    music = new Tunefish4Music(filename,length,node,*log,this);
+    m_music = new Tunefish4Music(filename,length,node,*m_log,this);
+    addMusicTextures();
     emit info(QString("[") + fileName() + "]" + " loading music '" + name + "' (file: " + filename + ")");
-    bool s =  music->load();
-    if (s)
-        s = music->createRtAudioStream();
+    bool s =  m_music->load();
+    if (s) {
+        s = m_music->createRtAudioStream();
+    }
     return s;
   }
   else
@@ -412,19 +504,18 @@ bool Project::parseTagMusic(QDomNode node)
     return false;
   }
 
-  return true;
 }
 
 bool Project::parseTagTimeline(QDomNode node)
 {
   QDomElement element = node.toElement();
-  if (demoTimeline)
+  if (m_demoTimeline)
   {
     emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
               "(" + element.nodeName() +  ") multiple timelines !");
     return false;
   }
-  if (!music)
+  if (!m_music)
   {
     emit error(QString("[") + fileName() + "]" + " error at line " + QString::number(element.lineNumber()) +
               "(" + element.nodeName() +  ") you need to include a music before include a timeline");
@@ -440,17 +531,23 @@ bool Project::parseTagTimeline(QDomNode node)
               "(" + element.nodeName() +  ") invalid framerate '" + framerate_str + "'");
     return false;
   }
-  demoTimeline = new DemoTimeline(element,*this,framerate,*log);
-  emit demoTimelineChanged(demoTimeline);
+  m_demoTimeline = new DemoTimeline(element,*this,framerate,*m_log);
+  emit demoTimelineChanged(m_demoTimeline);
   return true;
 }
 
+void Project::addMusicTextures()
+{
+    Q_ASSERT(m_music);
+    m_textures["notes_velocity"] = &(m_music->noteVelocityTex());
+    m_textures["max_notes_velocity"] = &(m_music->maxNoteVelocityTex());
+}
 
 Scene* Project::getRayMarchScene(const QString& name) const
 {
   QMap<QString,Scene*>::const_iterator it;
-  it = rmScenes.find(name);
-  if (it !=rmScenes.end())
+  it = m_rmScenes.find(name);
+  if (it !=m_rmScenes.end())
   {
     return it.value();
   }
@@ -461,8 +558,8 @@ Scene* Project::getRayMarchScene(const QString& name) const
 Framework* Project::getFramework(const QString& name) const
 {
   QMap<QString,Framework*>::const_iterator it;
-  it = frameworks.find(name);
-  if (it !=frameworks.end())
+  it = m_frameworks.find(name);
+  if (it !=m_frameworks.end())
   {
     return it.value();
   }
@@ -486,14 +583,14 @@ QString Project::getDefaultProjectText()
 
 void Project::notifyDocumentChanged()
 {
-  textUpdateTimer->stop();
-  textUpdateTimer->start();
+  m_textUpdateTimer->stop();
+  m_textUpdateTimer->start();
 }
 
 void Project::computeText()
 {
-  text = document.toString(2);
-  emit objectTextChanged(text);
+  m_text = m_document.toString(2);
+  emit objectTextChanged(m_text);
 }
 
 void Project::destroyNode(QDomNode &node)
@@ -507,9 +604,10 @@ void Project::exportAsLinuxDemo(const QDir &dir) const
   emit info(QString("[") + fileName() + "]" + tr("building linux project into directory: ") + dir.path());
   exportFrameworkSources(dir);
   exportScenesSources(dir);
-  if (demoTimeline)
+  exportGifsSources(dir);
+  if (m_demoTimeline)
   {
-    demoTimeline->exportSources(dir);
+    m_demoTimeline->exportSources(dir);
   }
 }
 
@@ -529,16 +627,15 @@ void Project::exportFrameworkSources(const QDir &dir) const
 
   source_code << ShaderMinifier::generatedSourceString();
   header_code << ShaderMinifier::generatedHeaderString();
-
   source_code << "#include \"frameworks.hpp\"\n\n";
 
   header_code << "#ifndef FRAMEWORKS_H\n";
   header_code << "#define FRAMEWORKS_H\n\n";
 
   QMap<QString,Framework*>::const_iterator it;
-  for  (it = frameworks.constBegin(); it !=frameworks.constEnd(); it++)
+  for  (it = m_frameworks.constBegin(); it !=m_frameworks.constEnd(); it++)
   {
-    ShaderMinifier minifier(*log);
+    ShaderMinifier minifier(*m_log);
 
     header_code << "extern const char* const fs_" << it.value()->objectName() << ";\n";
     header_code << "extern const unsigned int fs_" << it.value()->objectName() << "_len;\n";
@@ -576,8 +673,11 @@ void Project::exportScenesSources(const QDir &dir) const
   header_code << "#ifndef SCENES_H\n";
   header_code << "#define SCENES_H\n\n";
   header_code << "#include \"frameworks.hpp\"\n";
+#ifdef _WIN32
+  header_code << "#include <Windows.h>\n\n";
+#endif
   header_code << "#include <GL/gl.h>\n\n";
-  header_code << "#define " << scenes_count_str << " " << QString::number(rmScenes.size()) << "\n\n";
+  header_code << "#define " << scenes_count_str << " " << QString::number(m_rmScenes.size()) << "\n\n";
 
   QString scenes_src = "const char* const scenes_src[" +  scenes_count_str + "]";
   QString scenes_framework_src = "const char* const scenes_framework_src[" +  scenes_count_str + "]";
@@ -588,31 +688,12 @@ void Project::exportScenesSources(const QDir &dir) const
   header_code << "extern " << scenes_programs << ";\n"; scenes_programs += " = {\n";
 
   QMap<QString,Scene*>::const_iterator it;
-  for  (it = rmScenes.constBegin(); it !=rmScenes.constEnd(); it++)
+  for  (it = m_rmScenes.constBegin(); it !=m_rmScenes.constEnd(); it++)
   {
-    ShaderMinifier minifier;
+    ShaderMinifier minifier(*m_log);
     log->findAndConnectLogSignalsRecursively(minifier);
-
-
-
-    /*if (it.value()->framework())
-    {
-      header_code << "extern const char* fs_" << it.value()->objectName() << "_brut;\n";
-      //header_code << "extern const unsigned int fs_" << it.value()->objectName() << "_brut_len;\n";
-
-      header_code << "extern char* fs_" << it.value()->objectName() << ";\n";
-      //header_code << "extern unsigned int fs_" << it.value()->objectName() << "_len;\n";
-
-      source_code << "char* fs_" << it.value()->objectName() << " = 0;\n";
-      //source_code << "unsigned int fs_" << it.value()->objectName() << "_len=" + + ";\n";
-
-      minifier.cFormatedShaderCode(it.value()->objectName(),QString("fs_") + it.value()->objectName() + "_brut",it.value()->minifiedShaderCode(minifier));
-    }
-    else*/
     {
       header_code << "extern const char* const fs_" << it.value()->objectName() << ";\n";
-      //header_code << "extern const unsigned int fs_" << it.value()->objectName() << "_len;\n";
-
       source_code << it.value()->cFormatedShaderCode(minifier);
     }
 
@@ -620,16 +701,16 @@ void Project::exportScenesSources(const QDir &dir) const
     source_code << "GLuint fs_" << it.value()->objectName() << "_program;\n";
 
     QString comma = ",";
-    if (it == rmScenes.constEnd() - 1)
+    if (it+1 == m_rmScenes.constEnd())
     {
       comma = "";
     }
 
     scenes_src += "  fs_" + it.value()->objectName() + comma + "\n";
     scenes_programs += "  &fs_" + it.value()->objectName() + "_program" + comma + "\n";
-    if (it.value()->getFramework())
+    if (it.value()->framework())
     {
-      scenes_framework_src += "  fs_" + it.value()->getFramework()->objectName() + comma + "\n";
+      scenes_framework_src += "  fs_" + it.value()->framework()->objectName() + comma + "\n";
     }
     else
     {
@@ -649,5 +730,168 @@ void Project::exportScenesSources(const QDir &dir) const
   source_code.flush();
 }
 
+void Project::exportGifsSources(const QDir& dir) const
+{
+    QFile header(dir.absoluteFilePath("gifs.hpp"));
+    QFile source(dir.absoluteFilePath("gifs.cpp"));
 
-#endif 
+    if (!header.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate) || !source.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+    {
+      emit error(tr("error: cannot open files for writing"));
+      return;
+    }
+
+    QTextStream header_code(&header);
+    QTextStream source_code(&source);
+
+    source_code << ShaderMinifier::generatedSourceString();
+    header_code << ShaderMinifier::generatedHeaderString();
+
+    source_code << "#include \"gifs.hpp\"\n\n";
+
+    QString gifs_count_str = "GIFS_COUNT";
+
+    header_code << "#ifndef GIFS_H\n";
+    header_code << "#define GIFS_H\n\n";
+#ifdef _WIN32
+  header_code << "#include <Windows.h>\n\n";
+#endif
+  header_code << "#include <GL/gl.h>\n\n";
+
+    header_code << "#define " << gifs_count_str << " " << QString::number(m_gifs.size()) << "\n\n";
+
+    QString gifs_palettes = " unsigned char*  gifs_palettes[" +  gifs_count_str + "]";
+    QString gifs_names = " char* gifs_names[" +  gifs_count_str + "]";
+    QString gifs_images = " unsigned char*  gifs_images[" +  gifs_count_str + "]";
+    QString gifs_images_width = " unsigned int  gifs_images_width[" +  gifs_count_str + "]";
+    QString gifs_images_height = " unsigned int  gifs_images_height[" +  gifs_count_str + "]";
+    QString gifs_textures = "GLuint gifs_textures[" +  gifs_count_str + "]";
+
+    header_code << "extern " << gifs_palettes << ";\n";
+    header_code << "extern " << gifs_names << ";\n";
+    header_code << "extern " << gifs_images << ";\n";
+    header_code << "extern " << gifs_images_width << ";\n";
+    header_code << "extern " << gifs_images_height << ";\n";
+    header_code << "extern " << gifs_textures << ";\n";
+
+    gifs_palettes += "= {";
+    gifs_names += "= {";
+    gifs_images += "= {";
+    gifs_images_width += "= {";
+    gifs_images_height += "= {";
+    gifs_textures += ";";
+    QMap<QString,Gif*>::const_iterator it;
+    for  (it = m_gifs.constBegin(); it !=m_gifs.constEnd(); it++)
+    {
+
+        const gif* g = it.value()->data();
+        if (!g->images || g->images_count != 1) {
+            emit error("unsupported gif " + it.value()->fileName() + " with multiple images !");
+            return;
+        }
+        gif_image* f = f=g->images[0];
+        if (f->local_color_table_size && f->local_color_table) {
+            source_code << " unsigned char " << (it.key() + "_palette[" + QString::number(f->local_color_table_size<<2)+ "] = {");
+           const unsigned int size = f->local_color_table_size << 2;
+           unsigned i=0,j=0;
+           for (;i<size;i+=4)
+           {
+
+               if (f->control && f->control->transparent_flag && f->control->transparent_color_index == (j-1) / 3)
+               {
+                   source_code << QString::number(static_cast<int>(0))+ ",";
+                   source_code << QString::number(static_cast<int>(0))+ ",";
+                   source_code << QString::number(static_cast<int>(0))+ ",";
+
+                  source_code << QString::number(static_cast<int>(0)); // TODO do this operation in the player...
+                  j+=3;
+               }
+               else {
+                   source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
+                   source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
+                   source_code << QString::number(static_cast<int>(f->local_color_table[j++])) + ",";
+                  source_code << QString::number(static_cast<int>(255));
+               }
+
+               if (i+4 != size) {
+                source_code << ",";
+               }
+           }
+            source_code <<"};\n";
+        }
+        else if (g->global_color_table_size && g->global_color_table) {
+            source_code << " unsigned char " << (it.key() + "_palette[" + QString::number(g->global_color_table_size<<2)+ "] = {");
+           const unsigned int size = g->global_color_table_size << 2;
+           unsigned i=0,j=0;
+           for (;i<size;i+=4)
+           {
+               source_code << QString::number(static_cast<int>(g->global_color_table[j++])) + ",";
+               source_code << QString::number(static_cast<int>(g->global_color_table[j++])) + ",";
+               source_code << QString::number(static_cast<int>(g->global_color_table[j++])) + ",";
+               if (f->control && f->control->transparent_flag && f->control->transparent_color_index == (j-1) / 3)
+               {
+                  source_code << QString::number(static_cast<int>(0));
+               }
+               else {
+                  source_code << QString::number(static_cast<int>(255));
+               }
+               if (i+4 != size) {
+                source_code << ",";
+               }
+           }
+           source_code <<"};\n";
+        }
+        else {
+           emit error("unsupported gif " + it.value()->fileName() + " table shit error let's put a breakpoint your party is fucked up");
+        }
+
+        if (f->descriptor.left != 0 ||
+            f->descriptor.top != 0 ||
+            f->descriptor.width != g->screen_descriptor.width ||
+            f->descriptor.height != g->screen_descriptor.height)
+        {
+            emit error("unsupported sub image format ! put a breakpoint you are fucked up :)");
+            return ;
+        }
+
+        source_code << " unsigned char " << (it.key() + "_image [" + QString::number(g->screen_descriptor.width * g->screen_descriptor.height)  + "] = {");
+
+        for (int h = 0 ; h<g->screen_descriptor.height ; ++h )
+        {
+            for (int w =0; w < g->screen_descriptor.width ; ++w)
+            {
+                source_code << QString::number(static_cast<int>(f->pixels[w + g->screen_descriptor.width * (g->screen_descriptor.height - h - 1)]));
+                unsigned int k = w * h;
+                if (k + 1 != g->screen_descriptor.width * g->screen_descriptor.height)
+                    source_code << ",";
+            }
+        }
+        source_code << "};\n";
+
+
+        QString listComma = ",";
+        if (it + 1 == m_gifs.constEnd()) {
+            listComma = "";
+        }
+        gifs_palettes += it.key() + "_palette" + listComma;
+        gifs_names += "\"" + it.key() + "\"" + listComma;
+        gifs_images +=  it.key() + "_image" + listComma;
+        gifs_images_width += QString::number(g->screen_descriptor.width)+ listComma;
+        gifs_images_height += QString::number(g->screen_descriptor.height)+ listComma;
+
+    }
+
+    source_code << gifs_palettes << "};\n";
+    source_code << gifs_names << "};\n";
+    source_code << gifs_images << "};\n";
+    source_code << gifs_images_width << "};\n";
+    source_code << gifs_images_height << "};\n";
+    source_code << gifs_textures;// << "};\n";
+
+    header_code << "#endif\n";
+
+    header_code.flush();
+    source_code.flush();
+}
+
+

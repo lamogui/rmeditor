@@ -26,9 +26,9 @@ signals : // BUG : Qt doesn't support signals declarations inside macros
 public:
   Timeline(QObject* parentMusic); // The music is the parent of the timeline, if it's doesn't exists anymore the timeline should be destroyed ! 
 
-  // For now this should never be null
-  const Music& getMusic() const { return music; }
-  Music& getMusic() { return music; }
+  inline double framerate() const { return m_framerate; }
+  inline Music* music() const { return m_music; }
+  qint64 length() const; //in frames
 
   // frame timings shortcuts
   qint64 getLength() const; 
@@ -44,12 +44,15 @@ signals:
   void requestPosition(double position);
 
 protected:
-  // links
-  Music& music; // shortcut to casted parent
+  double m_height;
+  double m_framerate;
+  Music& m_music;
 
 private:
   DECLARE_PROPERTY_NOTIFY(double, framerate, Framerate);
 
 };
 
-#endif // !TIMELINE_HPP
+
+
+#endif

@@ -49,34 +49,35 @@ private:
 
     /*
     Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=nullptr);
-    ~Project() override;
+    virtual ~Project();
 
     
     void connectLog(LogWidget& log) override;
 
     Scene *getRayMarchScene(const QString& name) const;
     Framework *getFramework(const QString& name) const;
-    inline const QMap<QString,Scene*>& rayMarchScenes() const {return rmScenes;}
-    inline const QMap<QString,Framework*>& getFrameworks() const {return frameworks;}
+    inline const QMap<QString,Scene*>& rayMarchScenes() const {return m_rmScenes;}
+    inline const QMap<QString,Framework*>& frameworks() const {return m_frameworks;}
+    inline const QMap<QString, Texture2D*>& textures() const {return m_textures; }
     static QString nodeTypeToString(QDomNode::NodeType type);
 
 
     static QString getDefaultProjectText();
 
-    bool buildable() const override { return true; }
+    virtual bool buildable() const { return true; }
 
-    inline Music* getMusic() const { return music; }
-    inline DemoTimeline* getDemoTimeline() const { return demoTimeline; }
+    inline Music* music() const { return m_music; }
+    inline DemoTimeline* demoTimeline() const { return m_demoTimeline; }
 
-    inline QDomDocument& getDocument() { return document; }
+    inline QDomDocument& document() { return m_document; }
 
     void exportFrameworkSources(const QDir& dir) const;
     void exportScenesSources(const QDir& dir) const;
-
+    void exportGifsSources(const QDir& dir) const;
 
   public slots:
     void resetProject();
-    bool build(const QString& text) override;
+    virtual bool build(const QString& text);
     void notifyDocumentChanged();
     void destroyNode(QDomNode& node);
 
@@ -94,17 +95,17 @@ private:
     bool parseTagScenes(QDomNode node);
     bool parseTagMusic(QDomNode node);
     bool parseTagTimeline(QDomNode node);
+    bool parseTagResources(QDomNode node);
 
-    QMap<QString,Scene*> rmScenes;
-    QMap<QString,Framework*> frameworks;
+    void addMusicTextures();
 
-    Music* music;
-    DemoTimeline* demoTimeline;
-    QString text;
-    QDir dir;
-    LogWidget* log; 
-    QDomDocument document;
-    QTimer* textUpdateTimer;*/
+    Music* m_music;
+    DemoTimeline* m_demoTimeline;
+    QString m_text;
+    QDir m_dir;
+    LogWidget* m_log; 
+    QDomDocument m_document;
+    QTimer* m_textUpdateTimer;*/
 };
 
-#endif // !PROJECT_HPP
+#endif

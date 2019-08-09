@@ -43,7 +43,7 @@ public slots:
        void resetCamera();
        void takeScreenshot();
 
-       inline void setOnlyShowTexture(bool e) { onlyShowTexture = e;}
+       inline void setOnlyShowTexture(bool e) { m_onlyShowTexture = e;}
        void startUpdateLoop();
        void stopUpdateLoop();
        void setCurrentRenderer(const QWeakPointer<Renderer>& renderer);
@@ -82,7 +82,7 @@ protected:
 
        // Hum let's clean this one day 
        bool captureMouse;
-       bool onlyShowTexture;
+       bool m_onlyShowTexture;
 
        // Options 
        TextureDisplayed textureDisplayed;

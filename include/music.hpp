@@ -4,7 +4,7 @@
 #include <QMutex>
 #include <QOpenGLTexture>
 
-#include <rtaudio/RtAudio.h>
+#include "../rtaudio/RtAudio.h"
 #include "mediafile.hpp"
 
 
@@ -17,14 +17,14 @@ class Music : public MediaFile
 
 public:
   Music(QObject* parent);
-  ~Music() override;
+  virtual ~Music();
 
   virtual double getPosition() const = 0;
   virtual double getLength() const = 0;
 
   inline QWeakPointer<QOpenGLTexture> getNoteVelocityTexture() { return noteVelocityTexture; }
-
-  bool isPlaying() const { return playing; }
+  inline QWeakPointer<QOpenGLTexture> getMaxNoteVelocityTexture() { return maxNoteVelocityTexture; }
+  bool playing() const { return m_playing; }
 
   virtual void exportMusicCData(const QFile& source, const QFile& header) const = 0;
 
@@ -39,8 +39,8 @@ public slots:
   virtual void setPosition(double time) = 0;
   virtual void updateTextures() = 0;
 
-  inline void play() { playing = true; }
-  inline void pause() { playing = false;}
+  inline void play() { m_playing = true; }
+  inline void pause() { m_playing = false;}
 
 protected:
 
@@ -51,14 +51,15 @@ protected:
   static void rtAudioError(RtAudioError::Type type, const std::string &errorText);
 
   // RtAudio
-  size_t bytesPerFrame; //Rt audio bytes per frame
-  RtAudio audio;
+  size_t m_bytesPerFrame; //Rt audio bytes per frame
+  RtAudio m_audio;
 
   // Usefull variables
-  QSharedPointer<QOpenGLTexture> noteVelocityTexture;
+  QSharedPointer<QOpenGLTexture> m_noteVelocityTexture;
+  QSharedPointer<QOpenGLTexture> m_maxNoteVelocityTexture;
 
   // Control
-  volatile bool playing;
+  volatile bool m_playing;
 
 private:
   DECLARE_PROPERTY(Timeline*, mainTimeline, MainTimeline);

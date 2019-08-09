@@ -52,16 +52,17 @@ private slots:
      void onDestroyTextEditable(QObject* obj);
 
 private:
+     TextEditable* m_object;
      QString colorSyntax(QString in);
 
      TextEditable& textObject;
      QWidget *lineNumberArea;
-     QString filename;
-     Highlighter *highlighter;
-     int id;
-     QTimer *timer;
-     int startLineNumber;
-     bool isSaved;
+     QString m_filename;
+     Highlighter *m_highlighter;
+     int m_id;
+     QTimer *m_timer;
+     int m_startLineNumber;
+     bool m_saved;
  };
 
 

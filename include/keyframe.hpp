@@ -21,21 +21,15 @@ class Keyframe : public QGraphicsObject
   
   public:
     Keyframe(QGraphicsObject* parent = nullptr);
-    ~Keyframe() override;
-
-    // QGraphicsItem
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-    QRectF boundingRect() const override;
+#if defined(Q_OS_WIN) && defined(QT_NO_DEBUG) //Bug mingw ?
+    virtual ~Keyframe();
+#endif
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual QRectF boundingRect() const;
 
   protected:
-    // QGraphicsItem
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
-
-    void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
-    void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
+    virtual void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+    virtual void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 
   signals:
     void requestFramePosition(qint64 absoluteFrame);
@@ -57,4 +51,4 @@ class Keyframe : public QGraphicsObject
     DECLARE_PROPERTY(qint64, relativeFrame, RelativeFrame)
 };
 
-#endif // !KEYFRAME_HPP
+#endif

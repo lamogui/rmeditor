@@ -1,4 +1,4 @@
-/*
+﻿/*
  ---------------------------------------------------------------------
  Tunefish 4  -  http://tunefish-synth.com
  ---------------------------------------------------------------------
@@ -22,7 +22,9 @@
 #ifndef TF4_HPP
 #define TF4_HPP
 
-const eU32 TF_BUFFERSIZE            = 256;
+#include "system.hpp"
+
+//const eU32 TF_BUFFERSIZE            = 256;
 const eF32 TF_MASTER_VOLUME			= 2.0f;
 const eU32 TF_FRAMESIZE             = 512;
 const eU32 TF_MAXFRAMESIZE          = 4096;
@@ -673,11 +675,8 @@ struct eTfNoise
 {
     eTfNoise()
     {
-        filterLP = static_cast<eTfFilter*>(eAllocAligned(sizeof(eTfFilter), 16));
-        filterHP = static_cast<eTfFilter*>(eAllocAligned(sizeof(eTfFilter), 16));
-        eMemSet(filterLP, 0, sizeof(eTfFilter));
-        eMemSet(filterHP, 0, sizeof(eTfFilter));
-
+        filterLP = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
+        filterHP = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
     }
 
     ~eTfNoise()
@@ -696,26 +695,12 @@ struct eTfNoise
 
 struct eTfVoice
 {
-    eTfVoice(eBool allocFilters = eTRUE)
+    eTfVoice()
     {
-        if (allocFilters) 
-        {
-            filterLP = (eTfFilter*)eAllocAligned(sizeof(eTfFilter), 16);
-            filterHP = (eTfFilter*)eAllocAligned(sizeof(eTfFilter), 16);
-            filterBP = (eTfFilter*)eAllocAligned(sizeof(eTfFilter), 16);
-            filterNT = (eTfFilter*)eAllocAligned(sizeof(eTfFilter), 16);
-            eMemSet(filterLP, 0, sizeof(eTfFilter));
-            eMemSet(filterHP, 0, sizeof(eTfFilter));
-            eMemSet(filterBP, 0, sizeof(eTfFilter));
-            eMemSet(filterNT, 0, sizeof(eTfFilter));
-        } 
-        else
-        {
-            filterLP = nullptr;
-            filterHP = nullptr;
-            filterBP = nullptr;
-            filterNT = nullptr;
-        }
+        filterLP = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
+        filterHP = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
+        filterBP = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
+        filterNT = (eTfFilter*)eAllocAlignedAndZero(sizeof(eTfFilter), 16);
     }
 
     ~eTfVoice()
@@ -752,7 +737,6 @@ struct eTfVoice
 
 struct eTfInstrument
 {
-	eU32			index;
     eF32            params[TF_PARAM_COUNT];
     eS16            output[TF_MAXFRAMESIZE*2];
     eF32            lfo1Phase;
@@ -858,7 +842,6 @@ void    eTfVoicePitchBend(eTfVoice &state, eF32 semitones, eF32 cents);
 void    eTfVoicePanic(eTfVoice &state);
 
 void    eTfInstrumentInit(eTfSynth &synth, eTfInstrument &instr);
-void    eTfInstrumentFree(eTfSynth &synth, eTfInstrument &instr);
 eF32    eTfInstrumentProcess(eTfSynth &synth, eTfInstrument &instr, eF32 **outputs, long sampleFrames);
 void    eTfInstrumentNoteOn(eTfInstrument &instr, eS32 note, eS32 velocity);
 eBool   eTfInstrumentNoteOff(eTfInstrument &instr, eS32 note);
@@ -876,5 +859,6 @@ void    eTfPlayerUnloadSong(eTfPlayer &player);
 void    eTfPlayerProcess(eTfPlayer &player, const eU8 **output);
 void    eTfPlayerStart(eTfPlayer &player, eF32 time);
 void    eTfPlayerStop(eTfPlayer &player);
+
 
 #endif

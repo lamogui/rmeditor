@@ -4,8 +4,6 @@ varying vec2 coords;
 uniform sampler2D notes_velocity;
 
 
-
-
 void main()
 {
 

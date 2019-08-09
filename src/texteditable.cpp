@@ -60,6 +60,6 @@ bool TextEditable::save(const QString& text)
 
 bool TextEditable::save()
 {
-  return save(getText());
+  return save(text());
 }
 

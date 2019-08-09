@@ -32,10 +32,13 @@ Keyframe::Keyframe(QGraphicsObject* parent) :
   setParent(parent); // set Object parent 
 }
 
+
+#if defined(Q_OS_WIN) && defined(QT_NO_DEBUG)
 Keyframe::~Keyframe()
 {
   // QApplication::restoreOverrideCursor();
 }
+#endif
 
 void Keyframe::setRelativeFrame(qint64 newrelativeFrame)
 {
@@ -52,7 +55,7 @@ void Keyframe::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
   QGraphicsItem::mousePressEvent(event);
   
-  mousePressPos = event->scenePos();
+  m_mousePressPos = event->scenePos();
   if (shape.containsPoint(event->pos(), Qt::OddEvenFill))
   {
     mousePressRelativeFrame = getRelativeFrame();
@@ -63,21 +66,21 @@ void Keyframe::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void Keyframe::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
   QGraphicsItem::mouseMoveEvent(event);
-  if (mouseCapture)
+  if (m_mouseCapture)
     setRelativeFrame(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x());
 }
 
 void Keyframe::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
   QGraphicsItem::mouseReleaseEvent(event);
-  if (mouseCapture)
+  if (m_mouseCapture)
   {
     ASSERT_IF_UNIQUE_RECEIVER(sendUndoCommand(QUndoCommand*))
     {
       emit sendUndoCommand(new ModifyPropertyCommand(*this, "relativeFrame", mousePressRelativeFrame, (qint64)(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x())));
     }
   }
-  mouseCapture = false;
+  m_mouseCapture = false;
 }
 
 QRectF Keyframe::boundingRect() const

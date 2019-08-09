@@ -9,7 +9,7 @@ Timeline::Timeline(QObject* music):
   music(*qobject_cast<Music*>(music)),
   framerate(0)
 {
-  //setSceneRect(0,0,m->getLength()*framerate,height);
+  setSceneRect(0,0,m_music->length()*framerate,height);
 
   CONNECT_XML_SAVED_OBJECT(Timeline);
 }
@@ -32,10 +32,15 @@ void Timeline::setFramerate(double newFramerate)
 
 qint64 Timeline::currentFrame() const
 {
-  return (qint64)(getMusic().getPosition()*framerate);
+  return (qint64)(music()->getTime()*m_framerate);
 }
 
 qint64 Timeline::getLength() const
 {
-  return (qint64)(getMusic().getLength()*framerate);
+  return (qint64)(m_music->length()*m_framerate);
+}
+
+void Timeline::requestFramePosition(qint64 frame)
+{
+  m_music->setPosition(((double)frame/m_framerate) + (0.5/m_framerate));
 }

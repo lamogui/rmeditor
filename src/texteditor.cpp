@@ -7,10 +7,10 @@
 
 TextEditor::TextEditor(TextEditable& te, QWidget *parent) :
   QPlainTextEdit(parent),
-  textObject(te),
-  timer(new QTimer(this)),
-  startLineNumber(0),
-  isSaved(true)
+  m_object(&textObject),
+  m_timer(new QTimer(this)),
+  m_startLineNumber(0),
+  m_saved(true)
 {
     lineNumberArea = new LineNumberArea(this);
 
@@ -19,8 +19,8 @@ TextEditor::TextEditor(TextEditable& te, QWidget *parent) :
     connect(&textObject, SIGNAL(startLineNumberChanged(int)), this, SLOT(setStartLineNumber(int)));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-    connect(&textObject,SIGNAL(destroyed(QObject*)),this,SLOT(onDestroyTextEditable(QObject*)),Qt::DirectConnection);
-    connect(&textObject,SIGNAL(objectTextChanged(QString)),SLOT(setPlainText(QString)));
+    connect(m_object,SIGNAL(destroyed(QObject*)),this,SLOT(onDestroyObject(QObject*)),Qt::DirectConnection);
+    connect(m_object,SIGNAL(objectTextChanged(QString)),SLOT(setPlainText(QString)));
 
     updateLineNumberAreaWidth(0);
     highlightCurrentLine();
@@ -32,24 +32,24 @@ TextEditor::TextEditor(TextEditable& te, QWidget *parent) :
     setFont(font);
     setLineWrapMode(QPlainTextEdit::NoWrap);
 
-    highlighter = new Highlighter(document());
+    m_highlighter = new Highlighter(document());
 
 
 
-    timer->setSingleShot(true);
+    m_timer->setSingleShot(true);
     if (dynamic_cast<GLSLShaderCode*>(&textObject) != nullptr)
     {
-      highlighter->defineGLSLFragmentShaderRules();
-      timer->setInterval(1000);  //1 second because we want see our result as fast as possible
-      connect(timer, SIGNAL(timeout()), this, SLOT(build()));
+      m_highlighter->defineGLSLFragmentShaderRules();
+      m_timer->setInterval(1000);  //1 second because we want see our result as fast as possible
+      connect(m_timer, SIGNAL(timeout()), this, SLOT(build()));
       connect(this, SIGNAL(textChanged()), this, SLOT(resetTimer()));
     }
     else if (dynamic_cast<Project*>(&textObject) != nullptr)
     {
-      highlighter->defineXMLRule();
+      m_highlighter->defineXMLRule();
     }
 
-    this->setPlainText(textObject.getText());
+    this->setPlainText(m_object->text());
 
     setUndoRedoEnabled(true);
 }
@@ -57,32 +57,32 @@ TextEditor::TextEditor(TextEditable& te, QWidget *parent) :
 /*
 void TextEditor::refresh()
 {
-  if (object->needTextRefresh())
+  if (m_object->needTextRefresh())
   {
-    this->setPlainText(object->text());
+    this->setPlainText(m_object->text());
   }
 }*/
 
 bool TextEditor::save()
 {
   build();
-  isSaved = textObject.save();
-  if (isSaved)
+  m_saved = m_object->save();
+  if (m_saved)
   {
-    emit saved(this,isSaved);
+    emit saved(this,m_saved);
   }
-  return isSaved;
+  return m_saved;
 }
 
 bool TextEditor::build()
 {
-  return textObject.build(this->toPlainText());
+  return m_object->build(this->toPlainText());
 }
 
 int TextEditor::lineNumberAreaWidth()
 {
     int digits = 1;
-    int max = qMax(1, blockCount() + startLineNumber);
+    int max = qMax(1, blockCount() + m_startLineNumber);
     while (max >= 10) {
         max /= 10;
         ++digits;
@@ -159,7 +159,7 @@ void TextEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
-            QString number = QString::number(blockNumber + startLineNumber + 1);
+            QString number = QString::number(blockNumber + m_startLineNumber + 1);
             painter.setPen(Qt::darkGray);
             painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
                              Qt::AlignRight, number);
@@ -174,19 +174,21 @@ void TextEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 
 void TextEditor::resetTimer()
 {
-  if (timer)
+  if (m_timer)
   {
-    timer->start();
+    m_timer->start();
   }
 }
 
 void TextEditor::onTextEdited()
 {
-  if (isSaved)
+
+  if (m_saved)
   {
-    isSaved = false;
+    m_saved = false;
   }
-  emit saved(this,isSaved);
+  emit saved(this,m_saved);
+
 }
 
 void TextEditor::onDestroyTextEditable(QObject* obj)
@@ -197,7 +199,7 @@ void TextEditor::onDestroyTextEditable(QObject* obj)
 
 void TextEditor::setStartLineNumber(int n)
 {
-  startLineNumber = n;
+  m_startLineNumber = n;
   updateLineNumberAreaWidth(n);
   lineNumberArea->repaint();
 }

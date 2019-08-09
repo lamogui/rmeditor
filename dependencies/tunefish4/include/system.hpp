@@ -22,10 +22,12 @@
 #ifndef SYSTEM_HPP
 #define SYSTEM_HPP
 
+#define ePROFILER_FUNC() 
 #include "types.hpp"
 #include "runtime.hpp"
 #include "simd.hpp"
 #include "random.hpp"
 #include "array.hpp"
+#include "datastream.hpp"
 
 #endif

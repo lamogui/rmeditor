@@ -45,12 +45,13 @@ public:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
   QRectF boundingRect() const override;
 
+  inline QMap<qint64, CameraKeyframe*> getCameraKeyframes() const { return m_cameraKeyframes; }
   // GL
   void initializeGL(RenderFunctionsCache& renderCache);
 
   /*
   void setCamera(qint64 relative_frame, Camera& cam) const;
-  void insertCameraKeyframe(qint64 rel_frame, const QVector3D& pos, const QQuaternion& rot);
+  void insertCameraKeyframe(qint64 rel_frame, const QVector3D& pos, const QQuaternion& rot, float fov);
   */
 
   typedef enum
@@ -73,13 +74,13 @@ signals:
 protected:
   void renderImages();
 
-  void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-  void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-  void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override; 
+  virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
+  virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+  virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 
-  void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
-  void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
-  void 	hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+  virtual void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+  virtual void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
+  virtual void 	hoverMoveEvent(QGraphicsSceneHoverEvent *event);
 
   bool isInsideRightExtend(QPointF rel_pos, qreal scale) const;
   bool isInsideLeftExtend(QPointF rel_pos, qreal scale) const;

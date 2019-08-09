@@ -1,23 +1,16 @@
-/*
- ---------------------------------------------------------------------
- Tunefish 4  -  http://tunefish-synth.com
- ---------------------------------------------------------------------
- This file is part of Tunefish.
-
- Tunefish is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- Tunefish is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with Tunefish.  If not, see <http://www.gnu.org/licenses/>.
- ---------------------------------------------------------------------
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *   This file is part of
+ *       ______        _                             __ __
+ *      / ____/____   (_)____ _ ____ ___   ____ _   / // /
+ *     / __/  / __ \ / // __ `// __ `__ \ / __ `/  / // /_
+ *    / /___ / / / // // /_/ // / / / / // /_/ /  /__  __/
+ *   /_____//_/ /_//_/ \__, //_/ /_/ /_/ \__,_/     /_/.   
+ *                    /____/                              
+ *
+ *   Copyright © 2003-2012 Brain Control, all rights reserved.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef ARRAY_HPP
 #define ARRAY_HPP
@@ -40,7 +33,6 @@ void eArrayRemoveAt(ePtrArray *a, eU32 index);
 void eArrayRemoveSwap(ePtrArray *a, eU32 index);
 eInt eArrayFind(const ePtrArray *a, const ePtr data);
 eBool eArrayEqual(const ePtrArray *a0, const ePtrArray *a1);
-void eArrayReverse(ePtrArray *a);
 
 // performs insertion sort. not really fast,
 // but already a lot faster than bubble sort
@@ -48,49 +40,6 @@ void eArrayReverse(ePtrArray *a);
 // to get correct.
 template<class T> void eSort(T *data, eU32 count, eBool (*predicate)(const T &a, const T &b))
 {
-
-
-//  quickSort
-//
-//  This public-domain C implementation by Darel Rex Finley.
-//
-//  * This function assumes it is called with valid parameters.
-//
-//  * Example calls:
-//    quickSort(&myArray[0],5); // sorts elements 0, 1, 2, 3, and 4
-//    quickSort(&myArray[3],5); // sorts elements 3, 4, 5, 6, and 7
-
-
-  #define  QUICKSORT_MAX_LEVELS  300
-  T piv;
-  eS32 beg[QUICKSORT_MAX_LEVELS], end[QUICKSORT_MAX_LEVELS], i=0, L, R, swap;
-
-  eRandom Rand;
-  beg[0]=0; end[0]=count;
-  while (i>=0) {
-	eASSERT(i < QUICKSORT_MAX_LEVELS);
-    L=beg[i]; R=end[i]-1;
-    if (L<R) {
-      // original:
-      //piv=data[L];
-      // modified: pick random element and "exchange" with data[L]
-      eU32 PivIdx = Rand.NextInt(L, R);//L + Rand.nextInt() % (R - L + 1);
-      piv=data[PivIdx];
-      data[PivIdx] = data[L];
-
-      while (L<R) {
-        while (L<R && (predicate(data[R],piv))) R--; if (L<R) data[L++]=data[R];
-        while (L<R && (predicate(piv,data[L]))) L++; if (L<R) data[R--]=data[L];
-	  }
-      data[L]=piv; beg[i+1]=L+1; end[i+1]=end[i]; end[i++]=L;
-      if (end[i]-beg[i]>end[i-1]-beg[i-1]) {
-        swap=beg[i]; beg[i]=beg[i-1]; beg[i-1]=swap;
-        swap=end[i]; end[i]=end[i-1]; end[i-1]=swap;
-	  }
-	} else i--;
-  }
-
-/*
     for (eU32 j=1; j<count; j++)
     {
         const T key = data[j]; // don't use a reference here!
@@ -104,47 +53,7 @@ template<class T> void eSort(T *data, eU32 count, eBool (*predicate)(const T &a,
 
         data[i+1] = key;
     }
-*/
 }
-
-template<class T> void eMerge(T *arr0, eU32 elements0, T *arr1, eU32 elements1, T* arrFinal, eBool (*predicate)(const T &a, const T &b)) {
-	if((elements0 > 0) && (elements1 > 0)) {
-		// perform merge
-		for(;;) {
-			if(!predicate(*arr0, *arr1)) {
-				// use first
-				*arrFinal = *arr0;
-				arrFinal++;
-				elements0--;
-				if(elements0 == 0)
-					break;
-				arr0++;
-			} else {
-				// use second
-				*arrFinal = *arr1;
-				arrFinal++;
-				elements1--;
-				if(elements1 == 0)
-					break;
-				arr1++;
-			}
-		}
-	}
-	// append remaining
-	// append first
-	for(eU32 i = 0; i < elements0; i++) {
-		*arrFinal = *arr0;
-		arrFinal++;
-		arr0++;
-	}
-	// append second
-	for(eU32 i = 0; i < elements1; i++) {
-		*arrFinal = *arr1;
-		arrFinal++;
-		arr1++;
-	}
-}
-
 
 // templated dynamic array. this class is intro-safe,
 // because all array functions which are duplicated
@@ -205,20 +114,9 @@ public:
         eArrayFree((ePtrArray *)this);
     }
 
-    eFORCEINLINE void reverse()
-    {
-        eArrayReverse((ePtrArray *)this);
-    }
-
     eFORCEINLINE T & append(const T &data)
     {
         *(T *)eArrayAppend((ePtrArray *)this) = data;
-        return last();
-    }
-
-    eFORCEINLINE T & appendNew()
-    {
-        *(T *)eArrayAppend((ePtrArray *)this) = T();
         return last();
     }
 
@@ -294,11 +192,6 @@ public:
         return m_size;
     }
 
-    eFORCEINLINE eU32 sizeInBytes() const
-    {
-        return m_size*m_typeSize;
-    }
-
     eFORCEINLINE eU32 capacity() const
     {
         return m_capacity;
@@ -331,12 +224,6 @@ public:
     eFORCEINLINE void sort(eBool (*predicate)(const T &a, const T &b))
     {
         eSort(m_data, m_size, predicate);
-    }
-
-	eFORCEINLINE void merge(eArray<T>& arr0, eArray<T>& arr1, eBool (*predicate)(const T &a, const T &b))
-    {
-		this->resize(arr0.size() + arr1.size());
-		eMerge(arr0.m_data, arr0.m_size, arr1.m_data, arr1.m_size, m_data, predicate);
     }
 
     eFORCEINLINE eArray & operator = (const eArray &a)
@@ -376,4 +263,4 @@ public:
     eU32    m_typeSize;
 };
 
-#endif
+#endif // ARRAY_HPP

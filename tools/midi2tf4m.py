@@ -6,7 +6,7 @@ from os import listdir
 from os.path import isfile, isdir, join
 
 
-ROW_PER_BEAT = 32;
+ROW_PER_BEAT = 96;
 TF_PARAM_COUNT = 112;
 DEFAULT_TEMPO = 140;
 
@@ -23,12 +23,10 @@ def writeU8(f,n):
 
 
 if len(sys.argv) < 3:
-    print ("Usage: " + sys.argv[0] + " <midifile> <tf4mfile> <program_track0.txt> <program_track1.txt> ...")
+    print "Usage: {0} <midifile> <tf4mfile> <program_track0.txt> <program_track1.txt> ...".format(sys.argv[0])
     sys.exit(2)
 
 def AssociatedProgramFilename(name, path):
-    if (": " in name): #contains
-       name = name.split(': ', 1)[1];
     files = [f for f in listdir(path) if isfile(join(path, f))];
     for programfilename in files:
         programfile = open(join(path,programfilename),'r');
@@ -42,7 +40,6 @@ def AssociatedProgramFilename(name, path):
 
         except IndexError as e:
             print("Error file: " + programfilename + " is invalid (" + str(e) + ")");
-
     return None;
 
 midifilename = sys.argv[1]
@@ -79,7 +76,7 @@ for i,track in enumerate(midifile):
             if (event.tick > 0):
                 print("Error: the tempo is in the middle of the track is not supported");
                 sys.exit(7);
-            tempo = event.bpm;
+            tempo = bpm;
             tempo_set_count = tempo_set_count + 1;
         elif (event.name == 'Note On'):
             track_have_notes = True;
@@ -120,7 +117,7 @@ print ("secs_per_row: " + str(secs_per_row));
 
 
 if (midifile.format != 1):
-    print("Error midifile format is not format 1 please use midifile format 1 (separated tracks)");
+    print "Error midifile format is not format 1 please use midifile format 1 (separated tracks)";
     sys.exit(3);
 
 programfiles = [];

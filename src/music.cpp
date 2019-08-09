@@ -18,13 +18,13 @@
 
 Music::Music(QObject* parent):
   MediaFile(parent),
-  audio(),
-  playing(false),
-  mainTimeline(nullptr)
+  m_audio(),
+  m_length(length),
+  m_playing(false)
 {
   /* 
   // FIXME : move this elsewhere
-  if (audio.getDeviceCount() < 1)
+  if (m_audio.getDeviceCount() < 1)
   {
     emit error("[" + filename + "] error: no audio device found");
   }
@@ -41,13 +41,18 @@ int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int n
 
   jassert(userData && outputBuffer);
   Music* music = (Music*) userData;
-  if (music->playing)
+  if (music->m_playing)
   {
     music->processAudio(outputBuffer,nBufferFrames,streamTime,status);
+    //for (int i = 0; i < nBufferFrames; i++)
+    //{
+    //    reinterpret_cast<short*>(outputBuffer)[i*2] = sin(static_cast<float>(i)/static_cast<float>(nBufferFrames)) * 16000;
+    //    reinterpret_cast<short*>(outputBuffer)[i*2+1] = cos(static_cast<float>(i)/static_cast<float>(nBufferFrames)) * 16000;
+    //}
   }
   else
   {
-    memset(outputBuffer,0,nBufferFrames*music->bytesPerFrame);
+    memset(outputBuffer,0,nBufferFrames*music->m_bytesPerFrame);
   }
   if (status & RTAUDIO_OUTPUT_UNDERFLOW)
     Log::Warning("[RtAudio] output buffer underflow !"); // TODO : make an Log::ASyncWarning Log::ASyncError etc calls 
