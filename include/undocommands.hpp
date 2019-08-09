@@ -145,24 +145,19 @@ private:
   typedef QUndoCommand BaseClass;
 };
 
-#define UNDOCOMMANDS_RECEIVER_OBJECT \
-  public: \
-    QUndoStack& getUndoStack() { return undoStack; } \
-  public slots: \
-    void receiveUndoCommand(QUndoCommand* cmd) \
-    { \
-      undoStack.push(cmd); \
-    } \
-  protected: \
-    QUndoStack undoStack; \
-  private:
-
-#define ASSERT_IF_UNIQUE_RECEIVER(S) \
-  jassert(receivers(SIGNAL(S)) == 1); \
-  if (receivers(SIGNAL(S)) == 1)
+//#define ASSERT_IF_UNIQUE_RECEIVER(S) \
+//  jassert(receivers(SIGNAL(S)) == 1); \
+//  if (receivers(SIGNAL(S)) == 1)
 
 // Utils
-QObject* GetUndoReceiver(QObject& context);
-void ConnectToUndoReceiver(QObject& object);
+namespace UndoStack
+{
+  QObject* getOwner(QObject& context);
+  QUndoStack* get(QObject& context);
+  bool sendUndoCommand(QObject& context, QUndoCommand* undoCommand);
+  void assertSendUndoCommand(QObject& context, QUndoCommand* undoCommand);
+
+}; /* namespace UndoStack */
+
 
 #endif // !UNDOCOMMANDS_HPP

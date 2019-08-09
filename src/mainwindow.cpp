@@ -12,6 +12,7 @@
 #include "project.hpp"
 #include "render.hpp"   // for connect
 #include "renderer.hpp" // for connect
+#include "timeline.hpp" // for QMetaType (so connect I imagine ?)
 #include "timelinewidget.hpp"
 #include "timelinedockwidget.hpp"
 
@@ -108,8 +109,7 @@ void MainWindow::newProject()
 #include "scene.hpp"
 
 void MainWindow::open()
-{
-  
+{ 
   QString f = QFileDialog::getOpenFileName(this, tr("Open project file"), QString(), "*.xml");
   if (!f.isEmpty())
   {
@@ -120,25 +120,10 @@ void MainWindow::open()
     }
     else
     {
-      if (project)
-      {
-        delete project;
-      }
+      resetProject();
       project = new Project(this);
       project->setPath(QFileInfo(f));
-      ui->renderWidget->makeCurrent();
-      project->initializeGL(ui->renderWidget->getRenderFunctions());
-      ui->renderWidget->doneCurrent();
-
-      editor->appendMediaFile(project);
-      StringMap<MediaFile*>::const_iterator it; 
-      for (it = project->getMediaFiles().constBegin(); it != project->getMediaFiles().constEnd(); ++it)
-      {
-        editor->appendMediaFile(it.value());
-      }
-
-      connect(project, &Project::mediaFileInserted, editor, &MediaFilesEditorWidget::appendMediaFile);
-
+      initializeProject();
     }
   }
   
@@ -150,18 +135,33 @@ void MainWindow::saveAllShaders()
 }
 
 
-void MainWindow::connectProject()
+void MainWindow::resetProject()
 {
-  connect(project,SIGNAL(appendTextEditable(TextEditable*)),editor,SLOT(appendTextEditable(TextEditable*)));
-  connect(project,SIGNAL(demoTimelineChanged(Timeline*)),this,SLOT(setTimeline(Timeline*)));
-  timelineWidget->setProject(project);
+  if (project)
+  {
+    delete project;
+  }
 }
 
-void MainWindow::setTimeline(Timeline *t)
+void MainWindow::initializeProject()
 {
-  (void)t; // oh !
-  //jassert(t == project->getDemoTimeline() || !t); // Don't support another case yet 
-  //timelineWidget->setProject(project);
+  ui->renderWidget->makeCurrent();
+  project->initializeGL(ui->renderWidget->getRenderFunctions());
+  ui->renderWidget->doneCurrent();
+
+  editor->appendMediaFile(project);
+  StringMap<MediaFile*>::const_iterator it;
+  for (it = project->getMediaFiles().constBegin(); it != project->getMediaFiles().constEnd(); ++it)
+  {
+    editor->appendMediaFile(it.value());
+  }
+
+  Music* music = project->getMusic();
+  Timeline* timeline = music ? music->getMainTimeline() : nullptr;
+  timelineWidget->setTargetTimeline(timeline);
+
+  connect(project, &Project::mediaFileInserted, editor, &MediaFilesEditorWidget::appendMediaFile);
+  connect(project, &Project::mainTimelineChanged, timelineWidget, &TimelineDockWidget::setTargetTimeline);
 }
 
 void MainWindow::insertCameraKeyframe()

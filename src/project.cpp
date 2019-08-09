@@ -6,11 +6,30 @@
 #include "renderfunctionscache.hpp"
 #include "jassert.hpp"
 
+
 Project::Project(QObject* parent) :
   TextEditable(parent),
   music(nullptr)
 {
 
+}
+
+Project* Project::get(const QObject& context)
+{
+  QObject* parent = context.parent();
+  QGraphicsItem* parentItem = context.metaObject()->inherits(&QGraphicsObject::staticMetaObject) ? ((QGraphicsObject&)context).parentItem() : nullptr;
+  while (parent != nullptr || parentItem != nullptr)
+  {
+    Project* p = parent ? qobject_cast<Project*>(parent) : qobject_cast<Project*>(parent);
+    if (p)
+    {
+      return p;
+    }
+    parent = p->parent();
+    parentItem 
+  }
+  jassertfalse; //probably missing to attach properly a parent !
+  return nullptr;
 }
 
 void Project::initializeGL(RenderFunctionsCache& gl)
@@ -29,10 +48,12 @@ void Project::setMusic(Music* newMusic)
   {
     Music* oldMusic = music;
     music = newMusic;
-    if (oldMusic)
-      oldMusic->setParent(nullptr);
+
     if (music)
+    {
       music->setParent(this);
+      emit mainTimelineChanged(music->getMainTimeline());
+    }
     
     QVariant oldValue = QVariant::fromValue(oldMusic);
     QVariant newValue = QVariant::fromValue(newMusic);

@@ -1,5 +1,6 @@
 
 #include "undocommands.hpp"
+#include "project.hpp"
 
 /*
 ** ModifyPropertyCommand
@@ -40,26 +41,40 @@ void ModifyPropertyCommand::internalDo(const QVariant& value)
 /*
 ** Utils
 */
-QObject* GetUndoReceiver(QObject& context)
+
+namespace UndoStack
 {
-  QObject* object = &context; 
-  while (object)
+  QObject* getOwner(QObject& context)
   {
-    const QMetaObject* meta = object->metaObject();
-    if (meta)
-    {
-      if (meta->indexOfSlot("receiveUndoCommand(QUndoCommand*)"))
-        return object;
-    }
-    object = object->parent();
+    return Project::get(context);
   }
-  return nullptr;
-}
 
-void ConnectToUndoReceiver(QObject& object)
-{
-  QObject* receiver = GetUndoReceiver(object);
-  if (receiver)
-    QObject::connect(&object, SIGNAL(sendUndoCommand(QUndoCommand*)), receiver, SLOT(receiveUndoCommand(QUndoCommand*)));
-}
+  QUndoStack* get(QObject& context)
+  {
+    Project* project = (Project*)getOwner(context);
+    if (project)
+    {
+      return &project->getUndoStack();
+    }
+    return nullptr;
+  }
 
+  bool sendUndoCommand(QObject& context, QUndoCommand* undoCommand)
+  {
+    QUndoStack* stack = get(context);
+    if (!stack)
+    {
+      return false;
+    }
+    stack->push(undoCommand);
+    return true;
+  }
+
+
+  void assertSendUndoCommand(QObject& context, QUndoCommand* undoCommand)
+  {
+    jassert(undoCommand);
+    bool res = sendUndoCommand(context, undoCommand);
+    jassert(res);
+  }
+}

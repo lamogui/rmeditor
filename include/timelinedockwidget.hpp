@@ -4,8 +4,9 @@
 #include <QDockWidget>
 
 class Camera;
-class Project;
+class Music;
 class Renderer;
+class Timeline;
 class TimelineWidget;
 
 
@@ -22,7 +23,8 @@ public:
   virtual ~TimelineDockWidget();
 
 
-  void setProject(Project* project);
+  void setTargetTimeline(Timeline* timeline);
+  Timeline* getTargetTimeline() const;
   TimelineWidget* getTimelineWidget() const;
 
 public slots:
@@ -43,8 +45,6 @@ protected slots:
 
 private:
     Ui::TimelineDockWidget *ui;
-
-    Project* project;
 };
 
 #endif

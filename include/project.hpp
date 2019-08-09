@@ -9,13 +9,15 @@
 
 class Music;
 class RaymarchingScene;
+class Timeline;
 class Project : public TextEditable
 {
-  UNDOCOMMANDS_RECEIVER_OBJECT
   Q_OBJECT
 
 public:
   Project(QObject* parent = nullptr);
+
+  static Project* get(const QObject& context);
 
   // GL 
   void initializeGL(RenderFunctionsCache& gl) override;
@@ -26,6 +28,7 @@ public:
 
   //Accessors
   QDir getDir() const;
+  QUndoStack& getUndoStack() { return undoStack; }
 
   //Utils
   void reset(); // reset project without notify 
@@ -36,6 +39,7 @@ public slots:
 
 signals:
   void mediaFileInserted(MediaFile* mediaFile); // attached target should connect to MediaFile destruction Qt style
+  void mainTimelineChanged(Timeline* newTimeline);
 
 private:
   DECLARE_PROPERTY(Music*, music, Music)
@@ -43,6 +47,7 @@ private:
   QDomDocument document;
 
   QString xmlContent;
+  QUndoStack undoStack; 
 
 private:
   typedef TextEditable BaseClass;
