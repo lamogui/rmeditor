@@ -25,10 +25,9 @@ class TimelineTrack : public QGraphicsObject
 signals : // BUG : Qt doesn't support signals declarations inside macros 
   void propertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue);
   void xmlPropertyChanged(QDomElement node, QString propertyName, QVariant newValue);
-  void sendUndoCommand(QUndoCommand*);
-
+  
 public:
-  TimelineTrack(QGraphicsObject* parent = nullptr); 
+  Q_INVOKABLE TimelineTrack(QGraphicsObject* parent = nullptr); 
   
   // GL
   void initializeGL(RenderFunctionsCache& cache);
@@ -41,7 +40,8 @@ public:
   float getHeight() const { return height; }
 
   // GraphicsItem
-  QRectF boundingRect() const;
+  QRectF boundingRect() const override;
+  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 signals:
   void requestFramePosition(qint64 position);
@@ -52,6 +52,11 @@ protected slots:
 
 protected:
   bool makeSequenceFit(Sequence& sequence);
+
+  //Graphics
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+
+  QPointF mousePressPos;
 
 private:
   // Properties

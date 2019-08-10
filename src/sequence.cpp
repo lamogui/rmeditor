@@ -236,28 +236,21 @@ void Sequence::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
   qint64 delta = event->scenePos().x() - mousePressPos.x();
   if (m_currentAction==Move)
   {
-    ASSERT_IF_UNIQUE_RECEIVER(sendUndoCommand(QUndoCommand*))
-    {
-      emit sendUndoCommand(new ModifyPropertyCommand(*this, "startFrame", mousePressStartFrame, mousePressStartFrame + delta));
-    }
+    UndoStack::assertSendUndoCommand(*this, new ModifyPropertyCommand(*this, "startFrame", mousePressStartFrame, mousePressStartFrame + delta));
   }
   else if (m_currentAction==RightExtend)
   {
-    ASSERT_IF_UNIQUE_RECEIVER(sendUndoCommand(QUndoCommand*))
-    {
-      qint64 v = mousePressLength + delta;
-      emit sendUndoCommand(new ModifyPropertyCommand(*this, "length", mousePressLength, v < 0 ? 0 : v));
-    }
+    qint64 v = mousePressStartFrame - delta;
+    UndoStack::assertSendUndoCommand(*this, new ModifyPropertyCommand(*this, "length", mousePressLength, v < 0 ? 0 : v));
   }
   else if (currentAction == LeftExtend)
   {
-    ASSERT_IF_UNIQUE_RECEIVER(sendUndoCommand(QUndoCommand*))
     {
       qint64 v = mousePressStartFrame - delta;
       QUndoCommand* cmd = new QUndoCommand("Extend sequence");
       QUndoCommand* startFrameCmd = new ModifyPropertyCommand(*this, "startFrame", mousePressStartFrame, mousePressStartFrame + delta, cmd);
       QUndoCommand* lengthCmd = new ModifyPropertyCommand(*this, "length", mousePressLength, v < 0 ? 0 : v, cmd);
-      emit sendUndoCommand(cmd);
+      UndoStack::assertSendUndoCommand(*this, cmd);
     }
   }
   QApplication::restoreOverrideCursor();

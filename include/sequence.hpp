@@ -21,10 +21,9 @@ class Sequence : public QGraphicsObject
 signals : // BUG : Qt doesn't support signals declarations inside macros 
   void propertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue);
   void xmlPropertyChanged(QDomElement node, QString propertyName, QVariant newValue);
-  void sendUndoCommand(QUndoCommand*);
-
+  
 public:
-  Sequence(QGraphicsObject* parent = nullptr);
+  Q_INVOKABLE Sequence(QGraphicsObject* parent = nullptr);
 
   // Utils 
   inline qint64 getEndFrame() const { return getStartFrame() + getLength(); }

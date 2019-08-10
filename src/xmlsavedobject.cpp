@@ -73,6 +73,30 @@ static bool LoadDoubleFromXmlNode(double& target, const QDomElement& node, QStri
   return true;
 }
 
+static bool LoadIntFromXmlNode(int& target, const QDomElement& node, QString& failureReason)
+{
+  QString str;
+  if (!LoadQStringFromXmlNode(str, node, failureReason))
+    return false;
+
+  bool ok = false;
+  target = str.toInt(&ok);
+  if (!ok)
+  {
+    failureReason = "line " + QString::number(node.lineNumber()) + "(" + node.nodeName() + ") is not a int number (got " + str + ")";
+    return false;
+  }
+  return true;
+}
+
+static bool LoadIntFromXmlNode(QVariant& target, const QDomElement& node, QString& failureReason)
+{
+  int value;
+  bool success = LoadIntFromXmlNode(value, node, failureReason);
+  target = value;
+  return success;
+}
+
 static bool LoadQVector3DFromXmlNode(QVector3D& target, const QDomElement& node, QString& failureReason)
 {
   double x = 0.0, y = 0.0, z = 0.0;
@@ -144,6 +168,11 @@ static QObject* InstantiateOwnedQObjectFromXmlNode(const QMetaObject& targetClas
   if (!newInstance)
   {
     failureReason = "line " + QString::number(element.lineNumber()) + " (" + node.nodeName() + ") could not instantiate new object of class " + element.tagName();
+    failureReason += "\nList of " + QString::number(realTargetClass->constructorCount()) + " available constructors: ";
+    for (int c = 0; c < realTargetClass->constructorCount(); ++c)
+    {
+      failureReason += realTargetClass->constructor(c).methodSignature().toStdString().c_str();
+    }
     jassertfalse; // make sure your constructor is Q_INVOKABLE
     return nullptr;
   }
@@ -310,8 +339,14 @@ bool LoadObjectFromXmlNode(QObject& object, const QDomNode& node, QString& failu
           case QVariant::Quaternion:
             success = LoadQQuaternionFromXmlNode(value, element, failureReason);
             break;
+          case QVariant::Int:
+          case QVariant::UInt:
+          case QVariant::LongLong:
+          case QVariant::ULongLong:
+            success = LoadIntFromXmlNode(value, element, failureReason);
+            break;
           default:
-            failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the property type of " + variableName + " is unsupported yet";
+            failureReason = "line " + QString::number(element.lineNumber()) + " (" + element.nodeName() + ") the property type (" + QString::number(variable.type()) + ") of " + variableName + " is unsupported yet";
             jassertfalse; // TODO 
             return false;
         }

@@ -17,7 +17,6 @@ class Keyframe : public QGraphicsObject
   signals:// BUG : Qt doesn't support signals declarations inside macros 
     void propertyChanged(QObject* owner, QString propertyName, QVariant oldValue, QVariant newValue);
     void xmlPropertyChanged(QDomElement node, QString propertyName, QVariant newValue);
-    void sendUndoCommand(QUndoCommand*);
   
   public:
     Keyframe(QGraphicsObject* parent = nullptr);

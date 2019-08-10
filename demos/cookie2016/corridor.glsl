@@ -8,6 +8,7 @@ bool lightOn = false;
 
 void globals()
 {
+
 	if (track_time > 13.)
 		lightOn = true;
 }

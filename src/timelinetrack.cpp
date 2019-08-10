@@ -1,6 +1,11 @@
+
 #include "timelinetrack.hpp"
+#include "project.hpp"
 #include "sequence.hpp"
 #include "timeline.hpp"
+
+#include <QGraphicsSceneContextMenuEvent>
+#include <QMenu>
 
 TimelineTrack::TimelineTrack(QGraphicsObject* parent) :
   QGraphicsObject(parent),
@@ -42,7 +47,12 @@ quint64 TimelineTrack::getLength() const
 
 QRectF TimelineTrack::boundingRect() const
 {
-  return QRectF(pos(), QSizeF(getHeight(), getLength()));
+  return QRectF(pos(), QSizeF(getLength(), getHeight()));
+}
+
+void TimelineTrack::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+  //nothing to do 
 }
 
 bool TimelineTrack::makeSequenceFit(Sequence& sequence)
@@ -64,6 +74,29 @@ bool TimelineTrack::makeSequenceFit(Sequence& sequence)
     overlapedSequence = isInsideSequence(sequence.getEndFrame() - 1);
   }
   return shouldModifyProperties;
+}
+
+void TimelineTrack::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+  mousePressPos = event->scenePos();
+
+  QMenu contextMenu;
+  QMenu addSequenceMenu;
+  addSequenceMenu.setTitle(tr("Add sequence"));
+  
+  Project* p = Project::get(*this);
+
+  /*QMap<QString, Scene*> scenes = project->rayMarchScenes();
+  QMap<QString, Scene*>::const_iterator it = scenes.constBegin();
+  for (; it != scenes.constEnd(); it++)
+  {
+    QAction* action = new QAction(it.key(), &addSequenceMenu);
+    addSequenceMenu.addAction(action);
+  }
+
+  connect(&addSequenceMenu, SIGNAL(triggered(QAction*)), this, SLOT(addSequenceAction(QAction*)));
+  contextMenu.addMenu(&addSequenceMenu);
+  contextMenu.exec(event->screenPos()); */
 }
 
 void TimelineTrack::insertSequence(Sequence* sequence)

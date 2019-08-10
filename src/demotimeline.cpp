@@ -28,7 +28,7 @@ DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogW
 }
 */
 
-DemoTimeline::DemoTimeline(QObject* parentMusic) :
+DemoTimeline::DemoTimeline(Music* parentMusic) :
   Timeline(parentMusic),
   renderCache(nullptr)
 {
@@ -104,11 +104,12 @@ void DemoTimeline::updateCamera(qint64 frame, Camera &cam)
   }
 }
 
+*/
 void DemoTimeline::updateTime()
 {
-  updateCamera();
+  //updateCamera();
 }
-
+/*
 void DemoTimeline::insertCameraKeyframe(Camera *cam)
 {
   if (cam)

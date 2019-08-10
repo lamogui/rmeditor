@@ -33,7 +33,7 @@ class DemoTimeline : public Timeline
   Q_OBJECT
 
 public:
-  DemoTimeline(QObject* parentMusic);
+  Q_INVOKABLE DemoTimeline(Music* parentMusic = nullptr);
   virtual ~DemoTimeline();
 
   void initializeGL(RenderFunctionsCache& cache);
@@ -47,9 +47,9 @@ public:
   unsigned int sequenceID(qint64 frame) const;
 
   inline Render* getRender() override { return render; }
-
+  */
   virtual void updateTime();
-  
+  /*
 public slots:
   void updateCamera(qint64 frame, Camera& cam);
   inline void updateCamera(Camera& cam) { updateCamera(currentFrame(),cam);}
@@ -74,8 +74,7 @@ protected slots:
   void trackRequestFramePosition(qint64 position);
   /*
 protected:
-  virtual void keyReleaseEvent(QKeyEvent *keyEvent);
-  virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
+  void keyReleaseEvent(QKeyEvent *keyEvent) override;
 
   void load();
   bool correctStartFrame(Sequence* seq); //seq must not be in m_sequences !

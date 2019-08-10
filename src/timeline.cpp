@@ -4,10 +4,9 @@
 #include "logwidget.hpp"
 
 
-Timeline::Timeline(QObject* music):
+Timeline::Timeline(Music* music):
   QGraphicsScene(music),
-  music(*qobject_cast<Music*>(music)),
-  framerate(0)
+  framerate(60.0)
 {
   setSceneRect(0,0,m_music->length()*framerate,height);
 

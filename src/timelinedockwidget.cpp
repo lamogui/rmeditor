@@ -26,13 +26,12 @@ TimelineWidget* TimelineDockWidget::getTimelineWidget() const
   return ui->timelineView;
 }
 
-void TimelineDockWidget::setProject(Project *project)
+void TimelineDockWidget::setTargetTimeline(Timeline* timeline)
 {
-  m_project = project;
-  if (m_project)
+  DemoTimeline* demoTimeline = qobject_cast<DemoTimeline*>(timeline);
+  if (demoTimeline)
   {
-    //getTimelineWidget()->setTimeline(this->project->getDemoTimeline());
-    jassertfalse;
+    getTimelineWidget()->setTimeline(demoTimeline);
     this->setEnabled(true);
   }
   else
@@ -42,11 +41,30 @@ void TimelineDockWidget::setProject(Project *project)
   }
 }
 
+Timeline* TimelineDockWidget::getTargetTimeline() const
+{
+  TimelineWidget* widget = getTimelineWidget();
+  return widget ? widget->getTimeline() : nullptr;
+}
+
 void TimelineDockWidget::on_playPauseButton_clicked(bool)
 {
-  if (ui->timelineView->timeline())
+  Timeline* timeline = getTargetTimeline();
+  if (timeline)
   {
-    emitCurrentRendererChanged(ui->timelineView->getTimeline()->getRenderer());
+    if (timeline->getRenderer())
+    {
+      emitCurrentRendererChanged(timeline->getRenderer());
+    }
+    Music& music = timeline->getMusic();
+    if (music.isPlaying())
+    {
+      music.pause();
+    }
+    else
+    {
+      music.play();
+    }
   }
   if (m_project->music()->playing())
   {
@@ -60,21 +78,30 @@ void TimelineDockWidget::on_playPauseButton_clicked(bool)
 
 void TimelineDockWidget::on_rewindButton_clicked(bool)
 {
-  if (ui->timelineView->timeline())
+  Timeline* timeline = getTargetTimeline();
+  if (timeline)
   {
-    emitCurrentRendererChanged(ui->timelineView->getTimeline()->getRenderer());
+    if (timeline->getRenderer())
+      emitCurrentRendererChanged(timeline->getRenderer());
+    timeline->getMusic().setPosition(0);
   }
-  m_project->music()->setPosition(0);
+  else
+    jassertfalse; //button should be locked
+
 }
 
 void TimelineDockWidget::on_stopButton_clicked(bool)
 {
-  if (ui->timelineView->timeline())
+  Timeline* timeline = getTargetTimeline();
+  if (timeline)
   {
-    emitCurrentRendererChanged(ui->timelineView->getTimeline()->getRenderer());
+    if (timeline->getRenderer())
+      emitCurrentRendererChanged(ui->timelineView->getTimeline()->getRenderer());
+
+    Music& music = timeline->getMusic();
+    music.pause();
+    music.setPosition(0);
   }
-  m_project->music()->pause();
-  m_project->music()->setPosition(0);
 }
 
 void TimelineDockWidget::emitCurrentRendererChanged(const QWeakPointer<Renderer>& renderer)
@@ -84,9 +111,10 @@ void TimelineDockWidget::emitCurrentRendererChanged(const QWeakPointer<Renderer>
 
 void TimelineDockWidget::focusInEvent(QFocusEvent* event)
 {
-  if (ui->timelineView->timeline())
+  Timeline* timeline = getTargetTimeline();
+  if (timeline && timeline->getRenderer())
   {
-    emitCurrentRendererChanged(ui->timelineView->getTimeline()->getRenderer());
+    emitCurrentRendererChanged(timeline->getRenderer());
   }
 }
 
@@ -96,6 +124,6 @@ void TimelineDockWidget::insertCameraKeyframe(Camera *cam)
   if (t)
   {
 //    t->insertCameraKeyframe(cam);
-    jassertfalse;
+    jassertfalse; // todo
   }
 }

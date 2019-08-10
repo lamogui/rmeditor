@@ -29,7 +29,6 @@ public slots:
     void newProject();
     void open();
     void saveAllShaders();
-    void setTimeline(Timeline* t);
     void insertCameraKeyframe();
 
     void exportAsVideo();
@@ -42,7 +41,8 @@ public slots:
 
 
 private:
-    void connectProject();
+    void resetProject();
+    void initializeProject();
 
 
     Project* m_project;

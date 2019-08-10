@@ -24,11 +24,11 @@ signals : // BUG : Qt doesn't support signals declarations inside macros
   void xmlPropertyChanged(QDomElement node, QString propertyName, QVariant newValue); 
 
 public:
-  Timeline(QObject* parentMusic); // The music is the parent of the timeline, if it's doesn't exists anymore the timeline should be destroyed ! 
+  Timeline(Music* parentMusic); // The music is the parent of the timeline, if it's doesn't exists anymore the timeline should be destroyed ! 
 
-  inline double framerate() const { return m_framerate; }
-  inline Music* music() const { return m_music; }
-  qint64 length() const; //in frames
+  // For now this should never be null
+  const Music& getMusic() const { return *qobject_cast<Music*>(parent()); }
+  Music& getMusic() { return *qobject_cast<Music*>(parent()); }
 
   // frame timings shortcuts
   qint64 getLength() const; 
