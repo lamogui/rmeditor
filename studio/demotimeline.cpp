@@ -28,8 +28,8 @@ DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogW
 }
 */
 
-DemoTimeline::DemoTimeline(Music* parentMusic) :
-  Timeline(parentMusic),
+DemoTimeline::DemoTimeline(Music* _parentMusic) :
+	Timeline(_parentMusic),
   renderCache(nullptr)
 {
 }

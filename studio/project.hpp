@@ -20,7 +20,7 @@ public:
   static Project* get(const QObject& context);
 
   // GL 
-  void initializeGL(RenderFunctionsCache& gl) override;
+	void initializeGL(RenderFunctionsCache& _gl) override;
 
   // TextEditable 
   const QString& getText() const override;

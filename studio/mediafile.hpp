@@ -6,8 +6,6 @@
 #include "camera.hpp" // QSharedPointer fail !
 #include "renderer.hpp"
 #include "renderfunctionscache.hpp"
-#include "xmlsavedobject.hpp"
-
 
 /*
 ** MediaFile : Any media file, it' could be rendered or not and could have a fixed length or not...
@@ -17,16 +15,13 @@ class MediaFile : public QObject
   Q_OBJECT
 
 public:
-  MediaFile(QObject* parent = nullptr);
-
-  // OpenGL
-  virtual void initializeGL(RenderFunctionsCache& gl);
+	MediaFile(QObject* parent = nullptr);
 
   // Renderer
-  virtual bool canBeRendered() const { return false; }
-  virtual Renderer* createRenderer() const { return nullptr; }
-  QWeakPointer<Renderer> getDefaultRenderer() { return defaultRenderer; }
-  QWeakPointer<Camera> getDefaultCamera() { return defaultCamera; }
+	void initializeGL(RenderFunctionsCache& _gl); // Still needed ? git rid of this shit no ?
+	Renderer* m_previewRenderer;
+
+	inline const QFileInfo& getPath() const { return m_path; }
 
 public slots:
   virtual bool load() = 0; // FIXME : one day make a reload slot which should call "reset" before load and put this as protected load virtual 
@@ -34,15 +29,8 @@ public slots:
 signals: 
   void pathChanged(QFileInfo); // Meta compiler doesn't support signals declared inside macros !
 
-protected:
-  QSharedPointer<Renderer> defaultRenderer; /* allow to see the media even without a timeline */
-  QSharedPointer<Camera> defaultCamera;
-
-  // Graphics
-  RenderFunctionsCache* renderCache;
-
 private:
-  DECLARE_PROPERTY_REFERENCE_NOTIFY(QFileInfo, path, Path)
+	QFileInfo m_path;
 };
 
 #endif // !MEDIAFILE_HPP

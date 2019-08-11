@@ -19,6 +19,7 @@ namespace VertexAttributesIndex
 
 };
 
-extern QOpenGLFunctions_4_4_Core g_renderFunctions;
+typedef QOpenGLFunctions_4_4_Core RenderFunctionsCache;
+extern RenderFunctionsCache g_renderFunctions;
 
 #endif //! RMEDITOR_RENDERFUNCTIONSCACHE_HPP

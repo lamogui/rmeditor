@@ -92,7 +92,7 @@ protected:
   */
 private:
   // properties
-  DECLARE_PROPERTY_CONTAINER(QVector, TimelineTrack*, track, Track)
+	QVector<TimelineTrack*> m_tracks;
 
   // render
   RenderFunctionsCache* renderCache;

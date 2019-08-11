@@ -11,6 +11,7 @@ release:DEFINES += eRELEASE
 debug:DEFINES += eDEBUG
 win32: DEFINES += eWIN32
 
+INCLUDEPATH += ../submodules/rtaudio
 HEADERS += \
   4klangmusic.hpp \
   camera.hpp \

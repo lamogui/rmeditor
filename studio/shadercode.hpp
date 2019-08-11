@@ -14,26 +14,27 @@ class GLSLShaderCode : public TextEditable
   Q_OBJECT
 
 public:
-  GLSLShaderCode(QObject* parent = nullptr);
+	GLSLShaderCode(QObject* parent = nullptr);
 
-  // TextEditable
-  const QString& getText() const override;
-  
-  QString getShaderCodeRecursive() const;
+	// Links
+	QPointer<GLSLShaderCode> m_framework;
 
-  // overridable
-  virtual QString minifiedShaderCode(const ShaderMinifier& minifier) const;
-  virtual QString cFormatedShaderCode(const ShaderMinifier& minifier) const;
+	// TextEditable
+	const QString& getText() const override;
+
+	QString getShaderCodeRecursive() const;
+
+	// overridable
+	virtual QString minifiedShaderCode(const ShaderMinifier& _minifier) const;
+	virtual QString cFormatedShaderCode(const ShaderMinifier& _minifier) const;
 
 protected:
-  // Utils
-  bool handleShaderCompileResult(const QString& shaderCode, ShaderProgram& program, QOpenGLShader::ShaderType type);
-  bool handleShaderLinkResult(ShaderProgram& program);
+	// Utils
+	bool handleShaderCompileResult(const QString& _shaderCode, ShaderProgram& _program, QOpenGLShader::ShaderType _type);
+	bool handleShaderLinkResult(ShaderProgram& _program);
 
-  QString shaderCode;
+	QString m_shaderCode;
 
-private:
-  DECLARE_PROPERTY_REFERENCE(QPointer<GLSLShaderCode>, framework, Framework)
 };
 
 #endif // SCENE_H

@@ -4,7 +4,7 @@
 #include <QMutex>
 #include <QOpenGLTexture>
 
-#include "../rtaudio/RtAudio.h"
+#include "RtAudio.h"
 #include "mediafile.hpp"
 
 
@@ -12,8 +12,7 @@ class RtAudio;
 class Timeline;
 class Music : public MediaFile
 {
-  Q_OBJECT
-  Q_PROPERTY(bool playing MEMBER playing READ isPlaying) // don't use macro because volatile bool + read only + non standard getter name
+	Q_OBJECT
 
 public:
   Music(QObject* parent);
@@ -22,11 +21,13 @@ public:
   virtual double getPosition() const = 0;
   virtual double getLength() const = 0;
 
-  inline QWeakPointer<QOpenGLTexture> getNoteVelocityTexture() { return noteVelocityTexture; }
-  inline QWeakPointer<QOpenGLTexture> getMaxNoteVelocityTexture() { return maxNoteVelocityTexture; }
-  bool playing() const { return m_playing; }
+	inline const QOpenGLTexture& getNoteVelocityTexture() { return m_noteVelocityTexture; }
+	inline const QOpenGLTexture& getMaxNoteVelocityTexture() { return m_maxNoteVelocityTexture; }
 
   virtual void exportMusicCData(const QFile& source, const QFile& header) const = 0;
+
+	// Control
+	volatile bool m_playing;
 
   /*
     RtAudio stuff
@@ -38,9 +39,6 @@ public:
 public slots:
   virtual void setPosition(double time) = 0;
   virtual void updateTextures() = 0;
-
-  inline void play() { m_playing = true; }
-  inline void pause() { m_playing = false;}
 
 protected:
 
@@ -55,25 +53,19 @@ protected:
   RtAudio m_audio;
 
   // Usefull variables
-  QSharedPointer<QOpenGLTexture> m_noteVelocityTexture;
-  QSharedPointer<QOpenGLTexture> m_maxNoteVelocityTexture;
-
-  // Control
-  volatile bool m_playing;
-
-private:
-  DECLARE_PROPERTY(Timeline*, mainTimeline, MainTimeline);
+	QOpenGLTexture m_noteVelocityTexture;
+	QOpenGLTexture m_maxNoteVelocityTexture;
 };
 
-class ExternalLengthMusic : public Music
+class UserSettedLengthMusic : public Music
 {
   Q_OBJECT
 
 public:
-  ExternalLengthMusic(QObject* parent);
+	UserSettedLengthMusic(QObject* parent);
+	double m_length;
 
-private:
-  DECLARE_PROPERTY(double, length, Length)
+	inline double getLength() const override { return m_length; }
 };
 
 #endif // !MUSIC_HPP

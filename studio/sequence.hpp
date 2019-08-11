@@ -21,11 +21,11 @@ public:
   Q_INVOKABLE Sequence(QGraphicsObject* parent = nullptr);
 
   // Utils 
-  inline qint64 getEndFrame() const { return getStartFrame() + getLength(); }
-  inline bool isInside(qint64 frame) const { return (frame >= getStartFrame() && frame < getEndFrame()); }
-  inline bool overlap(const Sequence& seq) const { return (isInside(seq.getStartFrame())||
+	inline qint64 getEndFrame() const { return m_startFrame; }
+	inline bool isInside(qint64 frame) const { return (frame >= m_startFrame && frame < getEndFrame()); }
+	inline bool overlap(const Sequence& seq) const { return (isInside(seq.m_startFrame)||
                                                            isInside(seq.getEndFrame())||
-                                                           (seq.getStartFrame() < getStartFrame() && seq.getEndFrame() > getEndFrame())); }
+																													 (seq.m_startFrame < m_startFrame && seq.getEndFrame() > getEndFrame())); }
   
   // Time position 
   void setFramePosition(qint64 framePosition);
@@ -36,7 +36,7 @@ public:
   float getHeight() const { return height; }
 
   // GraphicsItem
-  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+	void paint(QPainter *painter, const QStyleOptionGraphicsItem *_option, QWidget *_widget) override;
   QRectF boundingRect() const override;
 
   inline QMap<qint64, CameraKeyframe*> getCameraKeyframes() const { return m_cameraKeyframes; }
@@ -87,10 +87,10 @@ protected slots:
 
 private:
   // properties
-  DECLARE_PROPERTY_REFERENCE(QPointer<MediaFile>, media, Media)
-  DECLARE_PROPERTY(qint64, startFrame, StartFrame)
-  DECLARE_PROPERTY(quint64, length, Length)
-  DECLARE_PROPERTY_CONTAINER(Int64Map, CameraKeyframe*, cameraKeyframe, CameraKeyframe)
+	QPointer<MediaFile> m_media;
+	qint64 m_startFrame;
+	quint64 m_length;
+	QMap<qint64, CameraKeyframe*> m_cameraKeyframes;
 
   // Internal 
   QSharedPointer<Renderer> renderer;

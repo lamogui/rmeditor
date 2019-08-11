@@ -20,7 +20,7 @@ Keyframe::Keyframe(QGraphicsObject* parent) :
   color(255, 195, 77, 255),
   selectedColor(255, 105, 0, 255),
   mouseCapture(false),
-  relativeFrame(-1)
+	m_relativeFrame(-1)
 {
   float l = 5;
   shape.append(QPointF(-l, 0));
@@ -31,14 +31,6 @@ Keyframe::Keyframe(QGraphicsObject* parent) :
 
   setParent(parent); // set Object parent 
 }
-
-
-#if defined(Q_OS_WIN) && defined(QT_NO_DEBUG)
-Keyframe::~Keyframe()
-{
-  // QApplication::restoreOverrideCursor();
-}
-#endif
 
 void Keyframe::setRelativeFrame(qint64 newrelativeFrame)
 {

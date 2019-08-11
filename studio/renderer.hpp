@@ -8,7 +8,7 @@
 
 
 class Render;
-class Camera;
+class CameraState;
 class Project;
 class Scene;
 
@@ -24,48 +24,29 @@ public:
   virtual ~Renderer() {}
 
   // Rendering
-  virtual void initializeGL(RenderFunctionsCache& gl) = 0;
-  virtual void renderChildrens(RenderFunctionsCache& gl) {}            // Pre-render all the internals FBOs/GeometryShaders before "real" render
-  virtual void glRender(RenderFunctionsCache& gl, Render& render) = 0; // You must not bind any FBO in this function 
+	virtual void initializeGL(RenderFunctionsCache& _gl) = 0;
+	virtual void renderChildrens(RenderFunctionsCache& _gl) { (void)_gl; }            // Pre-render all the internals FBOs/GeometryShaders before "real" render
+	virtual void glRender(RenderFunctionsCache& _gl, Render& _render) = 0; // You must not bind any FBO in this function
 
-  // Camera
-  inline virtual bool hasDynamicCamera() const { return false; }       // Can we control the camera of the renderer
-  virtual void setCurrentCamera(const QWeakPointer<Camera>& camera) {} // Set the camera that should be used to render 
-  virtual Camera* getCurrentCamera() { return nullptr; }               // Get the current camera to modify it's posistion if needed ! 
+	CameraState* m_linkedCameraState; // if we can control the camera this is a link to the data both input / output...
+
+	// Time variables (TODO put thoses in a dedicated struct
+	float m_musicTime;    // current music time (= global timeline time)
+	float m_sequenceTime; // time since the last cut in the timeline
+	float m_mediaTime;    // time over media (if any)
+
+	// Music variables
+	float m_bassLvl;
+	float m_bassLvlTime;
+	float m_bassLvlSequenceTime;
+	float m_noiseLvl;
+	float m_noiseLvlTime;
+	float m_noiseLvlSequenceTime;
 
   // Media
-  inline virtual bool hasFixedLength() const { return false; }         // Does the Renderer is linked to a fixed media length
+	inline virtual bool hasFixedLength() const { return false; }         // Does the Renderer is linked to a fixed media length
   inline virtual float getLength() const { return 0.f; }               // the media length if any 
 
-  // Time 
-  void setTimeVariables(float music, float sequence, float media);
-
-
-  // Music
-  void setBassVariables(float bass, float bassTime, float bassSequenceTime);
-  void setNoiseVariables(float noise, float noiseTime, float noiseSequenceTime);
-
-
-protected:
-  // Time variables
-  float musicTime;    // current music time (= global timeline time)
-  float sequenceTime; // time since the last cut in the timeline 
-  float mediaTime;    // time over media (if any) 
-
-  // Music variables 
-  float bassLvl;
-  float bassLvlTime;     
-  float bassLvlSequenceTime; 
-  float noiseLvl;
-  float noiseLvlTime;
-  float noiseLvlSequenceTime;
-
-  FBO m_fbo;
-  Camera* m_camera;
 };
 
-
-
-  Scene* m_scene;
-  QTime m_sequenceTime;
 #endif // !RMEDITOR_RENDERER_HPP

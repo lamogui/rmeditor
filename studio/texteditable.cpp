@@ -40,7 +40,7 @@ bool TextEditable::load()
   return readSuccess && build(text);
 }
 
-bool TextEditable::save(const QString& text)
+bool TextEditable::save(const QString& _text)
 {
   QFile file(getPath().absoluteFilePath());
   if (!file.open(QIODevice::WriteOnly))

@@ -23,16 +23,16 @@ public slots:
   //Return true is the file is loaded or created (not if it build correctly)
   bool load() final;
   virtual bool save();
-  virtual bool build(const QString& text) { return false; }
+	virtual bool build(const QString& _text) { return false; }
 
 
 signals:
   // text edition 
-  void startLineNumberChanged(int line);
-  void objectTextChanged(QString text); // for project (probably)
+	void startLineNumberChanged(int _line);
+	void objectTextChanged(QString _text); // for project (probably)
 
 protected:
-  bool save(const QString& text);
+	bool save(const QString& _text);
 };
 
 #endif

@@ -32,7 +32,7 @@ public:
   quint64 getLength() const;
 
   // Graphics
-  float getHeight() const { return height; }
+	float getHeight() const { return m_height; }
 
   // GraphicsItem
   QRectF boundingRect() const override;
