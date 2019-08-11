@@ -33,6 +33,5 @@ build/
 build*/
 build-*/
 
-
 #qt .user
 *.user
