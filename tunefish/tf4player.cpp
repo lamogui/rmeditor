@@ -92,6 +92,7 @@ bool eTfPlayerLoadSong(eTfPlayer &player, const eU8 *data, eU32 len, eF32 delay)
 	//  read instruments
 	// -----------------------------------------------------------------------------------------
 	eU32 tagInst = stream.ReadU32();
+    (void) tagInst;
 	eASSERT(eMemEqual(&tagInst, "INST", 4));
 
 	for (eU32 j = 0; j < song.instrCount; j++)
@@ -106,6 +107,7 @@ bool eTfPlayerLoadSong(eTfPlayer &player, const eU8 *data, eU32 len, eF32 delay)
 	//  read song
 	// -----------------------------------------------------------------------------------------
 	eU32 tagSong = stream.ReadU32();
+    (void)tagSong;
 	eASSERT(eMemEqual(&tagSong, "SONG", 4));
 
 	for (eU32 j = 0; j < song.instrCount; j++)
@@ -134,7 +136,8 @@ bool eTfPlayerLoadSong(eTfPlayer &player, const eU8 *data, eU32 len, eF32 delay)
 		}
 	}
 
-	eU32 tagEnd = stream.ReadU32();
+    eU32 tagEnd = stream.ReadU32();
+    (void) tagEnd;
 	eASSERT(eMemEqual(&tagEnd, "ENDS", 4));
     return true;
 }
