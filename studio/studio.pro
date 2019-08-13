@@ -11,7 +11,7 @@ release:DEFINES += eRELEASE
 debug:DEFINES += eDEBUG
 win32: DEFINES += eWIN32
 
-INCLUDEPATH += ../submodules/rtaudio ../submodules/ogg/include ../submodules/vorbis/include
+INCLUDEPATH += ../submodules/rtaudio ../submodules/ogg/include ../submodules/vorbis/include ../tunefish ../enigma
 HEADERS += \
   4klangmusic.hpp \
   camera.hpp \
@@ -46,8 +46,7 @@ HEADERS += \
   timelinedockwidget.hpp \
   timelinewidget.hpp \
   tunefish4music.hpp \
-  undocommands.hpp \
-  xmlsavedobject.hpp
+  undocommands.hpp
 
 SOURCES += \
   camera.cpp \
@@ -82,8 +81,7 @@ SOURCES += \
   timelinedockwidget.cpp \
   timelinewidget.cpp \
   tunefish4music.cpp \
-  undocommands.cpp \
-  xmlsavedobject.cpp
+  undocommands.cpp
 
 FORMS += \
   editorwidget.ui \

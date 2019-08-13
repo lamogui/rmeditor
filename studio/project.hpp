@@ -7,18 +7,19 @@
 #include "undocommands.hpp"
 #include "demotimeline.hpp"
 
-#include <QDir>
+#include <QOpenGLTexture>
 
+class QDDir;
 class Music;
 class RaymarchingScene;
-class Project : public MediaFile
+class Framework;
+class GifTexture;
+class Project : public MediaFile // TODO do not inherit from media file ?
 {
   Q_OBJECT
 
 public:
 	Project(QObject* parent = nullptr);
-
-	static Project* get(const QObject& context);
 
 	// GL
 	void initializeGL(RenderFunctionsCache& _gl);
@@ -26,6 +27,7 @@ public:
 	//Accessors
 	QDir getDir() const;
 	qreal getFramerate() const { return m_framerate; }
+	qint64 getNumFrames() const;
 
 	// Datas
 	Music* m_music; // TODO do not make a pointer for this, use an aggregation and hide impl
@@ -36,10 +38,16 @@ public:
 	void exportScenesSources(const QDir& dir) const;
 	void exportGifsSources(const QDir& dir) const;
 
+public slots:
+	bool load() override;
+
 protected:
 	qreal m_framerate;
 
-	QVector<RaymarchingScene>
+	QList<RaymarchingScene*> m_rmScenes;
+	QList<Framework*> m_frameworks;
+	QList<GifTexture*> m_gifs;
+	QMap<QString, QOpenGLTexture*> m_textures; // table of all textures used for rendering
 
 	/*
 	void connectLog(LogWidget& log) override;

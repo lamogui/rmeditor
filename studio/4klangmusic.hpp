@@ -20,7 +20,7 @@ public:
   _4KlangMusic(const QString& filename, double length, QDomNode node ,LogWidget& log,QObject* parent);
   virtual ~_4KlangMusic();
 
-  double getTime() const override;
+	qreal getTime() const override;
 
   void exportMusicCData(const QFile& source, const QFile& header) const override;
 

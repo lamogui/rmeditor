@@ -6,7 +6,6 @@
 #include "renderfunctionscache.hpp"
 #include "jassert.hpp"
 
-
 Project::Project(QObject* parent) :
 	MediaFile(parent),
 	m_music(nullptr),
@@ -17,7 +16,12 @@ Project::Project(QObject* parent) :
 
 QDir Project::getDir() const
 {
-  return getPath().absoluteDir();
+	return getPath().absoluteDir();
+}
+
+qint64 Project::getNumFrames() const
+{
+	return m_music ? static_cast< qint64 >(m_music->getLength() * m_framerate) : 0;
 }
 
 //#include "tunefish4music.hpp"

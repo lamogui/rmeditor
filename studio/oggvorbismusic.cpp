@@ -1,29 +1,29 @@
 #include "oggvorbismusic.hpp"
 #include "logmanager.hpp"
 
-OggVorbisMusic::OggVorbisMusic(QObject* parent) : Music(parent), vorbisFile({0})
+OggVorbisMusic::OggVorbisMusic(QObject* parent) : Music(parent), m_vorbisFile({0})
 {
 
 }
 
 OggVorbisMusic::~OggVorbisMusic()
 {
-  ov_clear(&vorbisFile);
-  file.close();
+  ov_clear(&m_vorbisFile);
+  m_file.close();
 }
 
 double OggVorbisMusic::getPosition() const
 {
-  if (!file.isOpen())
+  if (!m_file.isOpen())
     return 0;
-  return ov_time_tell(&const_cast<OggVorbis_File&>(vorbisFile));
+  return ov_time_tell(&const_cast<OggVorbis_File&>(m_vorbisFile));
 }
 
 double OggVorbisMusic::getLength() const
 {
-  if (!file.isOpen())
+  if (!m_file.isOpen())
     return 0;
-  return ov_time_total(&const_cast<OggVorbis_File&>(vorbisFile), -1);
+  return ov_time_total(&const_cast<OggVorbis_File&>(m_vorbisFile), -1);
 }
 
 void OggVorbisMusic::exportMusicCData(const QFile& source, const QFile& header) const
@@ -33,8 +33,8 @@ void OggVorbisMusic::exportMusicCData(const QFile& source, const QFile& header) 
 
 bool OggVorbisMusic::load()
 {
-  ov_clear(&vorbisFile);
-  file.close();
+  ov_clear(&m_vorbisFile);
+  m_file.close();
 
   if (!getPath().exists())
   {
@@ -42,11 +42,11 @@ bool OggVorbisMusic::load()
     return false;
   }
 
-  file.setFileName(getPath().absoluteFilePath());
+  m_file.setFileName(getPath().absoluteFilePath());
 
-  if (!file.open(QIODevice::ReadOnly))
+  if (!m_file.open(QIODevice::ReadOnly))
   {
-    Log::Error("[" + getPath().fileName() + "] could not open the file: " + file.errorString());
+    Log::Error("[" + getPath().fileName() + "] could not open the file: " + m_file.errorString());
     return false;
   }
 
@@ -56,7 +56,7 @@ bool OggVorbisMusic::load()
   callbacks.close_func = &OggVorbisMusic::close;
   callbacks.tell_func = &OggVorbisMusic::tell;
 
-  int ret = ov_open_callbacks((void*)&file, &vorbisFile, nullptr, 0, callbacks);
+  int ret = ov_open_callbacks((void*)&m_file, &m_vorbisFile, nullptr, 0, callbacks);
   if (ret != 0)
   {
     handleOVError(ret);
@@ -66,15 +66,15 @@ bool OggVorbisMusic::load()
   /* Throw the comments plus a few lines about the bitstream we're
   decoding */
   {
-    char **ptr = ov_comment(&vorbisFile, -1)->user_comments;
-    vorbis_info *vi = ov_info(&vorbisFile, -1);
+    char **ptr = ov_comment(&m_vorbisFile, -1)->user_comments;
+    vorbis_info *vi = ov_info(&m_vorbisFile, -1);
     while (*ptr) {
       Log::Info("[" + getPath().fileName() + "] " + *ptr);
       ++ptr;
     }
     Log::Info("[" + getPath().fileName() + "] Bitstream is " + QString::number(vi->channels) + " channel, " + QString::number(vi->rate) + "Hz");
-    Log::Info("[" + getPath().fileName() + "] Decoded length: " + QString::number(ov_pcm_total(&vorbisFile, -1)) + " samples");
-    Log::Info("[" + getPath().fileName() + "] Encoded by: " + ov_comment(&vorbisFile, -1)->vendor);
+    Log::Info("[" + getPath().fileName() + "] Decoded length: " + QString::number(ov_pcm_total(&m_vorbisFile, -1)) + " samples");
+    Log::Info("[" + getPath().fileName() + "] Encoded by: " + ov_comment(&m_vorbisFile, -1)->vendor);
   }
   return createRtAudioStream();
 }
@@ -84,7 +84,7 @@ void OggVorbisMusic::setPosition(double time)
 {
   if (time < 0.0)
     time = 0.0;
-  int ret = ov_time_seek(&vorbisFile, time);
+  int ret = ov_time_seek(&m_vorbisFile, time);
   if (ret != 0)
     handleOVError(ret);
 }
@@ -98,7 +98,7 @@ bool OggVorbisMusic::createRtAudioStream()
 {
   try
   {
-    vorbis_info *vi = ov_info(&vorbisFile, -1);
+    vorbis_info *vi = ov_info(&m_vorbisFile, -1);
     RtAudio::StreamParameters parameters;
     parameters.deviceId = audio.getDefaultOutputDevice();
     parameters.nChannels = vi->channels;
@@ -126,7 +126,7 @@ void OggVorbisMusic::processAudio(void *outputBuffer, unsigned int nBufferFrames
   {
     float** ov_buffers;
     int currentBitstream;
-    int readed = ov_read_float(&vorbisFile, &ov_buffers, requestSize, &currentBitstream);
+    int readed = ov_read_float(&m_vorbisFile, &ov_buffers, requestSize, &currentBitstream);
     if (readed < 0)
     {
       handleOVError(readed);
@@ -135,7 +135,7 @@ void OggVorbisMusic::processAudio(void *outputBuffer, unsigned int nBufferFrames
 
     jassert(readed <= requestSize); // wrongly understand the documentation
     
-    vorbis_info *vi = ov_info(&vorbisFile, -1);
+    vorbis_info *vi = ov_info(&m_vorbisFile, -1);
     for (int c = 0; c < vi->channels; ++c)
     {
       for (int s = 0; s < readed; ++s)
@@ -211,7 +211,7 @@ void OggVorbisMusic::handleOVError(int error) const
     default: jassertfalse; // todo
   }
 
-  Log::Error("[" + QFileInfo(file.fileName()).fileName() + "] " + err);
+  Log::Error("[" + QFileInfo(m_file.fileName()).fileName() + "] " + err);
 }
 
 

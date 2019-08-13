@@ -8,13 +8,13 @@
 
 
 
-class Gif : public MediaFile
+class GifTexture : public MediaFile
 {
 	Q_OBJECT
 
 public:
-	Gif(const QString& uniformName, const QString& filename, QObject* parent);
-	virtual ~Gif();
+	GifTexture(const QString& uniformName, const QString& filename, QObject* parent);
+	virtual ~GifTexture();
 
 	QOpenGLTexture& getTexture() {return m_texture;}
 	const gif* getData() const {return m_data;}

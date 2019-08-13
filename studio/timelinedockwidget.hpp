@@ -3,10 +3,10 @@
 
 #include <QDockWidget>
 
+class Project;
 class Camera;
 class Music;
 class Renderer;
-class Timeline;
 class TimelineWidget;
 
 
@@ -16,37 +16,37 @@ class TimelineDockWidget;
 
 class TimelineDockWidget : public QDockWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-  explicit TimelineDockWidget(QWidget *parent = 0);
-  virtual ~TimelineDockWidget();
+	explicit TimelineDockWidget(QWidget *parent = 0);
+	virtual ~TimelineDockWidget();
 
 
-  void setTargetTimeline(Timeline* timeline);
-  Timeline* getTargetTimeline() const;
-  TimelineWidget* getTimelineWidget() const;
+	void setTargetTimeline(Timeline* timeline);
+	Timeline* getTargetTimeline() const;
+	TimelineWidget* getTimelineWidget() const;
 
 public slots:
-  void insertCameraKeyframe(Camera* cam);
+	void insertCameraKeyframe(Camera* cam);
 
 signals:
-  void currentRendererChanged(QWeakPointer<Renderer> renderer);
+	void currentRendererChanged(QWeakPointer<Renderer> renderer);
 
 protected:
-  void focusInEvent(QFocusEvent* event);
+	void focusInEvent(QFocusEvent* event);
 
 protected slots:
-  void emitCurrentRendererChanged(const QWeakPointer<Renderer>& renderer);
+	void emitCurrentRendererChanged(const QWeakPointer<Renderer>& renderer);
 
-  void on_playPauseButton_clicked(bool);
-  void on_rewindButton_clicked(bool);
-  void on_stopButton_clicked(bool);
+	void on_playPauseButton_clicked(bool);
+	void on_rewindButton_clicked(bool);
+	void on_stopButton_clicked(bool);
 
 private:
-    Ui::TimelineDockWidget *ui;
+	Ui::TimelineDockWidget* m_ui;
 
-    Project* m_project;
+	Project* m_project;
 };
 
 #endif

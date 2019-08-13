@@ -3,17 +3,17 @@
 #include "gif.h"
 #include <QFile>
 
-Gif::Gif(const QString& uniformName, const QString& filename, QDomNode node, LogWidget& log,QObject* parent) :
+GifTexture::GifTexture(const QString& uniformName, const QString& filename, QDomNode node, LogWidget& log,QObject* parent) :
     NodeFile(filename,node,log,parent),
     m_data(nullptr),
     m_uniformName(uniformName)
 {
     fileChanged(filename);
     m_watcher.addPath(filename);
-    QObject::connect(&m_watcher, &QFileSystemWatcher::fileChanged, this, &Gif::fileChanged);
+    QObject::connect(&m_watcher, &QFileSystemWatcher::fileChanged, this, &GifTexture::fileChanged);
 }
 
-Gif::~Gif()
+GifTexture::~GifTexture()
 {
     if (m_data)
     {
@@ -23,7 +23,7 @@ Gif::~Gif()
 
 
 #include <QImage>
-void Gif::fileChanged(const QString& filename)
+void GifTexture::fileChanged(const QString& filename)
 {
     if (m_data) {
         delete_gif(m_data);

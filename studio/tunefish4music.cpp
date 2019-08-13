@@ -15,9 +15,9 @@ Tunefish4Music::~Tunefish4Music()
   eTfPlayerUnloadSong(m_player);
 }
 
-double Tunefish4Music::getTime() const
+qreal Tunefish4Music::getTime() const
 {
-  return (double)m_player.time;
+	return static_cast<qreal>(m_player.time);
 }
 
 bool Tunefish4Music::createRtAudioStream()
