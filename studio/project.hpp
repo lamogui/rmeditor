@@ -16,44 +16,51 @@ class Project : public MediaFile
   Q_OBJECT
 
 public:
-  Project(QObject* parent = nullptr);
+	Project(QObject* parent = nullptr);
 
-  static Project* get(const QObject& context);
+	static Project* get(const QObject& context);
 
-  // GL 
+	// GL
 	void initializeGL(RenderFunctionsCache& _gl);
 
-  //Accessors
+	//Accessors
 	QDir getDir() const;
+	qreal getFramerate() const { return m_framerate; }
 
-  //Utils
-  void reset(); // reset project without notify 
+	// Datas
+	Music* m_music; // TODO do not make a pointer for this, use an aggregation and hide impl
+	DemoTimeline m_demoTimeline;
+
+	void exportCDatas(const QDir& dir) const;
+	void exportFrameworkSources(const QDir& dir) const;
+	void exportScenesSources(const QDir& dir) const;
+	void exportGifsSources(const QDir& dir) const;
+
+protected:
+	qreal m_framerate;
+
+	QVector<RaymarchingScene>
+
+	/*
+	void connectLog(LogWidget& log) override;
+
+	Scene *getRayMarchScene(const QString& name) const;
+	Framework *getFramework(const QString& name) const;
+	inline const QMap<QString,Scene*>& rayMarchScenes() const {return m_rmScenes;}
+	inline const QMap<QString,Framework*>& frameworks() const {return m_frameworks;}
+	inline const QMap<QString, Texture2D*>& textures() const {return m_textures; }
+	static QString nodeTypeToString(QDomNode::NodeType type);
 
 
+	static QString getDefaultProjectText();
 
-		/*
-    void connectLog(LogWidget& log) override;
+	virtual bool buildable() const { return true; }
 
-    Scene *getRayMarchScene(const QString& name) const;
-    Framework *getFramework(const QString& name) const;
-    inline const QMap<QString,Scene*>& rayMarchScenes() const {return m_rmScenes;}
-    inline const QMap<QString,Framework*>& frameworks() const {return m_frameworks;}
-    inline const QMap<QString, Texture2D*>& textures() const {return m_textures; }
-    static QString nodeTypeToString(QDomNode::NodeType type);
+	inline Music* music() const { return m_music; }
+	inline DemoTimeline* demoTimeline() const { return m_demoTimeline; }
 
+	inline QDomDocument& document() { return m_document; }
 
-    static QString getDefaultProjectText();
-
-    virtual bool buildable() const { return true; }
-
-    inline Music* music() const { return m_music; }
-    inline DemoTimeline* demoTimeline() const { return m_demoTimeline; }
-
-    inline QDomDocument& document() { return m_document; }
-
-    void exportFrameworkSources(const QDir& dir) const;
-    void exportScenesSources(const QDir& dir) const;
-    void exportGifsSources(const QDir& dir) const;
 
   public slots:
     void resetProject();
@@ -61,10 +68,9 @@ public:
     void notifyDocumentChanged();
     void destroyNode(QDomNode& node);
 
-    void exportAsLinuxDemo(const QDir& dir) const;
 
-  signals:
-    void appendTextEditable(TextEditable* object);
+
+	signals:
     void demoTimelineChanged(Timeline* t);
 
   protected slots:
@@ -80,8 +86,7 @@ public:
     void addMusicTextures();
 */
 
-	Music* m_music; // TODO do not make a pointer for this, use an aggregation and hide impl
-	DemoTimeline m_demoTimeline;
+
 };
 
 #endif

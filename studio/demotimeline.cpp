@@ -41,8 +41,7 @@ DemoTimeline::~DemoTimeline()
 
 void DemoTimeline::trackRequestFramePosition(qint64 position)
 {
-  if (getFramerate())
-    emit requestPosition((double)position / (double)getFramerate());
+	emit requestPosition( static_cast<qreal>(position) / m_project.getFramerate() );
 }
 
 /*

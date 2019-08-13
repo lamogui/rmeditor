@@ -95,7 +95,6 @@ protected:
 	*/
 
 protected:
-	double m_framerate;
 	Project& m_project;
 };
 

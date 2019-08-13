@@ -8,137 +8,17 @@
 
 
 Project::Project(QObject* parent) :
-  TextEditable(parent),
-  music(nullptr)
+	MediaFile(parent),
+	m_music(nullptr),
+	m_demoTimeline( *this ),
+	m_framerate(60.0)
 {
-
-}
-
-Project* Project::get(const QObject& context)
-{
-  QObject* parent = context.parent();
-  QGraphicsItem* parentItem = context.metaObject()->inherits(&QGraphicsObject::staticMetaObject) ? ((QGraphicsObject&)context).parentItem() : nullptr;
-  while (parent != nullptr || parentItem != nullptr)
-  {
-    Project* p = parent ? qobject_cast<Project*>(parent) : qobject_cast<Project*>(parent);
-    if (p)
-    {
-      return p;
-    }
-    parent = p->parent();
-    parentItem 
-  }
-  jassertfalse; //probably missing to attach properly a parent !
-  return nullptr;
-}
-
-void Project::initializeGL(RenderFunctionsCache& gl)
-{
-  StringMap<MediaFile*>::iterator it;
-  for (it = mediaFiles.begin(); it != mediaFiles.end(); ++it)
-  {
-    it.value()->initializeGL(gl);
-  }
-  BaseClass::initializeGL(gl);
-}
-
-void Project::setMusic(Music* newMusic)
-{
-  if (music != newMusic)
-  {
-    Music* oldMusic = music;
-    music = newMusic;
-
-    if (music)
-    {
-      music->setParent(this);
-      emit mainTimelineChanged(music->getMainTimeline());
-    }
-    
-    QVariant oldValue = QVariant::fromValue(oldMusic);
-    QVariant newValue = QVariant::fromValue(newMusic);
-
-    emit propertyChanged(this, "music", oldValue, newValue);
-  }
-}
-
-void Project::insertMediaFile(MediaFile* mediaFile)
-{
-  jassert(mediaFile);
-  jassert(mediaFiles.constFind(mediaFile->getPath().fileName()) == mediaFiles.constEnd());
-
-  mediaFile->setParent(this);
-  if (renderCache)
-  {
-    mediaFile->initializeGL(*renderCache);
-  }
-  mediaFiles.insert(mediaFile->getPath().fileName(), mediaFile);
-  emit mediaFileInserted(mediaFile);
-
-  QVariant oldValue;
-  QVariant newValue = QVariant::fromValue(mediaFile);
-  emit propertyChanged(this, "mediaFiles", oldValue, newValue);
-}
-
-void Project::removeMediaFile(MediaFile* mediaFile)
-{
-  jassert(mediaFile);
-  jassert(mediaFiles.constFind(mediaFile->getPath().fileName()) != mediaFiles.constEnd());
-
-  mediaFiles.remove(mediaFile->getPath().fileName());
-
-  QVariant oldValue = QVariant::fromValue(mediaFile);
-  QVariant newValue;
-  emit propertyChanged(this, "mediaFiles", oldValue, newValue);
 }
 
 QDir Project::getDir() const
 {
   return getPath().absoluteDir();
 }
-
-void Project::reset()
-{
-  document.clear();
-  for (StringMap<MediaFile*>::iterator it = mediaFiles.begin(); it != mediaFiles.end(); ++it)
-  {
-    delete it.value();
-  }
-  mediaFiles.clear();
-}
-
-bool Project::build(const QString& text)
-{
-  reset();
-  xmlContent = text;
-  bool buildSuccess = true;
-  QString errorMsg;
-  int errorLine, errCol;
-
-  if (!document.setContent(xmlContent, &errorMsg, &errorLine, &errCol))
-  {
-    Log::Error(QString("[") + getPath().fileName() + "]" + QString(" XML Error at line ") +
-      QString::number(errorLine) + " col " + QString::number(errCol) + ": " + errorMsg);
-    buildSuccess = false;
-  }
-  else
-  {
-    QDomNode node = document.documentElement();
-    QString failureReason;
-    QStringList warnings;
-    buildSuccess = LoadObjectFromXmlNode(*this, node, failureReason, warnings);
-    foreach(QString w, warnings)
-    {
-      Log::Warning("[" + getPath().fileName() + "] " + w);
-    }
-    if (!buildSuccess)
-    {
-      Log::Error("[" + getPath().fileName() + "] " + failureReason);
-    }
-  }
-  return buildSuccess;
-}
-
 
 //#include "tunefish4music.hpp"
 //#include "4klangmusic.hpp"

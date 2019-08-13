@@ -14,8 +14,8 @@ public:
   QuadFragmentShaderCode(QObject* parent = nullptr);
 
   // MediaFile Renderer
-  bool canBeRendered() const override { return true; }
-  Renderer* createRenderer() const override;
+	bool canBeRendered() const override { return true; }
+	Renderer* createRenderer() const override;
 
   // Accessors
   ShaderProgram* getShaderProgram() const { return shaderProgram; }
