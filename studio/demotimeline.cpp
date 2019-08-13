@@ -1,6 +1,7 @@
 ﻿
 #include "demotimeline.hpp"
-#include "timelinetrack.hpp"
+#include "project.hpp"
+#include "music.hpp"
 #include "jassert.hpp"
 
 /*
@@ -28,9 +29,8 @@ DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogW
 }
 */
 
-DemoTimeline::DemoTimeline(Music* _parentMusic) :
-	Timeline(_parentMusic),
-  renderCache(nullptr)
+DemoTimeline::DemoTimeline(Project& _parentProject) :
+	m_project( _parentProject )
 {
 }
 
@@ -38,51 +38,6 @@ DemoTimeline::~DemoTimeline()
 {
 }
 
-void DemoTimeline::initializeGL(RenderFunctionsCache& cache)
-{
-  renderCache = &cache;
-  for (int i = 0; i < tracks.size(); i++)
-  {
-    tracks[i]->initializeGL(cache);
-  }
-}
-
-void DemoTimeline::insertTrack(TimelineTrack* track)
-{
-  addItem(track); // parenting
-
-  connect(track, &TimelineTrack::requestFramePosition, this, &DemoTimeline::trackRequestFramePosition);
-
-  tracks.push_back(track);
-
-  if (renderCache)
-    track->initializeGL(*renderCache);
-
-  QVariant oldValue;
-  QVariant newValue = QVariant::fromValue(track);
-  emit propertyChanged(this, "tracks", oldValue, newValue);
-}
-
-void DemoTimeline::removeTrack(TimelineTrack* track)
-{
-  for (int i = 0; i < tracks.size(); ++i)
-  {
-    if (tracks[i] == track)
-    {
-      tracks.remove(i);
-      break;
-    }
-    jassert(i != tracks.size() - 1); // track wasn't inside this timeline
-  }
-
-  disconnect(track, &TimelineTrack::requestFramePosition, this, &DemoTimeline::trackRequestFramePosition);
-
-  removeItem(track); // parenting
-
-  QVariant oldValue = QVariant::fromValue(track);
-  QVariant newValue;
-  emit propertyChanged(this, "tracks", oldValue, newValue);
-}
 
 void DemoTimeline::trackRequestFramePosition(qint64 position)
 {

@@ -2,8 +2,7 @@
 #define OGGVORBISMUSIC_HPP
 
 #include "music.hpp"
-#include "vorbis\vorbisfile.h"
-
+#include <vorbis\vorbisfile.h>
 #include <ogg/ogg.h>
 
 #include <QFile>
@@ -13,7 +12,7 @@ class OggVorbisMusic : public Music
   Q_OBJECT
 
 public:
-  Q_INVOKABLE OggVorbisMusic(QObject* parent = nullptr);
+	OggVorbisMusic(QObject* parent = nullptr);
   ~OggVorbisMusic() override;
   
   // Music

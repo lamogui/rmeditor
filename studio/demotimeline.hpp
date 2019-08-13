@@ -3,8 +3,7 @@
 #define DEMOTIMELINE_HPP
 
 #include <QVector>
-
-#include "timeline.hpp"
+#include <QGraphicsScene>
 
 
 /*
@@ -27,16 +26,15 @@ protected:
 */
 
 
-class TimelineTrack;
-class DemoTimeline : public Timeline
+class Project;
+class DemoTimeline : public QGraphicsScene
 {
   Q_OBJECT
 
 public:
-  Q_INVOKABLE DemoTimeline(Music* parentMusic = nullptr);
+	DemoTimeline(Project& _parentProject);
   virtual ~DemoTimeline();
 
-  void initializeGL(RenderFunctionsCache& cache);
   /*
   qint64 sequenceStartFrameChanged(qint64 previous_frame,  Sequence* seq); //return the correct start frame of the seq
   qint64 maxSequenceLengthBeforeOverlap(Sequence* seq) const;
@@ -49,6 +47,11 @@ public:
   inline Render* getRender() override { return render; }
   */
   virtual void updateTime();
+
+signals:
+	// property
+	void framerateChanged(double); // meta compiler doesn't support signal declaration inside macros...
+	void requestPosition(double position);
   /*
 public slots:
   void updateCamera(qint64 frame, Camera& cam);
@@ -89,13 +92,11 @@ protected:
   DemoRenderer* m_renderer;
   QMap<qint64, Sequence*> m_sequences;
   QPointF m_mousePressPos;
-  */
-private:
-  // properties
-	QVector<TimelineTrack*> m_tracks;
+	*/
 
-  // render
-  RenderFunctionsCache* renderCache;
+protected:
+	double m_framerate;
+	Project& m_project;
 };
 
 #endif

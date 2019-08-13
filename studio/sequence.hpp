@@ -18,7 +18,7 @@ class Sequence : public QGraphicsObject
   Q_OBJECT
   
 public:
-  Q_INVOKABLE Sequence(QGraphicsObject* parent = nullptr);
+	Sequence(QGraphicsObject* parent = nullptr);
 
   // Utils 
 	inline qint64 getEndFrame() const { return m_startFrame; }

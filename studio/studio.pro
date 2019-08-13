@@ -11,7 +11,7 @@ release:DEFINES += eRELEASE
 debug:DEFINES += eDEBUG
 win32: DEFINES += eWIN32
 
-INCLUDEPATH += ../submodules/rtaudio
+INCLUDEPATH += ../submodules/rtaudio ../submodules/ogg/include ../submodules/vorbis/include
 HEADERS += \
   4klangmusic.hpp \
   camera.hpp \
@@ -43,9 +43,7 @@ HEADERS += \
   shaderminifier.hpp \
   texteditable.hpp \
   texteditor.hpp \
-  timeline.hpp \
   timelinedockwidget.hpp \
-  timelinetrack.hpp \
   timelinewidget.hpp \
   tunefish4music.hpp \
   undocommands.hpp \
@@ -81,9 +79,7 @@ SOURCES += \
   shaderminifier.cpp \
   texteditable.cpp \
   texteditor.cpp \
-  timeline.cpp \
   timelinedockwidget.cpp \
-  timelinetrack.cpp \
   timelinewidget.cpp \
   tunefish4music.cpp \
   undocommands.cpp \

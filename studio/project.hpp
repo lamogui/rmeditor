@@ -3,14 +3,15 @@
 #ifndef PROJECT_HPP
 #define PROJECT_HPP
 
-#include "texteditable.hpp"
+#include "mediafile.hpp"
 #include "undocommands.hpp"
+#include "demotimeline.hpp"
+
 #include <QDir>
 
 class Music;
 class RaymarchingScene;
-class Timeline;
-class Project : public TextEditable
+class Project : public MediaFile
 {
   Q_OBJECT
 
@@ -20,43 +21,17 @@ public:
   static Project* get(const QObject& context);
 
   // GL 
-	void initializeGL(RenderFunctionsCache& _gl) override;
-
-  // TextEditable 
-  const QString& getText() const override;
-  bool buildable() const { return true; }
+	void initializeGL(RenderFunctionsCache& _gl);
 
   //Accessors
-  QDir getDir() const;
-  QUndoStack& getUndoStack() { return undoStack; }
+	QDir getDir() const;
 
   //Utils
   void reset(); // reset project without notify 
 
-public slots:
-  // TextEditable
-  bool build(const QString& text) override;
 
-signals:
-  void mediaFileInserted(MediaFile* mediaFile); // attached target should connect to MediaFile destruction Qt style
-  void mainTimelineChanged(Timeline* newTimeline);
 
-private:
-  DECLARE_PROPERTY(Music*, music, Music)
-  DECLARE_PROPERTY_CONTAINER(StringMap, MediaFile*, mediaFile, MediaFile)
-  QDomDocument document;
-
-  QString xmlContent;
-  QUndoStack undoStack; 
-
-private:
-  typedef TextEditable BaseClass;
-
-    /*
-    Project(const QDir& dir, const QString& filename, LogWidget& log,QObject* parent=nullptr);
-    virtual ~Project();
-
-    
+		/*
     void connectLog(LogWidget& log) override;
 
     Scene *getRayMarchScene(const QString& name) const;
@@ -103,14 +78,10 @@ private:
     bool parseTagResources(QDomNode node);
 
     void addMusicTextures();
+*/
 
-    Music* m_music;
-    DemoTimeline* m_demoTimeline;
-    QString m_text;
-    QDir m_dir;
-    LogWidget* m_log; 
-    QDomDocument m_document;
-    QTimer* m_textUpdateTimer;*/
+	Music* m_music; // TODO do not make a pointer for this, use an aggregation and hide impl
+	DemoTimeline m_demoTimeline;
 };
 
 #endif

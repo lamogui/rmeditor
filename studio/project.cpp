@@ -139,10 +139,6 @@ bool Project::build(const QString& text)
   return buildSuccess;
 }
 
-const QString& Project::getText() const
-{
-  return xmlContent;
-}
 
 //#include "tunefish4music.hpp"
 //#include "4klangmusic.hpp"
