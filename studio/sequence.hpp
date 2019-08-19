@@ -4,7 +4,6 @@
 #include <QGraphicsObject>
 #include <QBrush>
 
-#include "xmlsavedobject.hpp"
 #include "undocommands.hpp"
 #include "renderfunctionscache.hpp"
 

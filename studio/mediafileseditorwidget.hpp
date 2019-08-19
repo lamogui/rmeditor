@@ -2,11 +2,7 @@
 #define MEDIAFILESWIDGET_H
 
 #include <QDockWidget>
-
-
-namespace Ui {
-class MediaFilesEditorWidget;
-}
+#include "ui_mediafileseditorwidget.h"
 
 //class Project;
 class Renderer;
@@ -17,31 +13,30 @@ class MediaFilesEditorWidget : public QDockWidget
     Q_OBJECT
     
 public:
-    explicit MediaFilesEditorWidget(QWidget *parent = 0);
-    ~MediaFilesEditorWidget();
+	explicit MediaFilesEditorWidget(QWidget* _parent = nullptr);
 
 public slots:
-    //void loadProject(Project& project);
-    //void appendTextEditable(TextEditable* te);
-    
-    void appendMediaFile(MediaFile* newMediaFile);
-    //void onMediaFileDestroyed(MediaFile*);
-    void saveAllShaders();
+	//void loadProject(Project& project);
+	//void appendTextEditable(TextEditable* te);
+
+	void appendMediaFile(MediaFile* _newMediaFile);
+	//void onMediaFileDestroyed(MediaFile*);
+	void saveAllShaders();
 
 
 signals:
-    void rendererChanged(QWeakPointer<Renderer> renderer);
+	void rendererChanged(QWeakPointer<Renderer> _renderer);
 
 private slots:
-    void on_buildButton_clicked(bool);
-    void on_saveButton_clicked(bool);
-    void on_tab_currentChanged(int index);
+	void on_buildButton_clicked(bool);
+	void on_saveButton_clicked(bool);
+	void on_tab_currentChanged(int _index);
 
-    void onTextEditorSaved(TextEditor *e, bool saved);
+	void onTextEditorSaved(TextEditor *_e, bool _saved);
 
 
 private:
-    Ui::MediaFilesEditorWidget *ui;
+		Ui::MediaFilesEditorWidget m_ui;
 };
 
 #endif // MEDIAFILESWIDGET_H

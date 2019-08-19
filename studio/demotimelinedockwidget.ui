@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TimelineDockWidget</class>
- <widget class="QDockWidget" name="TimelineDockWidget">
+ <class>DemoTimelineDockWidget</class>
+ <widget class="QDockWidget" name="DemoTimelineDockWidget">
   <property name="enabled">
    <bool>true</bool>
   </property>
@@ -78,7 +78,7 @@
      </layout>
     </item>
     <item>
-     <widget class="TimelineWidget" name="timelineView">
+     <widget class="DemoTimelineWidget" name="timelineView">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -101,9 +101,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TimelineWidget</class>
+   <class>DemoTimelineWidget</class>
    <extends>QGraphicsView</extends>
-   <header>timelinewidget.hpp</header>
+   <header>demotimelinewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

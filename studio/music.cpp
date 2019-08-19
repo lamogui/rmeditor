@@ -9,7 +9,6 @@
 #include "logmanager.hpp"
 #include "jassert.hpp"
 
-#include "timeline.hpp"
 #include "renderer.hpp"
 
 /*

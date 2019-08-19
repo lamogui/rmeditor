@@ -2,30 +2,19 @@
 #define LOGDOCKWIDGET_HPP
 
 #include <QDockWidget>
-#include <QTextEdit>
+#include "ui_logdockwidget.h"
 #include "logwidget.hpp"
-
-namespace Ui {
-class LogDockWidget;
-}
 
 class LogDockWidget : public QDockWidget
 {
-    Q_OBJECT
-    
-public:
-    explicit LogDockWidget(QWidget *parent = 0);
-    ~LogDockWidget();
-    
-    LogWidget* getLogWidget();
+	Q_OBJECT
 
+public:
+	explicit LogDockWidget(QWidget *parent = nullptr);
+	Ui::LogDockWidget m_ui;
 
 private slots:
-    void on_clearButton_clicked(bool);
-
-    void logChanged();
-private:
-    Ui::LogDockWidget *ui;
+	void on_clearButton_clicked(bool);
 };
 
 #endif

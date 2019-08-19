@@ -3,11 +3,7 @@
 
 #include <QMainWindow>
 #include <QDir>
-
-
-namespace Ui {
-class MainWindow;
-}
+#include "ui_mainwindow.h"
 
 class MediaFilesEditorWidget;
 class LogDockWidget;
@@ -34,11 +30,8 @@ public slots:
     void exportAsVideo();
     void exportAsLinuxDemo();
 
-
     void freezeAll();
     void unfreezeAll();
-
-
 
 private:
     void resetProject();
@@ -47,8 +40,8 @@ private:
 
     Project* m_project;
 
-    Ui::MainWindow *ui;
-    LogDockWidget *m_info;
+		Ui::MainWindow m_ui;
+		LogDockWidget m_info;
     EditorWidget *m_editor;
     TimelineDockWidget *m_timeline;
 };

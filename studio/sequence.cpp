@@ -8,7 +8,7 @@
 #include "render.hpp" // for rendering preview
 #include "mediafile.hpp"
 #include "renderfunctionscache.hpp"
-#include "timelinewidget.hpp" // fucking scale
+#include "demotimelinewidget.hpp" // fucking scale
 #include "undocommands.hpp"
 
 Sequence::Sequence(QGraphicsObject* parent) :

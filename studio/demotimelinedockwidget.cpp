@@ -1,37 +1,29 @@
-﻿#include "timelinedockwidget.hpp"
-#include "ui_timelinedockwidget.h"
+﻿#include "demotimelinedockwidget.hpp"
 
-#include "demotimeline.hpp"
 #include "music.hpp"
-#include "timelinewidget.hpp"
+#include "demotimelinewidget.hpp"
 #include "project.hpp"
 
 TimelineDockWidget::TimelineDockWidget(QWidget *parent):
-  QDockWidget(parent),
-  ui(new Ui::TimelineDockWidget),
+	QDockWidget(parent),
   m_project(nullptr)
 {
-    ui->setupUi(this);
-    connect(ui->timelineView, &TimelineWidget::currentRendererChanged,this, &TimelineDockWidget::emitCurrentRendererChanged);
+		m_ui.setupUi(this);
+		connect(m_ui.timelineView, &TimelineWidget::currentRendererChanged,this, &TimelineDockWidget::emitCurrentRendererChanged);
     this->setEnabled(false);
-}
-
-TimelineDockWidget::~TimelineDockWidget()
-{
-    delete ui;
 }
 
 TimelineWidget* TimelineDockWidget::getTimelineWidget() const
 {
-  return ui->timelineView;
+	return m_ui.timelineView;
 }
 
-void TimelineDockWidget::setTargetTimeline(Timeline* timeline)
+void TimelineDockWidget::setProject(Project *_project)
 {
   DemoTimeline* demoTimeline = qobject_cast<DemoTimeline*>(timeline);
-  if (demoTimeline)
+	if (_project)
   {
-    getTimelineWidget()->setTimeline(demoTimeline);
+		getTimelineWidget()->setTimeline();
     this->setEnabled(true);
   }
   else
@@ -39,12 +31,6 @@ void TimelineDockWidget::setTargetTimeline(Timeline* timeline)
     getTimelineWidget()->setTimeline(nullptr);
     this->setEnabled(false);
   }
-}
-
-Timeline* TimelineDockWidget::getTargetTimeline() const
-{
-  TimelineWidget* widget = getTimelineWidget();
-  return widget ? widget->getTimeline() : nullptr;
 }
 
 void TimelineDockWidget::on_playPauseButton_clicked(bool)
@@ -96,7 +82,7 @@ void TimelineDockWidget::on_stopButton_clicked(bool)
   if (timeline)
   {
     if (timeline->getRenderer())
-      emitCurrentRendererChanged(ui->timelineView->getTimeline()->getRenderer());
+			emitCurrentRendererChanged(m_ui.timelineView->getTimeline()->getRenderer());
 
     Music& music = timeline->getMusic();
     music.pause();
@@ -120,7 +106,7 @@ void TimelineDockWidget::focusInEvent(QFocusEvent* event)
 
 void TimelineDockWidget::insertCameraKeyframe(Camera *cam)
 {
-  DemoTimeline* t = qobject_cast<DemoTimeline*>(ui->timelineView->timeline());
+	DemoTimeline* t = qobject_cast<DemoTimeline*>(m_ui.timelineView->timeline());
   if (t)
   {
 //    t->insertCameraKeyframe(cam);

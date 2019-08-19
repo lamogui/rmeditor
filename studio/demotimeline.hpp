@@ -4,27 +4,26 @@
 
 #include <QVector>
 #include <QGraphicsScene>
-
+#include "renderer.hpp"
 
 /*
 ** DemoTimelineRenderer : know how to render a DemoTimeline
 */
-/*
+
+class DemoTimeline;
 class DemoTimelineRenderer : public Renderer
 {
 public:
-  DemoTimelineRenderer(Project& project, DemoTimeline&  timeline, const QSize& initialSize); // Timeline is the parent
+	DemoTimelineRenderer(Project& _project); // Timeline is the parent
 
   // Rendering
-  void initializeGL(RenderFunctionsCache& gl) override;
-  void renderChildrens(RenderFunctionsCache& gl) override;
-  void glRender(RenderFunctionsCache& gl, Render& render) override; 
+	void initializeGL(RenderFunctionsCache& _gl) override;
+	void renderChildrens(RenderFunctionsCache& _gl) override;
+	void glRender(RenderFunctionsCache& _gl, Render& _render) override;
 
 protected:
-  Project& m_project;
-  DemoTimeline& m_timeline;};
-*/
-
+	Project& m_project;
+};
 
 class Project;
 class DemoTimeline : public QGraphicsScene
@@ -34,6 +33,8 @@ class DemoTimeline : public QGraphicsScene
 public:
 	DemoTimeline(Project& _parentProject);
   virtual ~DemoTimeline();
+
+	DemoTimelineRenderer m_renderer;
 
   /*
   qint64 sequenceStartFrameChanged(qint64 previous_frame,  Sequence* seq); //return the correct start frame of the seq
@@ -51,7 +52,7 @@ public:
 signals:
 	// property
 	void framerateChanged(double); // meta compiler doesn't support signal declaration inside macros...
-	void requestPosition(double position);
+	void requestPosition(double _position);
   /*
 public slots:
   void updateCamera(qint64 frame, Camera& cam);

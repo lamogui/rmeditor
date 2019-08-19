@@ -9,12 +9,6 @@ class LogManager final : public QObject
 {
   Q_OBJECT
 
-public:
-  ~LogManager();
-
-  // Statics
-  static LogManager* get();
-
 signals:
   void assertion(QString);
   void error(QString);
@@ -25,10 +19,7 @@ public slots:
   void handleOpengGLLoggedMessage(const QOpenGLDebugMessage& debugMessage);
 
 private:
-  // Singleton
-  LogManager();
-  static LogManager* createInstance();
-
+	LogManager(); // global non-static
 };
 
 namespace Log
@@ -38,7 +29,5 @@ namespace Log
   void Warning(const QString& str);
   void Info(const QString& str);
 }
-
-
 
 #endif // !LOGMANAGER_HPP

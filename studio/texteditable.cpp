@@ -50,7 +50,7 @@ bool TextEditable::save(const QString& _text)
   }
 
   QTextStream stream(&file);
-  stream << text;
+  stream << _text;
   stream.flush();
   file.close();
 

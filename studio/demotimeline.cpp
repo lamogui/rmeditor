@@ -8,28 +8,17 @@
 ** DemoTimelineRenderer
 */
 
+DemoTimelineRenderer::DemoTimelineRenderer(Project& _project)
+	: Renderer(), m_project(_project)
+{
+}
+
 /*
-DemoTimelineRenderer::DemoTimelineRenderer(DemoTimeline&  timeline, const QSize& initialSize)
-  : Renderer(),  timeline(timeline)
-{
-#include <QtMath>
-
-}
-
-DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogWidget &log):
-  Timeline(*(project.getMusic()),2*60.0,fps,log),
-  m_camera(new Camera),
-  m_node(node),
-  m_trackHeight(60.0),
-  m_project(&project),
-  m_render(new DemoRender(*this,QSize(1280,720)))
-{
-  render->getCamera() = camera;
-  load();
-}
+** DemoTimeline
 */
 
 DemoTimeline::DemoTimeline(Project& _parentProject) :
+	m_renderer( _parentProject ),
 	m_project( _parentProject )
 {
 }

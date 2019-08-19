@@ -1,30 +1,13 @@
 #include "logdockwidget.hpp"
-#include "ui_logdockwidget.h"
+
 
 LogDockWidget::LogDockWidget(QWidget *parent) :
-    QDockWidget(parent),
-    ui(new Ui::LogDockWidget)
+	QDockWidget(parent),
 {
-    ui->setupUi(this);
-    connect(ui->logWidget, SIGNAL(textChanged()), this, SLOT(logChanged()));
-}
-
-LogDockWidget::~LogDockWidget()
-{
-    delete ui;
-}
-
-LogWidget *LogDockWidget::getLogWidget()
-{
-  return ui->logWidget;
-}
-
-void LogDockWidget::logChanged()
-{
-  ui->logWidget->ensureCursorVisible();
+	m_ui.setupUi(this);
 }
 
 void LogDockWidget::on_clearButton_clicked(bool)
 {
-  getLogWidget()->clear();
+	m_ui.m_logWidget->clear();
 }

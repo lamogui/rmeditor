@@ -1,26 +1,9 @@
 #include "logmanager.hpp"
-#include "singleton.h"
 
 #include <QOpenGLDebugMessage>
 
 LogManager::LogManager()
 {
-
-}
-
-LogManager::~LogManager()
-{
-
-}
-
-LogManager* LogManager::createInstance()
-{
-  return new LogManager();
-}
-
-LogManager* LogManager::get()
-{
-  return Singleton<LogManager>::instance(LogManager::createInstance);
 }
 
 void LogManager::handleOpengGLLoggedMessage(const QOpenGLDebugMessage& debugMessage)
@@ -40,12 +23,12 @@ namespace Log
   void Assertion(const QString& str)
   {
     qDebug() << "[Assertion Error]" << str.toStdString().c_str();
-    emit LogManager::get()->assertion("[Assertion Error] " + str);
+		emit g_logManager->assertion("[Assertion Error] " + str);
   }
   void Error(const QString& str)
   {
     qDebug() << "[Error]" << str.toStdString().c_str();
-    emit LogManager::get()->error("[Error] " + str);
+		emit g_logManager->error("[Error] " + str);
   }
   void Warning(const QString& str)
   {

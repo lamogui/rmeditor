@@ -88,13 +88,13 @@ void ReferencedQuadFragmentShaderRenderer::glRender(RenderFunctionsCache& gl, Re
 
 void ReferencedQuadFragmentShaderRenderer::configureUniforms(ShaderProgram& program)
 {
-  program.setUniformValue("musicTime", musicTime);
-  program.setUniformValue("sequenceTime", sequenceTime);
-  program.setUniformValue("mediaTime", mediaTime);
-  program.setUniformValue("bassLvl", bassLvl);
-  program.setUniformValue("bassLvlTime", bassLvlTime);
-  program.setUniformValue("bassLvlSequenceTime", bassLvlSequenceTime);
-  program.setUniformValue("noiseLvl", noiseLvl);
-  program.setUniformValue("noiseLvlTime", noiseLvlTime);
-  program.setUniformValue("noiseLvlSequenceTime", noiseLvlSequenceTime);
+	program.setUniformValue("musicTime", m_musicTime);
+	program.setUniformValue("sequenceTime", m_sequenceTime);
+	program.setUniformValue("mediaTime", m_mediaTime);
+	program.setUniformValue("bassLvl", m_bassLvl);
+	program.setUniformValue("bassLvlTime", m_bassLvlTime);
+	program.setUniformValue("bassLvlSequenceTime", m_bassLvlSequenceTime);
+	program.setUniformValue("noiseLvl", m_noiseLvl);
+	program.setUniformValue("noiseLvlTime", m_noiseLvlTime);
+	program.setUniformValue("noiseLvlSequenceTime", m_noiseLvlSequenceTime);
 }

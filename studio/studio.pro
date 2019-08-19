@@ -11,11 +11,13 @@ release:DEFINES += eRELEASE
 debug:DEFINES += eDEBUG
 win32: DEFINES += eWIN32
 
-INCLUDEPATH += ../submodules/rtaudio ../submodules/ogg/include ../submodules/vorbis/include ../tunefish ../enigma
+INCLUDEPATH += ../submodules/rtaudio ../submodules/ogg/include ../submodules/vorbis/include ../tunefish ../enigma ../studio
 HEADERS += \
   4klangmusic.hpp \
   camera.hpp \
   demotimeline.hpp \
+  demotimelinedockwidget.hpp \
+  demotimelinewidget.hpp \
   fast2dquad.hpp \
   ffmpegencoder.hpp \
   gif.h \
@@ -43,14 +45,14 @@ HEADERS += \
   shaderminifier.hpp \
   texteditable.hpp \
   texteditor.hpp \
-  timelinedockwidget.hpp \
-  timelinewidget.hpp \
   tunefish4music.hpp \
   undocommands.hpp
 
 SOURCES += \
   camera.cpp \
   demotimeline.cpp \
+  demotimelinedockwidget.cpp \
+  demotimelinewidget.cpp \
   fast2dquad.cpp \
   ffmpegencoder.cpp \
   gif.c \
@@ -78,16 +80,15 @@ SOURCES += \
   shaderminifier.cpp \
   texteditable.cpp \
   texteditor.cpp \
-  timelinedockwidget.cpp \
-  timelinewidget.cpp \
   tunefish4music.cpp \
   undocommands.cpp
 
 FORMS += \
+  demotimelinedockwidget.ui \
   editorwidget.ui \
   logdockwidget.ui \
   mainwindow.ui \
-  timelinedockwidget.ui
+  mediafileseditorwidget.ui
 
 RESOURCES += ../icons/resources.qrc
 RC_FILE += resources.rc

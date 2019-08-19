@@ -4,7 +4,7 @@
 #include <QApplication>
 
 #include "mainwindow.hpp"
-#include "ui_mainwindow.h"
+
 
 #include "logmanager.hpp"
 #include "mediafileseditorwidget.hpp"
@@ -12,9 +12,9 @@
 #include "project.hpp"
 #include "render.hpp"   // for connect
 #include "renderer.hpp" // for connect
-#include "timeline.hpp" // for QMetaType (so connect I imagine ?)
-#include "timelinewidget.hpp"
-#include "timelinedockwidget.hpp"
+#include "demotimeline.hpp" // for QMetaType (so connect I imagine ?)
+#include "demotimelinewidget.hpp"
+#include "demotimelinedockwidget.hpp"
 
 /*
 #include "ffmpegencoder.hpp"
@@ -26,13 +26,11 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    m_project(nullptr),
-    ui(new Ui::MainWindow)
-
+		m_project(nullptr)
 {
-    ui->setupUi(this);
-    ui->progressBar->setVisible(false);
-    ui->cancelButton->setVisible(false);
+    m_ui.setupUi(this);
+    m_ui.progressBar->setVisible(false);
+    m_ui.cancelButton->setVisible(false);
 
     m_info = new LogDockWidget(this);
     m_info->getLogWidget()->setPrintTime(false);
@@ -47,29 +45,29 @@ MainWindow::MainWindow(QWidget *parent) :
     addDockWidget(Qt::BottomDockWidgetArea, m_timeline);
     addDockWidget(Qt::LeftDockWidgetArea, m_editor);
 
-    connect(m_editor,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
-    connect(m_timeline,SIGNAL(rendererChanged(Renderer*)),this->ui->widget,SLOT(setRenderer(Renderer*)));
+    connect(m_editor,SIGNAL(rendererChanged(Renderer*)),this->m_ui.widget,SLOT(setRenderer(Renderer*)));
+    connect(m_timeline,SIGNAL(rendererChanged(Renderer*)),this->m_ui.widget,SLOT(setRenderer(Renderer*)));
 
     //Main window actions
-    ui->toolBar->addAction(ui->actionNew);
-    ui->toolBar->addAction(ui->actionOpen);
-    ui->toolBar->addAction(ui->actionSaveAllShaders);
-    ui->toolBar->addSeparator();
-    ui->toolBar->addAction(ui->actionTake_screenshot);
-    ui->toolBar->addSeparator();
-    ui->toolBar->addAction(ui->actionInsert_camera_keyframe);
-    ui->toolBar->addAction(ui->actionReset_camera);
+    m_ui.toolBar->addAction(m_ui.actionNew);
+    m_ui.toolBar->addAction(m_ui.actionOpen);
+    m_ui.toolBar->addAction(m_ui.actionSaveAllShaders);
+    m_ui.toolBar->addSeparator();
+    m_ui.toolBar->addAction(m_ui.actionTake_screenshot);
+    m_ui.toolBar->addSeparator();
+    m_ui.toolBar->addAction(m_ui.actionInsert_camera_keyframe);
+    m_ui.toolBar->addAction(m_ui.actionReset_camera);
 
-    connect(ui->actionNew, &QAction::triggered, this, &MainWindow::newProject);
-    connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::open);
-    connect(ui->actionSaveAllShaders, &QAction::triggered, this, &MainWindow::saveAllShaders);
-    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
-    connect(ui->actionReset_camera, &QAction::triggered, ui->renderWidget, &RenderWidget::resetCamera);
-    connect(ui->actionTake_screenshot, &QAction::triggered, ui->renderWidget, &RenderWidget::takeScreenshot);
-    connect(ui->actionExport_as_video, &QAction::triggered, this, &MainWindow::exportAsVideo);
-    connect(ui->actionExport_as_Linux_Demo, &QAction::triggered, this, &MainWindow::exportAsLinuxDemo);
-    //connect(ui->actionInsert_camera_keyframe, &QAction::triggered, this, &MainWindow::insertCameraKeyframe);
-    connect(ui->actionSwitch_displayed_texture, &QAction::triggered, ui->renderWidget, &RenderWidget::switchDisplayedTexture);
+    connect(m_ui.actionNew, &QAction::triggered, this, &MainWindow::newProject);
+    connect(m_ui.actionOpen, &QAction::triggered, this, &MainWindow::open);
+    connect(m_ui.actionSaveAllShaders, &QAction::triggered, this, &MainWindow::saveAllShaders);
+    connect(m_ui.actionQuit, &QAction::triggered, this, &MainWindow::close);
+    connect(m_ui.actionReset_camera, &QAction::triggered, m_ui.renderWidget, &RenderWidget::resetCamera);
+    connect(m_ui.actionTake_screenshot, &QAction::triggered, m_ui.renderWidget, &RenderWidget::takeScreenshot);
+    connect(m_ui.actionExport_as_video, &QAction::triggered, this, &MainWindow::exportAsVideo);
+    connect(m_ui.actionExport_as_Linux_Demo, &QAction::triggered, this, &MainWindow::exportAsLinuxDemo);
+    //connect(m_ui.actionInsert_camera_keyframe, &QAction::triggered, this, &MainWindow::insertCameraKeyframe);
+    connect(m_ui.actionSwitch_displayed_texture, &QAction::triggered, m_ui.renderWidget, &RenderWidget::switchDisplayedTexture);
 
     showFullScreen();
 }
@@ -144,9 +142,9 @@ void MainWindow::resetProject()
 
 void MainWindow::initializeProject()
 {
-  ui->renderWidget->makeCurrent();
-  project->initializeGL(ui->renderWidget->getRenderFunctions());
-  ui->renderWidget->doneCurrent();
+  m_ui.renderWidget->makeCurrent();
+  project->initializeGL(m_ui.renderWidget->getRenderFunctions());
+  m_ui.renderWidget->doneCurrent();
 
   editor->appendMediaFile(project);
   StringMap<MediaFile*>::const_iterator it;
@@ -165,7 +163,7 @@ void MainWindow::initializeProject()
 
 void MainWindow::insertCameraKeyframe()
 {
-  Renderer* currentRenderer = ui->renderWidget->getCurrentRenderer().data();
+  Renderer* currentRenderer = m_ui.renderWidget->getCurrentRenderer().data();
   Camera* cam = currentRenderer ? currentRenderer->getCurrentCamera() : nullptr;
   if (cam)
   {
@@ -180,16 +178,16 @@ void MainWindow::exportAsVideo()
   {
     freezeAll();
 
-    ui->widget->setRenderer(m_project->demoTimeline()->getRenderer());
+    m_ui.widget->setRenderer(m_project->demoTimeline()->getRenderer());
 
-    ui->progressBar->setMinimum(0);
-    ui->progressBar->setMaximum(m_project->demoTimeline()->length());
-    ui->progressBar->setValue(0);
-    ui->progressBar->setFormat("Rendering %v/%m (%p%)");
-    ui->progressBar->setVisible(true);
-    ui->cancelButton->setVisible(true);
+    m_ui.progressBar->setMinimum(0);
+    m_ui.progressBar->setMaximum(m_project->demoTimeline()->length());
+    m_ui.progressBar->setValue(0);
+    m_ui.progressBar->setFormat("Rendering %v/%m (%p%)");
+    m_ui.progressBar->setVisible(true);
+    m_ui.cancelButton->setVisible(true);
 
-    disconnect(ui->cancelButton,SIGNAL(clicked(bool)),0,0);
+    disconnect(m_ui.cancelButton,SIGNAL(clicked(bool)),0,0);
 
 
     FFmpegEncoder* encoder = new FFmpegEncoder(
@@ -199,9 +197,9 @@ void MainWindow::exportAsVideo()
                                QSize(1920,1080),
                                *(m_info->getLogWidget()));
 
-    connect(ui->cancelButton,SIGNAL(clicked(bool)),encoder,SLOT(cancel()));
+    connect(m_ui.cancelButton,SIGNAL(clicked(bool)),encoder,SLOT(cancel()));
 
-    connect(encoder,SIGNAL(newFrameEncoded(int)),ui->progressBar,SLOT(setValue(int)));
+    connect(encoder,SIGNAL(newFrameEncoded(int)),m_ui.progressBar,SLOT(setValue(int)));
     connect(encoder,SIGNAL(finished()),this,SLOT(unfreezeAll()));
     connect(encoder,SIGNAL(finished()),encoder,SLOT(deleteLater()));
     encoder->start(QThread::HighPriority);
@@ -211,12 +209,12 @@ void MainWindow::exportAsVideo()
 
 void MainWindow::freezeAll()
 {
-  ui->renderWidget->setOnlyShowTexture(true);
+  m_ui.renderWidget->setOnlyShowTexture(true);
 
-  ui->menuBar->setEnabled(false);
-  ui->menuCamera->setEnabled(false);
-  ui->menuFile->setEnabled(false);
-  ui->menuExport->setEnabled(false);
+  m_ui.menuBar->setEnabled(false);
+  m_ui.menuCamera->setEnabled(false);
+  m_ui.menuFile->setEnabled(false);
+  m_ui.menuExport->setEnabled(false);
 
   m_timeline->setEnabled(false);
   m_editor->setEnabled(false);
@@ -226,18 +224,18 @@ void MainWindow::freezeAll()
 
 void MainWindow::unfreezeAll()
 {
-  ui->menuBar->setEnabled(true);
-  ui->menuCamera->setEnabled(true);
-  ui->menuFile->setEnabled(true);
-  ui->menuExport->setEnabled(true);
+  m_ui.menuBar->setEnabled(true);
+  m_ui.menuCamera->setEnabled(true);
+  m_ui.menuFile->setEnabled(true);
+  m_ui.menuExport->setEnabled(true);
 
   m_timeline->setEnabled(true);
   m_editor->setEnabled(true);
 
-  ui->renderWidget->setOnlyShowTexture(false);
+  m_ui.renderWidget->setOnlyShowTexture(false);
 
-  ui->progressBar->setVisible(false);
-  ui->cancelButton->setVisible(false);
+  m_ui.progressBar->setVisible(false);
+  m_ui.cancelButton->setVisible(false);
   //m_timeline->getTimelineWidget()->startUpdateLoop();
 }
 
@@ -251,5 +249,4 @@ void MainWindow::exportAsLinuxDemo()
       m_project->exportAsLinuxDemo(QDir(d));
     }
   }
-  */
 }

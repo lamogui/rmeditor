@@ -1,5 +1,5 @@
 #include "mediafileseditorwidget.hpp"
-#include "ui_mediafileseditorwidget.h"
+
 
 #include <iostream>
 
@@ -11,16 +11,10 @@
 #include "texteditor.hpp"  // temp
 #include "texteditable.hpp" // temp
 
-MediaFilesEditorWidget::MediaFilesEditorWidget(QWidget *parent) :
-    QDockWidget(parent),
-    ui(new Ui::MediaFilesEditorWidget)
+MediaFilesEditorWidget::MediaFilesEditorWidget(QWidget *_parent) :
+	QDockWidget(_parent),
 {
-  ui->setupUi(this);
-}
-
-MediaFilesEditorWidget::~MediaFilesEditorWidget()
-{
-  delete ui;
+  m_ui.setupUi(this);
 }
 
 /*
@@ -40,16 +34,16 @@ void MediaFilesEditorWidget::loadProject(Project &project)
 }
 */
 
-void MediaFilesEditorWidget::appendMediaFile(MediaFile* newMediaFile)
+void MediaFilesEditorWidget::appendMediaFile(MediaFile* _newMediaFile)
 {
-  jassert(newMediaFile);
+	jassert(_newMediaFile);
   //TODO : support all kind of editors
-  TextEditable* te = qobject_cast<TextEditable*>(newMediaFile);
+	TextEditable* te = qobject_cast<TextEditable*>(_newMediaFile);
   if (te)
   {
     //connect(newMediaFile, &QObject::destroyed, this, &MediaFilesEditorWidget::onMediaFileDestroyed);
     TextEditor* editor = new TextEditor(*te, this);
-    ui->tab->addTab(editor, te->getPath().fileName());
+    m_ui.tab->addTab(editor, te->getPath().fileName());
   }
   else
     jassertfalse; // todo
@@ -57,7 +51,7 @@ void MediaFilesEditorWidget::appendMediaFile(MediaFile* newMediaFile)
 
 void MediaFilesEditorWidget::on_saveButton_clicked(bool)
 {
-  TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->currentWidget());
+  TextEditor* te = dynamic_cast<TextEditor*>(m_ui.tab->currentWidget());
   if (te != nullptr)
   {
     if (te->save())
@@ -73,7 +67,7 @@ void MediaFilesEditorWidget::on_saveButton_clicked(bool)
 
 void MediaFilesEditorWidget::on_buildButton_clicked(bool)
 {
-  TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->currentWidget());
+  TextEditor* te = dynamic_cast<TextEditor*>(m_ui.tab->currentWidget());
   if (te != nullptr)
   {
     if (te->build())
@@ -94,10 +88,10 @@ void MediaFilesEditorWidget::on_tab_currentChanged(int index)
     return;
   }
 
-  TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->widget(index));
+  TextEditor* te = dynamic_cast<TextEditor*>(m_ui.tab->widget(index));
   jassert(te != nullptr);
   //te->refresh();
-  ui->buildButton->setEnabled(te->getTextObject().buildable());
+  m_ui.buildButton->setEnabled(te->getTextObject().buildable());
   emit rendererChanged(te->getTextObject().getDefaultRenderer());
 
 }
@@ -107,9 +101,9 @@ void MediaFilesEditorWidget::saveAllShaders()
   QList<TextEditor*> frameworks;
   QList<TextEditor*> scenes;
 
-  for (int i = 0; i < ui->tab->count(); i++)
+  for (int i = 0; i < m_ui.tab->count(); i++)
   {
-    QWidget* widget = ui->tab->widget(i);
+    QWidget* widget = m_ui.tab->widget(i);
     TextEditor* editor = dynamic_cast<TextEditor*>(widget);
     if (editor)
     {
@@ -143,19 +137,19 @@ void MediaFilesEditorWidget::saveAllShaders()
 
 void MediaFilesEditorWidget::onTextEditorSaved(TextEditor* e, bool saved)
 {
-  for (int i = 0; i < ui->tab->count(); i++)
+  for (int i = 0; i < m_ui.tab->count(); i++)
   {
-    QWidget* widget = ui->tab->widget(i);
+    QWidget* widget = m_ui.tab->widget(i);
     TextEditor* editor = dynamic_cast<TextEditor*>(widget);
     if (editor == e)
     {
       if (saved)
       {
-        ui->tab->setTabText(i, editor->getTextObject().getPath().fileName());
+        m_ui.tab->setTabText(i, editor->getTextObject().getPath().fileName());
       }
       else
       {
-        ui->tab->setTabText(i, editor->getTextObject().getPath().fileName() + "*");
+        m_ui.tab->setTabText(i, editor->getTextObject().getPath().fileName() + "*");
       }
       break;
     }
