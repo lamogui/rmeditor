@@ -103,7 +103,7 @@
   <customwidget>
    <class>DemoTimelineWidget</class>
    <extends>QGraphicsView</extends>
-   <header>demotimelinewidget.h</header>
+   <header>demotimelinewidget.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

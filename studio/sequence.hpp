@@ -19,97 +19,96 @@ class Sequence : public QGraphicsObject
 public:
 	Sequence(QGraphicsObject* parent = nullptr);
 
-  // Utils 
+	// MediaFile
+	QPointer<MediaFile> m_media; // TODO make this editable and notify..., maybe use an intex ?
+
+	// Utils
 	inline qint64 getEndFrame() const { return m_startFrame; }
-	inline bool isInside(qint64 frame) const { return (frame >= m_startFrame && frame < getEndFrame()); }
-	inline bool overlap(const Sequence& seq) const { return (isInside(seq.m_startFrame)||
-                                                           isInside(seq.getEndFrame())||
-																													 (seq.m_startFrame < m_startFrame && seq.getEndFrame() > getEndFrame())); }
-  
-  // Time position 
-  void setFramePosition(qint64 framePosition);
+	inline bool isInside(qint64 _frame) const { return (_frame >= m_startFrame && _frame < getEndFrame()); }
+	inline bool overlap(const Sequence& _seq) const { return (isInside(_seq.m_startFrame)||
+																													 isInside(_seq.getEndFrame())||
+																													 (_seq.m_startFrame < m_startFrame && _seq.getEndFrame() > getEndFrame())); }
+	// Time position
+	void setFramePosition(qint64 _framePosition);
 
-  // Graphics
-  QBrush selectedBrush() { return QBrush(QColor(200, 200, 255)); }
-  QBrush idleBrush() { return QBrush(QColor(200, 200, 200)); }
-  float getHeight() const { return height; }
+	// Graphics
+	QBrush selectedBrush() { return QBrush(QColor(200, 200, 255)); }
+	QBrush idleBrush() { return QBrush(QColor(200, 200, 200)); }
 
-  // GraphicsItem
+	// GraphicsItem
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *_option, QWidget *_widget) override;
-  QRectF boundingRect() const override;
+	QRectF boundingRect() const override;
 
-  inline QMap<qint64, CameraKeyframe*> getCameraKeyframes() const { return m_cameraKeyframes; }
-  // GL
-  void initializeGL(RenderFunctionsCache& renderCache);
+	inline QMap<qint64, CameraKeyframe*> getCameraKeyframes() const { return m_cameraKeyframes; }
+	// GL
+	void initializeGL(RenderFunctionsCache& _renderCache);
 
-  /*
-  void setCamera(qint64 relative_frame, Camera& cam) const;
-  void insertCameraKeyframe(qint64 rel_frame, const QVector3D& pos, const QQuaternion& rot, float fov);
-  */
+	/*
+	void setCamera(qint64 relative_frame, Camera& cam) const;
+	void insertCameraKeyframe(qint64 rel_frame, const QVector3D& pos, const QQuaternion& rot, float fov);
+	*/
 
-  typedef enum
-  {
-    Move,
-    LeftExtend,
-    RightExtend
-  } MouseAction;
+	typedef enum
+	{
+		Move,
+		LeftExtend,
+		RightExtend
+	} MouseAction;
 
-  //Do not use this is only used by DemoTimeline (I know it's ugly)
-  //inline void forceSetStartFrame(qint64 frame) { this->setPos(QPointF((qreal)frame,this->pos().y())); }
-  //void deleteCameraKeyframe(CameraKeyframe* key); // key must be correctly in sequence
-  
-  //Used by keyframes
-  //qint64 nearestFrameAvailableForKeyframe(qint64 rel_frame) const;
+	//Do not use this is only used by DemoTimeline (I know it's ugly)
+	//inline void forceSetStartFrame(qint64 frame) { this->setPos(QPointF((qreal)frame,this->pos().y())); }
+	//void deleteCameraKeyframe(CameraKeyframe* key); // key must be correctly in sequence
+
+	//Used by keyframes
+	//qint64 nearestFrameAvailableForKeyframe(qint64 rel_frame) const;
 
 signals:
-  void requestFramePosition(const Sequence* source, qint64 position);
+	void requestFramePosition(const Sequence* source, qint64 position);
 
 protected:
-  void renderImages();
+	void renderImages();
 
-  virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
-  virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
-  virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+	void mousePressEvent(QGraphicsSceneMouseEvent* _event) override;
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* _event) override;
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent* _event) override;
 
-  virtual void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event);
-  virtual void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
-  virtual void 	hoverMoveEvent(QGraphicsSceneHoverEvent *event);
+	void 	hoverEnterEvent(QGraphicsSceneHoverEvent* _event) override;
+	void 	hoverLeaveEvent(QGraphicsSceneHoverEvent* _event) override;
+	void 	hoverMoveEvent(QGraphicsSceneHoverEvent* _event) override;
 
-  bool isInsideRightExtend(QPointF rel_pos, qreal scale) const;
-  bool isInsideLeftExtend(QPointF rel_pos, qreal scale) const;
-  qreal getScaleFromWidget(const QWidget *widget) const;
+	bool isInsideRightExtend(QPointF _rel_pos, qreal _scale) const;
+	bool isInsideLeftExtend(QPointF _rel_pos, qreal _scale) const;
+	qreal getScaleFromWidget(const QWidget* _widget) const;
 
 
 protected slots:
-  void keyframePropertyChanged(QObject* owner, const QString& propertyName, const QVariant& oldValue, const QVariant& newValue);
-  void keyframeRequestFramePosition(qint64 position);
+	void keyframePropertyChanged(QObject* _owner, const QString& _propertyName, const QVariant& _oldValue, const QVariant& _newValue);
+	void keyframeRequestFramePosition(qint64 _position);
 
 private:
-  // properties
-	QPointer<MediaFile> m_media;
+	// properties
 	qint64 m_startFrame;
 	quint64 m_length;
 	QMap<qint64, CameraKeyframe*> m_cameraKeyframes;
 
-  // Internal 
-  QSharedPointer<Renderer> renderer;
-  QSharedPointer<Camera> camera; // sadly because of QWeakPointer we need to do that, maybe Camera should inherit from QObject ?  
+	// Internal
+	Renderer* m_renderer;
 
-  // Graphical
-  QImage preview;
-  float height;
+	// Graphical
+	QImage m_preview;
+	qreal m_height;
 
-  // Render
-  RenderFunctionsCache* renderCache; // fucking opengl context
+	// Render
+	RenderFunctionsCache* m_renderCache; // fucking opengl context
 
-  // Movement
-  QPointF mousePressPos;
-  qint64 mousePressStartFrame;
-  qint64 mousePressLength;
-  MouseAction currentAction;
+	// Movement
+	QPointF m_mousePressPos;
+	qint64 m_mousePressStartFrame;
+	qint64 m_mousePressLength;
+	MouseAction m_currentAction;
 
 private:
-  typedef QGraphicsObject BaseClass;
+	typedef QGraphicsObject BaseClass;
 };
 
 #endif

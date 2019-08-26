@@ -11,142 +11,82 @@
 #include "demotimelinewidget.hpp" // fucking scale
 #include "undocommands.hpp"
 
-Sequence::Sequence(QGraphicsObject* parent) :
-  QGraphicsObject(parent),
-  startFrame(-1), // invalid position
-  length(2), // minimal length is 1 frame else the sequence doesn't "exists", but actual impl only support at least 2 frames
-  camera(new Camera), 
-  height(60),
-  renderCache(nullptr)
+Sequence::Sequence(QGraphicsObject* _parent) :
+	QGraphicsObject(_parent),
+	m_startFrame(-1), // invalid position
+	m_length(2), // minimal length is 1 frame else the sequence doesn't "exists", but actual impl only support at least 2 frames
+	m_height(60),
+	m_renderCache(nullptr)
 {
-  setFlags(QGraphicsItem::ItemIsSelectable);
-  setAcceptHoverEvents(true);
+	setFlags(QGraphicsItem::ItemIsSelectable);
+	setAcceptHoverEvents(true);
 }
 
-void Sequence::setMedia(const QPointer<MediaFile>& mediaFile)
-{
-  if (media != mediaFile)
-  {
-    QPointer<MediaFile> oldMedia;
-    media = mediaFile;
-    if (!media.isNull())
-    {
-      jassert(media->canBeRendered());
-      renderer.reset(media->createRenderer());
-      if (renderer->hasDynamicCamera() && cameraKeyframes.size())
-      {
-        renderer->setCurrentCamera(camera);
-      }
-      if (renderCache)
-      {
-        renderer->initializeGL(*renderCache);
-        renderImages();
-      }
-    }
-    emit propertyChanged(this, "media", QVariant::fromValue(oldMedia), QVariant::fromValue(media));
-  }
-}
-
-void Sequence::insertCameraKeyframe(CameraKeyframe* keyframe)
-{
-  jassert(keyframe);
-  jassert(keyframe->getRelativeFrame() >= 0 && keyframe->getRelativeFrame() < (qint64)getLength()); // not terribble but should work
-  jassert(cameraKeyframes.constFind(keyframe->getRelativeFrame()) != cameraKeyframes.constEnd()); // Error erase previous keyframe
-
-  keyframe->setParentItem(this);
-
-  connect(keyframe, &Keyframe::propertyChanged, this, &Sequence::keyframePropertyChanged);
-  connect(keyframe, &Keyframe::requestFramePosition, this, &Sequence::keyframeRequestFramePosition);
-
-  cameraKeyframes.insert(keyframe->getRelativeFrame(), keyframe);
-  
-  QVariant oldValue;
-  QVariant newValue = QVariant::fromValue(keyframe);
-  emit propertyChanged(this, "cameraKeyframes", oldValue, newValue);
-}
-
-void Sequence::removeCameraKeyframe(CameraKeyframe* keyframe)
-{
-  Int64Map<CameraKeyframe*>::iterator it = cameraKeyframes.find(keyframe->getRelativeFrame());
-  jassert(it != cameraKeyframes.end());
-  jassert(it.value() == keyframe);
-
-  cameraKeyframes.erase(it);
-
-  disconnect(keyframe, &Keyframe::propertyChanged, this, &Sequence::keyframePropertyChanged);
-  disconnect(keyframe, &Keyframe::requestFramePosition, this, &Sequence::keyframeRequestFramePosition);
-
-  setParentItem(nullptr);
-
-  QVariant oldValue = QVariant::fromValue(keyframe);
-  QVariant newValue; 
-  emit propertyChanged(this, "cameraKeyframes", oldValue, newValue);
-}
-
-void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*_option*/, QWidget* _widget)
 {  
-  QBrush fillBrush(isSelected() ? selectedBrush() : idleBrush());
-  QRectF rect = boundingRect();
-  painter->fillRect(rect, fillBrush); 
-  painter->drawRect(rect);
+	QBrush fillBrush(isSelected() ? selectedBrush() : idleBrush());
+	QRectF rect = boundingRect();
+	painter->fillRect(rect, fillBrush);
+	painter->drawRect(rect);
 
-  qreal scale = getScaleFromWidget(widget);
-  QRectF previewRect(QPointF(5*scale,5),QSizeF(preview.size()));
-  previewRect.setWidth(previewRect.width()*scale);
-  if (previewRect.bottom() > rect.bottom() - 5)
-  {
-    previewRect.setBottom(rect.bottom() - 5);
-    previewRect.setWidth(rect.width() * previewRect.height() / (float) (preview.size().height()));
-  }
-  if (previewRect.width() > (rect.width() - 10*scale))
-  {
-    previewRect.setWidth((rect.width() - 10*scale));
-  }
-  if (getLength() > 10)
-  {
-    painter->drawImage(previewRect,preview);
-  }
-  QFont textFont;
-  textFont.setStretch((int)(100*scale));
-  painter->setFont(textFont);
-  QRectF textRect = QRectF(previewRect.right() + 5*scale,previewRect.top(), previewRect.right()-(previewRect.right()+5*scale), rect.height());
-  if (!media.isNull())
-  {
-    painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,media.data()->objectName() + " (" + media->getPath().fileName() + ")");
-  }
-  else
-  {
-    painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,QString("Missing media"));
-  }
+	qreal scale = getScaleFromWidget(_widget);
+	QRectF previewRect(QPointF(5*scale,5),QSizeF(m_preview.size()));
+	previewRect.setWidth(previewRect.width()*scale);
+	if (previewRect.bottom() > rect.bottom() - 5)
+	{
+		previewRect.setBottom(rect.bottom() - 5);
+		previewRect.setWidth(rect.width() * previewRect.height() / static_cast<qreal>(m_preview.size().height()));
+	}
+	if (previewRect.width() > (rect.width() - 10*scale))
+	{
+		previewRect.setWidth((rect.width() - 10*scale));
+	}
+	if (m_length > 10)
+	{
+		painter->drawImage(previewRect, m_preview);
+	}
+	QFont textFont;
+	textFont.setStretch(static_cast<int>(100*scale));
+	painter->setFont(textFont);
+	QRectF textRect = QRectF(previewRect.right() + 5*scale,previewRect.top(), previewRect.right()-(previewRect.right()+5*scale), rect.height());
+	if (!m_media.isNull())
+	{
+		painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,m_media.data()->objectName() + " (" + m_media->getPath().fileName() + ")");
+	}
+	else
+	{
+		painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,QString("Missing media"));
+	}
 }
 
 QRectF Sequence::boundingRect() const
 {
-  return QRectF(0, 0, getLength(), getHeight());
+	return QRectF(0, 0, m_length, m_height);
 }
 
-void Sequence::initializeGL(RenderFunctionsCache& renderCache)
+void Sequence::initializeGL(RenderFunctionsCache& _renderCache)
 {
-  this->renderCache = &renderCache;
-  renderImages();
-  if (!renderer.isNull())
-    renderer->initializeGL(renderCache);
+	this->m_renderCache = &_renderCache;
+	renderImages();
+	if ( m_renderer ) {
+		m_renderer ->initializeGL(_renderCache);
+	}
 }
 
 void Sequence::renderImages()
 {
-  jassert(renderCache);
-  if (!renderer.isNull())
+	jassert(m_renderCache);
+	if ( m_renderer )
   {
-    int height = getHeight() - 10;
+		int height = static_cast<int>(m_height - 10);
     RenderTexture2D render;
-    render.initializeGL(*renderCache, QSize(4 * height / 3, height));
-    preview = render.getImage();
-    render.render(*renderCache, *renderer);
+		render.initializeGL(*m_renderCache, QSize(4 * height / 3, height));
+		m_preview = render.getImage();
+		render.render(*m_renderCache, *m_renderer);
   }
 }
 
-void Sequence::setStartFrame(qint64 frame)
+void Sequence::setStartFrame(qint64 _frame)
 {
   qint64 previous_frame = getStartFrame();
   if (frame < 0)
