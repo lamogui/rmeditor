@@ -280,7 +280,7 @@ void DemoTimelineWidget::setScale(const QPointF& scale)
 	//update();
 }
 
-void DemoTimelineWidget::focusInEvent(QFocusEvent* _event)
+void DemoTimelineWidget::focusInEvent(QFocusEvent* /*_event*/)
 {
 	if (m_project)
 	{

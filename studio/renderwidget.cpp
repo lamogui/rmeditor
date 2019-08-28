@@ -14,38 +14,32 @@
 #include "fast2dquad.hpp"
 #include "quadfragmentshader.hpp" // for vertex quad shader ! 
 
-RenderWidget::RenderWidget(QWidget *parent) :
-  QOpenGLWidget(parent),
-  renderFunctions(nullptr),
-  render(nullptr),
-  quad(nullptr),
-  quadShader(nullptr),
-  openglDebugLogger(nullptr),
-  captureMouse(false),
-  onlyShowTexture(false),
-  textureDisplayed(color)
+RenderWidget::RenderWidget(QWidget *_parent) :
+	QOpenGLWidget(_parent),
+	m_textureDisplayed(color),
+	m_renderFunctions(nullptr),
+	m_render(nullptr),
+	m_quad(nullptr),
+	m_quadShader(nullptr),
+	m_openglDebugLogger(nullptr),
+	m_captureMouse(false)
 {
-  // Widget config
-  setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
-  setFocusPolicy(Qt::ClickFocus);
+	// Widget config
+	setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
+	setFocusPolicy(Qt::ClickFocus);
 
-  // Update Timer config
-  connect(&updateTimer, SIGNAL(timeout()), this, SLOT(update()));
-  startUpdateLoop();
+	// Update Timer config
+	connect(&m_updateTimer, &QTimer::timeout, this, &RenderWidget::update);
+	startUpdateLoop();
 
-  // Open GL Context config
-  QSurfaceFormat f;
-  f.setRenderableType(QSurfaceFormat::OpenGL);
-  f.setMajorVersion(4);
-  f.setMinorVersion(5);
-  f.setProfile(QSurfaceFormat::CoreProfile);
-  f.setOptions(QSurfaceFormat::DebugContext | f.options());
-  setFormat(f);
-}
-
-RenderWidget::~RenderWidget()
-{
-
+	// Open GL Context config
+	QSurfaceFormat f;
+	f.setRenderableType(QSurfaceFormat::OpenGL);
+	f.setMajorVersion(4);
+	f.setMinorVersion(5);
+	f.setProfile(QSurfaceFormat::CoreProfile);
+	f.setOptions(QSurfaceFormat::DebugContext | f.options());
+	setFormat(f);
 }
 
 const char* RenderWidget::getDisplayTextureFragmentShaderCode()
@@ -331,22 +325,19 @@ void RenderWidget::stopUpdateLoop()
   m_updateTimer.stop();
 }
 
-void RenderWidget::setCurrentRenderer(const QWeakPointer<Renderer>& renderer)
-{
-  currentRenderer = renderer;
-}
-
 void RenderWidget::switchDisplayedTexture()
 {
-  if (textureDisplayed < 2)
-    textureDisplayed = (TextureDisplayed)((int)textureDisplayed + 1);
-  else
-    textureDisplayed = TextureDisplayed::color;
-  if (quadShader)
-  {
-    quadShader->bind();
-    quadShader->setUniformValue("textureDisplayed", (int)textureDisplayed);
-  }
+	if (m_textureDisplayed < 2) {
+		m_textureDisplayed = static_cast<TextureDisplayed>(static_cast<int>(m_textureDisplayed) + 1);
+	}
+	else {
+		m_textureDisplayed = TextureDisplayed::color;
+	}
+	if (m_quadShader)
+	{
+		m_quadShader->bind();
+		m_quadShader->setUniformValue("textureDisplayed", (int)m_textureDisplayed);
+	}
 }
 
 void RenderWidget::cleanup()

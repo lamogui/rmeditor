@@ -3,7 +3,6 @@
 
 #include <QFileInfo>
 
-#include "camera.hpp" // QSharedPointer fail !
 #include "renderer.hpp"
 #include "renderfunctionscache.hpp"
 

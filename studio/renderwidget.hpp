@@ -6,86 +6,83 @@
 #include <QOpenGLDebugLogger>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
+#include <QPointer>
 #include "jassert.hpp"
 
 #include "renderfunctionscache.hpp"
+#include "renderer.hpp"
 
 class Camera;
 class RenderTexture2D;
 class Fast2DQuad;
 class Render;
-class Renderer;
 class RenderWidget : public QOpenGLWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-       RenderWidget(QWidget *parent = 0);
-       ~RenderWidget();
+	RenderWidget(QWidget *_parent = nullptr);
 
-       // Utils
-       static const char* getDisplayTextureFragmentShaderCode();
+	// Utils
+	static const char* getDisplayTextureFragmentShaderCode();
 
-       // Enum
-       enum TextureDisplayed
-       {
-         color = 0,
-         normal = 1,
-         depth = 2
-       };
+	// Enum
+	enum TextureDisplayed
+	{
+	 color = 0,
+	 normal = 1,
+	 depth = 2
+	};
 
-       // Accessors
-       QWeakPointer<Renderer> getCurrentRenderer() const { return currentRenderer; }
-       TextureDisplayed getTextureDisplayed() const { return textureDisplayed; }
-       RenderFunctionsCache& getRenderFunctions() { jassert(renderFunctions); return *renderFunctions; }
+	// Attributes
+	QPointer<Renderer> m_currentRenderer;
+	TextureDisplayed m_textureDisplayed;
+
+	// Accessors
+	RenderFunctionsCache& getRenderFunctions() { jassert(m_renderFunctions); return *m_renderFunctions; }
 
 public slots:
-       void resetCamera();
-       void takeScreenshot();
+	void resetCamera();
+	void takeScreenshot();
 
-       inline void setOnlyShowTexture(bool e) { m_onlyShowTexture = e;}
-       void startUpdateLoop();
-       void stopUpdateLoop();
-       void setCurrentRenderer(const QWeakPointer<Renderer>& renderer);
-       void switchDisplayedTexture();
+	void startUpdateLoop();
+	void stopUpdateLoop();
+	void switchDisplayedTexture();
 
 protected slots:
-       void cleanup();
+	void cleanup();
 
 protected:
-       // QWidget
-       void mousePressEvent(QMouseEvent* event) override;
-       void mouseReleaseEvent(QMouseEvent* event) override;
-       void mouseMoveEvent(QMouseEvent* event) override;
-       void wheelEvent(QWheelEvent* event) override;
-       void keyPressEvent(QKeyEvent* event) override;
-       void keyReleaseEvent(QKeyEvent* event) override;
+	// QWidget
+	void mousePressEvent(QMouseEvent* _event) override;
+	void mouseReleaseEvent(QMouseEvent* _event) override;
+	void mouseMoveEvent(QMouseEvent* _event) override;
+	void wheelEvent(QWheelEvent* _event) override;
+	void keyPressEvent(QKeyEvent* _event) override;
+	void keyReleaseEvent(QKeyEvent* _event) override;
 
-       // QOpenGLWidget
-       void initializeGL() override;
-       void paintGL() override;
+	// QOpenGLWidget
+	void initializeGL() override;
+	void paintGL() override;
 
-       // Time
-       QTimer updateTimer;
+	// Time
+	QTimer m_updateTimer;
 
-       // Render objects 
-       RenderFunctionsCache* renderFunctions;
-       RenderTexture2D* render;          // fbo
-       Fast2DQuad* quad;                 // geometry
-       QOpenGLShaderProgram* quadShader;  // shader
-       QWeakPointer<Renderer> currentRenderer;
-       QOpenGLDebugLogger* openglDebugLogger;
+	// Render objects
+	RenderFunctionsCache* m_renderFunctions;
+	RenderTexture2D* m_render;          // fbo
+	Fast2DQuad* m_quad;                 // geometry
+	QOpenGLShaderProgram* m_quadShader;  // shader
 
-       // Control (mouse / keyboard)
-       QPointF previousMousePos;
-       QSet<Qt::Key> keysPressed;
+	QOpenGLDebugLogger* m_openglDebugLogger;
 
-       // Hum let's clean this one day 
-       bool captureMouse;
-       bool m_onlyShowTexture;
+	// Control (mouse / keyboard)
+	QPointF m_previousMousePos;
+	QSet<Qt::Key> m_keysPressed;
 
-       // Options 
-       TextureDisplayed textureDisplayed;
+	// Hum let's clean this one day
+	bool m_captureMouse;
+
 
 };
 

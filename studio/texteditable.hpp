@@ -14,7 +14,7 @@ public:
 	TextEditable(QObject* parent = nullptr);
 
 	//The text to print in the editor and that will be saved in the file
-	virtual const QString& text() const = 0;
+	QString m_text;
 
 	//Is the text object buildable
 	virtual bool buildable() const {return false;}

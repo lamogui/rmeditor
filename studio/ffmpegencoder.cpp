@@ -81,12 +81,12 @@ void FFmpegEncoder::run()
 	m_ffmpeg = new QProcess();
 
   //Use signal/slot in queue because of opengl context
-	connect(this,SIGNAL(requestRendering(QSize,QImage*)), m_project.m_demoTimeline,SLOT(renderImage(QSize,QImage*)),Qt::BlockingQueuedConnection);
+	connect(this,&FFmpegEncoder::requestRendering, m_project.m_demoTimeline, &DemoTimeline::renderImage,Qt::BlockingQueuedConnection);
 
-	connect(m_ffmpeg,SIGNAL(readyReadStandardOutput()),this,SLOT(readStandardOutput()));
-	connect(m_ffmpeg,SIGNAL(readyReadStandardError()),this,SLOT(readStandardError()));
-	connect(m_ffmpeg,SIGNAL(errorOccurred(QProcess::ProcessError)),this,SLOT(ffmpegErrorOccurred(QProcess::ProcessError)));
-	connect(m_ffmpeg,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(ffmpegFinished(int,QProcess::ExitStatus)));
+	connect(m_ffmpeg,&QProcess::readyReadStandardOutput,this,&FFmpegEncoder::readStandardOutput);
+	connect(m_ffmpeg,&QProcess::readyReadStandardError,this,&FFmpegEncoder::readStandardError);
+	connect(m_ffmpeg,&QProcess::errorOccurred,this,&FFmpegEncoder::ffmpegErrorOccurred);
+	connect(m_ffmpeg,&QProcess::finished,this,&FFmpegEncoder::ffmpegFinished);
 
 
 	Music* music = m_project.m_music;

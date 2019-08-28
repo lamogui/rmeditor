@@ -6,6 +6,8 @@
 #include "renderfunctionscache.hpp"
 #include "jassert.hpp"
 
+#include <QDir>
+
 Project::Project(QObject* parent) :
 	MediaFile(parent),
 	m_music(nullptr),
