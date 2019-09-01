@@ -23,7 +23,6 @@ HEADERS += \
   gif.h \
   giftexture.hpp \
   highlighter.hpp \
-  jassert.hpp \
   keyframe.hpp \
   logdockwidget.hpp \
   logmanager.hpp \

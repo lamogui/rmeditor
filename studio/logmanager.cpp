@@ -2,43 +2,117 @@
 
 #include <QOpenGLDebugMessage>
 
-LogManager::LogManager()
+/*
+ * CppCodeOrigin
+ */
+
+Log::CppCodeOrigin::CppCodeOrigin(const char * _file, unsigned int  _lineNumber) :
+	m_file( _file ),
+	m_lineNumber( _lineNumber )
 {
 }
 
-void LogManager::handleOpengGLLoggedMessage(const QOpenGLDebugMessage& debugMessage)
+/*
+ * Entry
+ */
+
+Log::Entry::Entry( Type _type, Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) :
+	m_type( _type ),
+	m_category( _category ),
+	m_sender( _sender ),
+	m_what( _what ),
+	m_param( _param ),
+	m_cppOrigin( _cppOrigin )
 {
-  if (debugMessage.type() & (QOpenGLDebugMessage::ErrorType))
-    Log::Error("[OpenGL] " + debugMessage.message());
+}
+
+Log::Entry Log::Entry::Assertion( Category _category, const QObject* _sender, QString _what, const CppCodeOrigin& _cppOrigin ){
+	return Log::Entry( Log::Type::Assertion, _category, _sender, _what, static_cast<qint64>(-1), _cppOrigin );
+}
+Log::Entry Log::Entry::Error( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) {
+	return Log::Entry( Log::Type::Error, _category, _sender, _what, _param, _cppOrigin );
+}
+Log::Entry Log::Entry::Warning( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) {
+	return Log::Entry( Log::Type::Warning, _category, _sender, _what, _param, _cppOrigin );
+}
+Log::Entry Log::Entry::Info( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) {
+	return Log::Entry( Log::Type::Info, _category, _sender, _what, _param, _cppOrigin );
+}
+
+/*
+ * Manager
+ */
+
+Log::Manager g_logManager;
+
+Log::Manager::Manager() {
+	connect( this, &Log::Manager::newEntry, this, &Log::Manager::handleNewEntry );
+}
+
+void Log::Manager::Assertion( Category _category, const QObject* _sender, QString _what, const CppCodeOrigin& _cppOrigin ) {
+	emit g_logManager.newEntry( Log::Entry::Assertion(_category, _sender, _what, _cppOrigin) );
+}
+
+void Log::Manager::Error( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) {
+	emit g_logManager.newEntry( Log::Entry::Error(_category, _sender, _what, _param, _cppOrigin) );
+}
+
+void Log::Manager::Warning( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) {
+	emit g_logManager.newEntry( Log::Entry::Warning(_category, _sender, _what, _param, _cppOrigin) );
+}
+
+void Log::Manager::Info( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) {
+	emit g_logManager.newEntry( Log::Entry::Info(_category, _sender, _what, _param, _cppOrigin) );
+}
+
+void Log::Manager::handleOpengGLLoggedMessage(const QOpenGLDebugMessage& debugMessage)
+{
+	if (debugMessage.type() & (QOpenGLDebugMessage::ErrorType)) {
+		perror(Log::Category::OpenGL, nullptr, debugMessage.message());
+	}
   else if (debugMessage.type() &
     (QOpenGLDebugMessage::DeprecatedBehaviorType | QOpenGLDebugMessage::UndefinedBehaviorType |
-      QOpenGLDebugMessage::PortabilityType | QOpenGLDebugMessage::PerformanceType | QOpenGLDebugMessage::InvalidType))
-    Log::Warning("[OpenGL] " + debugMessage.message());
-  else
-    Log::Info("[OpenGL] " + debugMessage.message());
+		 QOpenGLDebugMessage::PortabilityType | QOpenGLDebugMessage::PerformanceType | QOpenGLDebugMessage::InvalidType)) {
+		pwarning(Log::Category::OpenGL, nullptr, debugMessage.message());
+	}
+	else {
+		pinfo(Log::Category::OpenGL, nullptr, debugMessage.message());
+	}
 }
 
-namespace Log
+void Log::Manager::handleNewEntry( Entry _entry )
 {
-  void Assertion(const QString& str)
-  {
-    qDebug() << "[Assertion Error]" << str.toStdString().c_str();
-		emit g_logManager->assertion("[Assertion Error] " + str);
-  }
-  void Error(const QString& str)
-  {
-    qDebug() << "[Error]" << str.toStdString().c_str();
-		emit g_logManager->error("[Error] " + str);
-  }
-  void Warning(const QString& str)
-  {
-    qDebug() << "[Warning]" << str.toStdString().c_str();
-    emit LogManager::get()->warning("[Warning] " + str);
-  }
-  void Info(const QString& str)
-  {
-    qDebug() << "[Info]" << str.toStdString().c_str();
-    emit LogManager::get()->info("[Info] " + str);
-  }
+	QString type;
+	switch (_entry.m_type) {
+		case Log::Type::Assertion:
+			type = "[ASSERT]";
+			break;
+		case Log::Type::Error:
+			type = "[ERROR]";
+			break;
+		case Log::Type::Warning:
+			type = "[WARN]";
+			break;
+		case Log::Type::Info:
+			type = "[INFO]";
+			break;
+	}
+
+	QString category;
+	switch ( _entry.m_category ){
+		case Shader:
+			category = "[SHADER]";
+			break;
+		case OpenGL:
+			category = "[OPENGL]";
+			break;
+		case Undefined:
+			break;
+	}
+
+	m_entries.push_back( _entry );
+
+	QString name = _entry.m_sender ? QString("[") + _entry.m_sender->objectName() + "]" : "";
+	qDebug() << type << category << name << _entry.m_what;
 }
 
