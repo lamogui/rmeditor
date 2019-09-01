@@ -2,7 +2,7 @@
 #define FFMPEGENCODER_HPP
 
 #if defined(_WIN32)
-#include <windows.h> // fix windows kit opengl header compile error
+#include <Windows.h> // fix windows kit opengl header compile error
 #endif
 #include <QImage>
 #include <QTcpSocket>
@@ -43,7 +43,7 @@ class FFmpegEncoder : public QThread
 		void logInfo(QString _txt);
 
 		void requestRendering(QSize _resolution, QImage* _target);
-		void newFrameEncoded(int _frame);
+		void newFrameEncoded(qint64 _frame);
 
 	protected:
 		void run() override; // QThread

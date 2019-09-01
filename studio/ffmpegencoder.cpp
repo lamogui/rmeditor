@@ -81,13 +81,13 @@ void FFmpegEncoder::run()
 	m_ffmpeg = new QProcess();
 
   //Use signal/slot in queue because of opengl context
-	connect(this,&FFmpegEncoder::requestRendering, m_project.m_demoTimeline, &DemoTimeline::renderImage,Qt::BlockingQueuedConnection);
+	connect(this,&FFmpegEncoder::requestRendering, &m_project.m_demoTimeline, &DemoTimeline::renderImage,Qt::BlockingQueuedConnection);
 
 	connect(m_ffmpeg,&QProcess::readyReadStandardOutput,this,&FFmpegEncoder::readStandardOutput);
 	connect(m_ffmpeg,&QProcess::readyReadStandardError,this,&FFmpegEncoder::readStandardError);
 	connect(m_ffmpeg,&QProcess::errorOccurred,this,&FFmpegEncoder::ffmpegErrorOccurred);
-	connect(m_ffmpeg,&QProcess::finished,this,&FFmpegEncoder::ffmpegFinished);
-
+	void (QProcess::*correctFinishedSignal)(int, QProcess::ExitStatus) = &QProcess::finished; // use this trick to get the correct signal see https://wiki.qt.io/New_Signal_Slot_Syntax#Overload
+	connect(m_ffmpeg, correctFinishedSignal, this, &FFmpegEncoder::ffmpegFinished);
 
 	Music* music = m_project.m_music;
   Q_ASSERT(music);
@@ -101,10 +101,10 @@ void FFmpegEncoder::run()
 
   //Ugly wait the music thread to pause shoud do a better pause func with mutex
   QThread::sleep(1);
-	music->setPosition((double)startFrame/m_timeline->framerate());
+	music->setPosition(static_cast<qreal>(startFrame)/m_project.getFramerate());
 
   size_t audioBufferSize = sizeof(qint16) * 2 * 512;
-	size_t videoBufferSize = sizeof(uchar)*m_resolution.width()*m_resolution.height()*3;
+	int videoBufferSize = static_cast<int>(sizeof(uchar))*m_resolution.width()*m_resolution.height()*3;
 
   QTcpSocket videoSocket;
 #ifndef Q_OS_LINUX
@@ -125,7 +125,7 @@ void FFmpegEncoder::run()
 
 	emit logInfo(tr("[ffmpeg] video resolution ") + QString::number(m_resolution.width()) + "x" + QString::number(m_resolution.height()));
   emit logInfo(tr("[ffmpeg] video buffer size ") + video_recv_buffer_size);
-  emit logInfo(tr("[ffmpeg] audio buffer size ") + audioBufferSize);
+	emit logInfo(tr("[ffmpeg] audio buffer size ") + QString::number(audioBufferSize));
 
   //globals options
   arguments << "-y"; // << "-loglevel" <<  "56";
@@ -166,7 +166,7 @@ void FFmpegEncoder::run()
   }
 
   //connect video socket
-  videoSocket.setSocketOption(QAbstractSocket::SendBufferSizeSocketOption, (qulonglong)videoBufferSize);
+	videoSocket.setSocketOption(QAbstractSocket::SendBufferSizeSocketOption, static_cast<qulonglong>(videoBufferSize));
   videoSocket.connectToHost(QHostAddress("127.0.0.1"),1911);
 
   if (!videoSocket.waitForConnected(3000))
@@ -189,10 +189,10 @@ void FFmpegEncoder::run()
     Q_ASSERT(image.byteCount() == videoBufferSize);
 
     qint64 writted = 0;
-    size_t tot_writted = 0;
+		qint64 tot_writted = 0;
     while (writted !=-1 && (tot_writted += writted) != image.byteCount())
     {
-      writted = videoSocket.write((char*)(image.bits() + tot_writted),image.byteCount()-tot_writted);
+			writted = videoSocket.write(reinterpret_cast<char*>(image.bits() + tot_writted),image.byteCount()-tot_writted);
     }
     while (videoSocket.bytesToWrite() > 0)
     {
@@ -213,9 +213,9 @@ void FFmpegEncoder::run()
 
   //Lets' go !
   void* outputBuffer = malloc(audioBufferSize);
-	for (size_t i = startFrame + 1; !m_cancel && i < endFrame; ++i)
+	for (qint64 i = startFrame + 1; !m_cancel && i < endFrame; ++i)
   {
-		double track_time = (double)i/m_project.getFramerate();
+		qreal track_time = static_cast<qreal>(i)/m_project.getFramerate();
     while (track_time >= music->getTime())
     {
 			music->processAudio(outputBuffer,512,track_time,0);
@@ -225,13 +225,13 @@ void FFmpegEncoder::run()
     //image.save(QString::number(i) + ".png");
 
 		Q_ASSERT(image.size() == m_resolution);
-		Q_ASSERT(image.sizeInBytes() == videoBufferSize);
+		Q_ASSERT(image.byteCount() == videoBufferSize);
 
     qint64 writted = 0;
-    size_t tot_writted = 0;
-		while (writted !=-1 && (tot_writted += writted) != image.sizeInBytes())
+		qint64 tot_writted = 0;
+		while (writted !=-1 && (tot_writted += writted) != image.byteCount())
     {
-			writted = videoSocket.write((char*)(image.bits() + tot_writted),image.sizeInBytes()-tot_writted);
+			writted = videoSocket.write(reinterpret_cast<char*>(image.bits()) + tot_writted,image.byteCount()-tot_writted);
       QCoreApplication::processEvents();
     }
     while (videoSocket.bytesToWrite() > 0)

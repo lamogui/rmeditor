@@ -26,6 +26,7 @@ protected:
 };
 
 class Project;
+class QDir;
 class DemoTimeline : public QGraphicsScene
 {
   Q_OBJECT
@@ -53,8 +54,9 @@ signals:
 	// property
 	void framerateChanged(double); // meta compiler doesn't support signal declaration inside macros...
 	void requestPosition(double _position);
-  /*
+
 public slots:
+	/*
   void updateCamera(qint64 frame, Camera& cam);
   inline void updateCamera(Camera& cam) { updateCamera(currentFrame(),cam);}
   inline void updateCamera(qint64 frame) { updateCamera(frame,m_camera); }
@@ -67,11 +69,12 @@ public slots:
 
   void deleteSelectedItems();
   void deleteItems(const QList<QGraphicsItem*> items);
-  void deleteSequence(Sequence* seq);
+	void deleteSequence(Sequence* seq);
+	*/
 
   void renderImage(const QSize& resolution, QImage* target);
 
-  void exportSources(const QDir& dir) const;*/
+	void exportSources(const QDir& dir) const;
 
 protected slots:
   //void addSequenceAction(QAction* action);
