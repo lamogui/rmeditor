@@ -3,22 +3,23 @@
 #include "gif.h"
 #include <QFile>
 
-GifTexture::GifTexture(const QString& uniformName, const QString& filename, QDomNode node, LogWidget& log,QObject* parent) :
-    NodeFile(filename,node,log,parent),
+GifTexture::GifTexture(const QString& _uniformName, const QString& _filename, QObject* _parent) :
+		MediaFile(_parent),
     m_data(nullptr),
-    m_uniformName(uniformName)
+		m_texture(QOpenGLTexture::Target2D),
+		m_uniformName(_uniformName)
 {
-    fileChanged(filename);
-    m_watcher.addPath(filename);
-    QObject::connect(&m_watcher, &QFileSystemWatcher::fileChanged, this, &GifTexture::fileChanged);
+	fileChanged(_filename);
+	m_watcher.addPath(_filename);
+	QObject::connect(&m_watcher, &QFileSystemWatcher::fileChanged, this, &GifTexture::fileChanged);
 }
 
 GifTexture::~GifTexture()
 {
-    if (m_data)
-    {
-        delete_gif(m_data);
-    }
+	if (m_data)
+	{
+			delete_gif(m_data);
+	}
 }
 
 
