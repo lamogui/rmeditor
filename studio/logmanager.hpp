@@ -37,8 +37,12 @@ namespace Log {
 
 	enum Category {
 		Undefined,
-		Shader,
-		OpenGL
+		Code,		// Code path not handled properly/yet need to be checked !
+		System, // Problems related to user system configuration
+		File,		// Problems with a file / media file
+		Shader, // Shaders errors / warnings
+		OpenGL, // Messages coming from OpengGL API
+		Audio,  // Messages coming from an Audio API
 	};
 
 	struct CppCodeOrigin {
@@ -102,13 +106,13 @@ extern Log::Manager g_logManager; // global instance
 #define passertmsg( _category, _sender, _cond, _what) \
 	PROUT_BLOCK_WITH_FORCED_SEMICOLON( \
 	if ( !_cond ) { \
-		if (PROUT_DEBUG_BREAK) { \
+		if (PROUT_IS_DEBUGGER_PRESENT) { \
 			PROUT_DEBUG_BREAK;\
 		} \
 		Log::Manager::Assertion( _category, _sender, QString( _what ) + " (" + QString(#_cond) + ")", PROUT_MAKE_CPP_ORIGIN()); \
 	} )
 #define passertmsgf( _category, _sender, _cond, _what, ... ) passertmsg( _category, _sender, _cond, QString::asprinf( _what, __VA_ARGS__ ) )
-#define passert( _category, _sender, _cond ) passertmsg( _category, _cond, tr("ASSERTION FAILED !") )
+#define passert( _category, _sender, _cond ) passertmsg( _category, _sender, _cond, tr("ASSERTION FAILED !") )
 
 // Errors
 #define perrorp( _category, _sender, _param, _what ) PROUT_BLOCK_WITH_FORCED_SEMICOLON( Log::Manager::Error( _category, _sender, QString( _what ), _param, PROUT_MAKE_CPP_ORIGIN()); )

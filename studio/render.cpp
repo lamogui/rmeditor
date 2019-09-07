@@ -4,7 +4,6 @@
 #include <QOpenGLFunctions>
 
 #include "logmanager.hpp"
-#include "jassert.hpp"
 
 /*
 ** Render

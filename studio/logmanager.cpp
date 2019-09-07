@@ -100,11 +100,23 @@ void Log::Manager::handleNewEntry( Entry _entry )
 
 	QString category;
 	switch ( _entry.m_category ){
+		case File:
+			category = "[FILE]";
+			break;
+		case System:
+			category = "[SYSTEM]";
+			break;
+		case Code:
+			category = "[CODE]";
+			break;
 		case Shader:
 			category = "[SHADER]";
 			break;
 		case OpenGL:
 			category = "[OPENGL]";
+			break;
+		case Audio:
+			category = "[AUDIO]";
 			break;
 		case Undefined:
 			break;

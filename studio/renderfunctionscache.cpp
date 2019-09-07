@@ -1,6 +1,5 @@
 
 #include "renderfunctionscache.hpp"
-#include "jassert.hpp"
 
 std::string VertexAttributesIndex::toString(Enum e)
 {

@@ -2,7 +2,6 @@
 #include "demotimeline.hpp"
 #include "project.hpp"
 #include "music.hpp"
-#include "jassert.hpp"
 
 /*
 ** DemoTimelineRenderer

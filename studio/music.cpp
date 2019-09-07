@@ -7,42 +7,42 @@
 #include <QMessageBox>
 
 #include "logmanager.hpp"
-#include "jassert.hpp"
 
-#include "renderer.hpp"
+#include "project.hpp"
 
 /*
 ** Music
 */
 
-Music::Music(QObject* parent):
-  MediaFile(parent),
+Music::Music(Project* _parent):
+  MediaFile(_parent),
+  m_playing(false),
   m_audio(),
-  m_length(length),
-  m_playing(false)
+  m_noteVelocityTexture(QOpenGLTexture::Target2D),
+  m_maxNoteVelocityTexture(QOpenGLTexture::Target2D)
 {
-  /* 
+
   // FIXME : move this elsewhere
-  if (m_audio.getDeviceCount() < 1)
-  {
-    emit error("[" + filename + "] error: no audio device found");
+	if (m_audio.getDeviceCount() < 1) {
+		perror(Log::System, this, tr("no audio device found"));
   }
-  */
+
 }
 
 Music::~Music()
 {
 }
 
-int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime, RtAudioStreamStatus status, void *userData)
+int Music::rtAudioCallback(void* _outputBuffer, void * _inputBuffer, unsigned int _nBufferFrames, double _streamTime, RtAudioStreamStatus _status, void *_userData)
 {
-  (void) inputBuffer;
+	(void) _inputBuffer;
 
-  jassert(userData && outputBuffer);
-  Music* music = (Music*) userData;
+	Music* music = reinterpret_cast<Music*>( _userData );
+	passert(Log::Code, music, music && _outputBuffer);
+
   if (music->m_playing)
   {
-    music->processAudio(outputBuffer,nBufferFrames,streamTime,status);
+		music->processAudio(_outputBuffer,_nBufferFrames,_streamTime,_status);
     //for (int i = 0; i < nBufferFrames; i++)
     //{
     //    reinterpret_cast<short*>(outputBuffer)[i*2] = sin(static_cast<float>(i)/static_cast<float>(nBufferFrames)) * 16000;
@@ -51,51 +51,34 @@ int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int n
   }
   else
   {
-    memset(outputBuffer,0,nBufferFrames*music->m_bytesPerFrame);
+		memset(_outputBuffer,0,_nBufferFrames*music->m_bytesPerFrame);
   }
-  if (status & RTAUDIO_OUTPUT_UNDERFLOW)
-    Log::Warning("[RtAudio] output buffer underflow !"); // TODO : make an Log::ASyncWarning Log::ASyncError etc calls 
+	if (_status & RTAUDIO_OUTPUT_UNDERFLOW) {
+		pwarning( Log::Audio, music, tr( "output buffer underflow !" ));
+	}
 
   return 0;
 }
 
-void Music::rtAudioError(RtAudioError::Type type, const std::string &errorText)
+void Music::rtAudioError(RtAudioError::Type _type, const std::string& _errorText)
 {
-  (void) type;
-  Log::Error(tr("[RtAudio] ") + QString::fromStdString(errorText));
-}
-
-void Music::setMainTimeline(Timeline* timeline)
-{
-  if (mainTimeline != timeline)
-  {
-    QVariant oldValue = QVariant::fromValue(mainTimeline);
-    QVariant newValue = QVariant::fromValue(timeline);
-    if (timeline)
-      timeline->setParent(this);
-    mainTimeline = timeline;
-    emit propertyChanged(this, "mainTimeline", oldValue, newValue);
-  }
+	if ( _type == RtAudioError::WARNING || _type == RtAudioError::DEBUG_WARNING ) {
+		pwarning( Log::Audio, nullptr, QString::fromStdString(_errorText) );
+	} else if ( _type == RtAudioError::INVALID_PARAMETER || _type == RtAudioError::INVALID_USE) {
+		perror( Log::Code, nullptr, QString::fromStdString(_errorText) );
+	} else {
+		perror( Log::Audio, nullptr, QString::fromStdString(_errorText) );
+	}
 }
 
 /*
-** ExternalLengthMusic
+** UserSettedLengthMusic
 */
 
-ExternalLengthMusic::ExternalLengthMusic(QObject* parent) : 
-  Music(parent),
-  length(0)
+UserSettedLengthMusic::UserSettedLengthMusic(Project* _parent) :
+  Music(_parent),
+  m_length(0)
 {
-}
-
-void ExternalLengthMusic::setLength(double newlength)
-{
-  if (newlength <= 0)
-  {
-    newlength = 0;
-    Log::Error("[" + getPath().fileName() + "] error: invalid length " + newlength);
-  }
-  SET_PROPERTY(double, length)
 }
 
 

@@ -7,14 +7,14 @@
 #include "RtAudio.h"
 #include "mediafile.hpp"
 
-
+class Project;
 class RtAudio;
 class Music : public MediaFile
 {
 	Q_OBJECT
 
 public:
-	Music(QObject* _parent);
+	Music(Project* _parent);
 	virtual ~Music();
 
 	virtual qreal getTime() const = 0;
@@ -61,7 +61,7 @@ class UserSettedLengthMusic : public Music
   Q_OBJECT
 
 public:
-	UserSettedLengthMusic(QObject* parent);
+	UserSettedLengthMusic(Project* _parent);
 	qreal m_length;
 
 	inline qreal getLength() const override { return m_length; }

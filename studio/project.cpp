@@ -4,7 +4,6 @@
 #include "music.hpp"
 #include "mediafile.hpp"
 #include "renderfunctionscache.hpp"
-#include "jassert.hpp"
 
 #include <QDir>
 

@@ -7,7 +7,6 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLWidget>
 #include <QPointer>
-#include "jassert.hpp"
 
 #include "renderfunctionscache.hpp"
 #include "renderer.hpp"

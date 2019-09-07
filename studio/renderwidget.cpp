@@ -6,7 +6,6 @@
 #include <QVector3D>   // for camera control
 
 #include "logwidget.hpp"
-#include "jassert.hpp"
 
 #include "camera.hpp"
 #include "render.hpp"

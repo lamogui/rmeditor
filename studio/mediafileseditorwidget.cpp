@@ -3,8 +3,7 @@
 
 #include <iostream>
 
-// essentials 
-#include "jassert.hpp"
+// essentials
 #include "logmanager.hpp"
 
 #include "scene.hpp" // Should be temp 

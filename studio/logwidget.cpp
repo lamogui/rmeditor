@@ -4,8 +4,6 @@
 #include <QGraphicsObject>
 #include <QGraphicsScene>
 #include "logwidget.hpp"
-#include "jassert.hpp"
-
 
 LogWidget::LogWidget(QWidget *parent):
   QTextEdit(parent),
