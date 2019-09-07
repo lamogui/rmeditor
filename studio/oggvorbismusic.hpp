@@ -7,12 +7,13 @@
 
 #include <QFile>
 
+class Project;
 class OggVorbisMusic : public Music
 {
   Q_OBJECT
 
 public:
-	OggVorbisMusic(QObject* parent = nullptr);
+	OggVorbisMusic(Project* _parent = nullptr);
 	~OggVorbisMusic() override;
 
 	// Music
@@ -21,7 +22,7 @@ public:
 
 	void exportMusicCData(const QFile& source, const QFile& header) const override;
 
-public slots:
+	public slots:
 	//MediaFile
 	bool load() override;
 

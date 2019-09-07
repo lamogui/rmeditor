@@ -105,7 +105,7 @@ extern Log::Manager g_logManager; // global instance
 // Asserts
 #define passertmsg( _category, _sender, _cond, _what) \
 	PROUT_BLOCK_WITH_FORCED_SEMICOLON( \
-	if ( !_cond ) { \
+	if ( !(_cond) ) { \
 		if (PROUT_IS_DEBUGGER_PRESENT) { \
 			PROUT_DEBUG_BREAK;\
 		} \
@@ -113,6 +113,8 @@ extern Log::Manager g_logManager; // global instance
 	} )
 #define passertmsgf( _category, _sender, _cond, _what, ... ) passertmsg( _category, _sender, _cond, QString::asprinf( _what, __VA_ARGS__ ) )
 #define passert( _category, _sender, _cond ) passertmsg( _category, _sender, _cond, tr("ASSERTION FAILED !") )
+#define ptodo( _what ) passertmsg( Log::Code, nullptr, false, tr("TODO: ") + _what )
+
 
 // Errors
 #define perrorp( _category, _sender, _param, _what ) PROUT_BLOCK_WITH_FORCED_SEMICOLON( Log::Manager::Error( _category, _sender, QString( _what ), _param, PROUT_MAKE_CPP_ORIGIN()); )
