@@ -14,8 +14,7 @@ class Music : public MediaFile
 	Q_OBJECT
 
 public:
-	Music(Project* _parent);
-	virtual ~Music();
+	Music(Project* _parent, const QFileInfo& _path);
 
 	virtual qreal getTime() const = 0;
 	virtual qreal getLength() const = 0;
@@ -47,6 +46,9 @@ protected:
 
 	static void rtAudioError(RtAudioError::Type _type, const std::string &_errorText);
 
+	void allocateNoteVelocityTextures(int _nbInstruments, int _nbNotes, const void* _velocityBuffer, const void* _maxVelocityBuffer);
+	static void createNoteVelocityTexture(QOpenGLTexture& _texture);
+
 	// RtAudio
 	size_t m_bytesPerFrame; //Rt audio bytes per frame
 	RtAudio m_audio;
@@ -61,7 +63,7 @@ class UserSettedLengthMusic : public Music
   Q_OBJECT
 
 public:
-	UserSettedLengthMusic(Project* _parent);
+	UserSettedLengthMusic(Project* _parent, const QFileInfo& _path);
 	qreal m_length;
 
 	inline qreal getLength() const override { return m_length; }

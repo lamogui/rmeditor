@@ -7,28 +7,24 @@
 #include "tf4.hpp"
 #include "tf4player.hpp"
 
-class Tunefish4Music : public Music
+class Tunefish4Music : public UserSettedLengthMusic
 {
   Q_OBJECT
 
 public:
-	Tunefish4Music(const QString& _filename, qreal _length, QDomNode _node ,LogWidget& _log, QObject* _parent);
-  virtual ~Tunefish4Music();
+	Tunefish4Music(Project* _parent, const QFileInfo& _path);
+	~Tunefish4Music() override;
 
 	qreal getTime() const override;
 
-	void exportMusicCData(const QFile& source, const QFile& header) const override;
+	void exportMusicCData(const QFile& _source, const QFile& _header) const override;
 
-  /*
-    RtAudio stuff
-  */
+	/*
+		RtAudio stuff
+	*/
 	bool createRtAudioStream() override;
 	void processAudio(void* _outputBuffer, unsigned int _nBufferFrames,
 										double _streamTime, RtAudioStreamStatus _status) override;
-
-  size_t instrumentCount() const { return m_player.song.instrCount; }
-
-
 
 public slots:
 	bool load() override;

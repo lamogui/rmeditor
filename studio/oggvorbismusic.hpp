@@ -13,7 +13,7 @@ class OggVorbisMusic : public Music
   Q_OBJECT
 
 public:
-	OggVorbisMusic(Project* _parent = nullptr);
+	OggVorbisMusic(Project* _parent,const QFileInfo& _path);
 	~OggVorbisMusic() override;
 
 	// Music

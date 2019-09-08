@@ -40,7 +40,6 @@ void GifTexture::fileChanged(const QString& filename)
     }
 
 		m_texture.create();
-		m_texture.bind();
 		m_texture.setFormat(QOpenGLTexture::RGBA8U);
 		m_texture.setWrapMode(QOpenGLTexture::WrapMode::Repeat);
 		m_texture.setMinMagFilters(QOpenGLTexture::Filter::LinearMipMapLinear, QOpenGLTexture::Filter::Linear);

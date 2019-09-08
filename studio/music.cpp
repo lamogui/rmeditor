@@ -14,8 +14,8 @@
 ** Music
 */
 
-Music::Music(Project* _parent):
-  MediaFile(_parent),
+Music::Music(Project* _parent, const QFileInfo& _path):
+	MediaFile(_parent, _path),
   m_playing(false),
   m_audio(),
   m_noteVelocityTexture(QOpenGLTexture::Target2D),
@@ -27,10 +27,6 @@ Music::Music(Project* _parent):
 		perror(Log::System, this, tr("no audio device found"));
   }
 
-}
-
-Music::~Music()
-{
 }
 
 int Music::rtAudioCallback(void* _outputBuffer, void * _inputBuffer, unsigned int _nBufferFrames, double _streamTime, RtAudioStreamStatus _status, void *_userData)
@@ -71,12 +67,33 @@ void Music::rtAudioError(RtAudioError::Type _type, const std::string& _errorText
 	}
 }
 
+void Music::allocateNoteVelocityTextures(int _nbInstruments, int _nbNotes, const void* _velocityBuffer, const void* _maxVelocityBuffer){
+	if (!m_noteVelocityTexture.isCreated()) {
+		createNoteVelocityTexture(m_noteVelocityTexture);
+	}
+	m_noteVelocityTexture.setSize( _nbNotes, _nbInstruments );
+	m_noteVelocityTexture.setData(QOpenGLTexture::PixelFormat::Luminance, QOpenGLTexture::PixelType::Float32, _velocityBuffer);
+
+	if (m_maxNoteVelocityTexture.isCreated()) {
+		createNoteVelocityTexture(m_maxNoteVelocityTexture);
+	}
+	m_noteVelocityTexture.setSize( _nbNotes, _nbInstruments );
+	m_noteVelocityTexture.setData(QOpenGLTexture::PixelFormat::Luminance, QOpenGLTexture::PixelType::Float32, _maxVelocityBuffer);
+}
+
+void Music::createNoteVelocityTexture(QOpenGLTexture& _texture) {
+	_texture.create();
+	_texture.setFormat(QOpenGLTexture::R32F);
+	_texture.setWrapMode(QOpenGLTexture::WrapMode::Repeat);
+	_texture.setMinMagFilters(QOpenGLTexture::Filter::LinearMipMapLinear, QOpenGLTexture::Filter::Linear);
+}
+
 /*
 ** UserSettedLengthMusic
 */
 
-UserSettedLengthMusic::UserSettedLengthMusic(Project* _parent) :
-  Music(_parent),
+UserSettedLengthMusic::UserSettedLengthMusic(Project* _parent, const QFileInfo& _path) :
+	Music(_parent, _path),
   m_length(0)
 {
 }

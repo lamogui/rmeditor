@@ -2,8 +2,8 @@
 #include "logmanager.hpp"
 #include "project.hpp"
 
-OggVorbisMusic::OggVorbisMusic(Project* _parent) :
-  Music(_parent),
+OggVorbisMusic::OggVorbisMusic(Project* _parent, const QFileInfo& _path) :
+	Music(_parent,_path),
   m_vorbisFile({0})
 {
 
@@ -40,13 +40,13 @@ bool OggVorbisMusic::load()
 	ov_clear(&m_vorbisFile);
 	m_file.close();
 
-	if (!getPath().exists())
+	if (!m_path.exists())
 	{
-		perror( Log::File, this, tr("The file \"") + getPath().absoluteFilePath() + tr("\" doesn't exists !") );
+		perror( Log::File, this, tr("The file \"") + m_path.absoluteFilePath() + tr("\" doesn't exists !") );
 		return false;
 	}
 
-	m_file.setFileName(getPath().absoluteFilePath());
+	m_file.setFileName(m_path.absoluteFilePath());
 
 	if (!m_file.open(QIODevice::ReadOnly))
 	{
@@ -110,7 +110,7 @@ bool OggVorbisMusic::createRtAudioStream()
 		unsigned int sampleRate = static_cast<unsigned int >(vi->rate);
 		unsigned int bufferFrames = 1024;  // Hum maybe music should control the global framerate and use an appropriate value here ?
 		m_bytesPerFrame = sizeof(float) * parameters.nChannels; // For Music
-		m_audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, rtAudioCallback, reinterpret_cast<void*>(this), 0, Music::rtAudioError);
+		m_audio.openStream(&parameters, nullptr, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, rtAudioCallback, reinterpret_cast<void*>(this), nullptr, Music::rtAudioError);
 		m_audio.startStream();
 	}
 	catch (RtAudioError &err)

@@ -1,10 +1,8 @@
 
 #include "mediafile.hpp"
-#include "camera.hpp"
-#include "logwidget.hpp"
 
-MediaFile::MediaFile(QObject* parent) : QObject(parent), m_previewRenderer(nullptr)
+MediaFile::MediaFile(QObject* _parent, const QFileInfo& _path) : QObject(_parent), m_path(_path), m_previewRenderer(nullptr)
 {
-  connect(this, SIGNAL(pathChanged(QFileInfo)), this, SLOT(load()));
 }
+
 
