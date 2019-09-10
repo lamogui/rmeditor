@@ -11,7 +11,7 @@ class TextEditable : public MediaFile /* Represent any text compilable text medi
 	Q_OBJECT
 
 public:
-	TextEditable(QObject* parent = nullptr);
+	TextEditable(QObject* _parent, const QFileInfo& _path);
 
 	//The text to print in the editor and that will be saved in the file
 	QString m_text;
@@ -29,7 +29,6 @@ public slots:
 signals:
 	// text edition
 	void startLineNumberChanged(int _line);
-	void objectTextChanged(QString _text); // for project (probably)
 
 protected:
 	bool save(const QString& _text);

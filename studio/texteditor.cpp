@@ -4,54 +4,55 @@
 #include "highlighter.hpp"
 #include "project.hpp"
 #include "shadercode.hpp"
+#include "logmanager.hpp"
 
-TextEditor::TextEditor(TextEditable& te, QWidget *parent) :
-  QPlainTextEdit(parent),
-  m_object(&textObject),
+TextEditor::TextEditor(QWidget *_parent, TextEditable& _te) :
+	QPlainTextEdit(_parent),
+	m_object(_te),
   m_timer(new QTimer(this)),
   m_startLineNumber(0),
   m_saved(true)
 {
-    lineNumberArea = new LineNumberArea(this);
+	lineNumberArea = new LineNumberArea(this);
 
-    connect(this, &TextEditor::textChanged, this, &TextEditor::onTextEdited);
-    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
-    connect(&textObject, SIGNAL(startLineNumberChanged(int)), this, SLOT(setStartLineNumber(int)));
-    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
-    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-    connect(m_object,SIGNAL(destroyed(QObject*)),this,SLOT(onDestroyObject(QObject*)),Qt::DirectConnection);
-    connect(m_object,SIGNAL(objectTextChanged(QString)),SLOT(setPlainText(QString)));
+	connect(this, &TextEditor::textChanged, this, &TextEditor::onTextEdited);
+	connect(this, &TextEditor::blockCountChanged, this, &TextEditor::updateLineNumberAreaWidth);
+	connect(&m_object, &TextEditable::startLineNumberChanged, this, &TextEditor::setStartLineNumber);
+	connect(this, &TextEditor::updateRequest, this, &TextEditor::updateLineNumberArea);
+	connect(this, &TextEditor::cursorPositionChanged, this, &TextEditor::highlightCurrentLine);
+	connect(&m_object, &QObject::destroyed,this,&TextEditor::onDestroyTextEditable,Qt::DirectConnection);
+	connect(&m_object,&TextEditable::objectTextChanged, this, &TextEditor::setPlainText);
 
-    updateLineNumberAreaWidth(0);
-    highlightCurrentLine();
+	updateLineNumberAreaWidth(0);
+	highlightCurrentLine();
 
-    QFont font("consolas",9);
-    const int tabStop = 2;  // 4 characters
-    QFontMetrics metrics(font);
-    setTabStopWidth(tabStop * metrics.width(' '));
-    setFont(font);
-    setLineWrapMode(QPlainTextEdit::NoWrap);
+	QFont font("consolas",9);
+	const int tabStop = 2;  // 4 characters
+	QFontMetrics metrics(font);
+	setTabStopWidth(tabStop * metrics.width(' '));
+	setFont(font);
+	setLineWrapMode(QPlainTextEdit::NoWrap);
 
-    m_highlighter = new Highlighter(document());
+	m_highlighter = new Highlighter(document());
 
 
 
-    m_timer->setSingleShot(true);
-    if (dynamic_cast<GLSLShaderCode*>(&textObject) != nullptr)
-    {
-      m_highlighter->defineGLSLFragmentShaderRules();
-      m_timer->setInterval(1000);  //1 second because we want see our result as fast as possible
-      connect(m_timer, SIGNAL(timeout()), this, SLOT(build()));
-      connect(this, SIGNAL(textChanged()), this, SLOT(resetTimer()));
-    }
-    else if (dynamic_cast<Project*>(&textObject) != nullptr)
-    {
-      m_highlighter->defineXMLRule();
-    }
+	m_timer->setSingleShot(true);
+	if (dynamic_cast<GLSLShaderCode*>(&textObject) != nullptr)
+	{
+		m_highlighter->defineGLSLFragmentShaderRules();
+		m_timer->setInterval(1000);  //1 second because we want see our result as fast as possible
+		connect(m_timer, SIGNAL(timeout()), this, SLOT(build()));
+		connect(this, SIGNAL(textChanged()), this, SLOT(resetTimer()));
+	}
+	else if (dynamic_cast<Project*>(&textObject) != nullptr)
+	{
+		m_highlighter->defineXMLRule();
+	}
 
-    this->setPlainText(m_object->text());
+	this->setPlainText(m_object->text());
 
-    setUndoRedoEnabled(true);
+	setUndoRedoEnabled(true);
 }
 
 /*
@@ -191,9 +192,9 @@ void TextEditor::onTextEdited()
 
 }
 
-void TextEditor::onDestroyTextEditable(QObject* obj)
+void TextEditor::onDestroyTextEditable(QObject* _obj)
 {
-  jassert(obj == &textObject);
+	passert(Log::Code, this, _obj == &m_object);
   delete this;
 }
 

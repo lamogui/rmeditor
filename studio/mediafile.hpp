@@ -2,9 +2,9 @@
 #define MEDIAFILE_HPP
 
 #include <QFileInfo>
-
-#include "renderer.hpp"
 #include "renderfunctionscache.hpp"
+
+class Renderer;
 
 /*
 ** MediaFile : Any media file, it' could be rendered or not and could have a fixed length or not...

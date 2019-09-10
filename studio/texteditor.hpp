@@ -20,74 +20,73 @@ class TextEditor : public QPlainTextEdit
      Q_OBJECT
 
  public:
-     TextEditor(TextEditable& textObject, QWidget *parent = 0);
+	TextEditor(QWidget *_parent, TextEditable& _textObject);
 
-     void lineNumberAreaPaintEvent(QPaintEvent *event);
-     int lineNumberAreaWidth();
+	void lineNumberAreaPaintEvent(QPaintEvent *event);
+	int lineNumberAreaWidth();
 
-     TextEditable& getTextObject() const
-       {return textObject;}
+	TextEditable& getTextObject() const
+	 {return textObject;}
 
 
 public slots:
-     bool build();
-     bool save();
-     //void refresh();
+	bool build();
+	bool save();
+	//void refresh();
 
 signals:
-     void saved(TextEditor* editor, bool);
+	void saved(TextEditor* _editor, bool);
 
 protected:
-     void resizeEvent(QResizeEvent *event);
+	void resizeEvent(QResizeEvent *event);
 
 private slots:
-     void updateLineNumberAreaWidth(int newBlockCount);
-     void highlightCurrentLine();
-     void updateLineNumberArea(const QRect &, int);
-     void resetTimer();
+	void updateLineNumberAreaWidth(int _newBlockCount);
+	void highlightCurrentLine();
+	void updateLineNumberArea(const QRect &, int);
+	void resetTimer();
 
-     void setStartLineNumber(int n);
+	void setStartLineNumber(int _n);
 
-     void onTextEdited();
-     void onDestroyTextEditable(QObject* obj);
+	void onTextEdited();
+	void onDestroyTextEditable(QObject* _obj);
 
 private:
-     TextEditable* m_object;
-     QString colorSyntax(QString in);
+	QString colorSyntax(QString in);
 
-     TextEditable& textObject;
-     QWidget *lineNumberArea;
-     QString m_filename;
-     Highlighter *m_highlighter;
-     int m_id;
-     QTimer *m_timer;
-     int m_startLineNumber;
-     bool m_saved;
+	TextEditable& m_object;
+	QWidget *lineNumberArea;
+	QString m_filename;
+	Highlighter *m_highlighter;
+	int m_id;
+	QTimer *m_timer;
+	int m_startLineNumber;
+	bool m_saved;
  };
 
 
- class LineNumberArea : public QWidget
- {
+class LineNumberArea : public QWidget
+{
 
- public:
-     LineNumberArea(TextEditor *editor) :
-       QWidget(editor)
-     {
-         codeEditor = editor;
-     }
+public:
+	LineNumberArea(TextEditor* _editor) :
+	 QWidget(_editor)
+	{
+		 m_codeEditor = _editor;
+	}
 
-     QSize sizeHint() const {
-         return QSize(codeEditor->lineNumberAreaWidth(), 0);
-     }
+	QSize sizeHint() const {
+		 return QSize(m_codeEditor->lineNumberAreaWidth(), 0);
+	}
 
- protected:
-     void paintEvent(QPaintEvent *event) {
-         codeEditor->lineNumberAreaPaintEvent(event);
-     }
+protected:
+	void paintEvent(QPaintEvent* _event) {
+		m_codeEditor->lineNumberAreaPaintEvent(_event);
+	}
 
- private:
-     TextEditor *codeEditor;
- };
+private:
+	TextEditor* m_codeEditor;
+};
 
 
 #endif // TEXTEDITOR_H
