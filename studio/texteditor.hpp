@@ -25,8 +25,8 @@ class TextEditor : public QPlainTextEdit
 	void lineNumberAreaPaintEvent(QPaintEvent *event);
 	int lineNumberAreaWidth();
 
-	TextEditable& getTextObject() const
-	 {return textObject;}
+	const TextEditable& getTextObject() const
+	 {return m_object;}
 
 
 public slots:
@@ -55,11 +55,11 @@ private:
 	QString colorSyntax(QString in);
 
 	TextEditable& m_object;
-	QWidget *lineNumberArea;
+	QWidget* m_lineNumberArea;
 	QString m_filename;
 	Highlighter *m_highlighter;
 	int m_id;
-	QTimer *m_timer;
+	QTimer* m_timer;
 	int m_startLineNumber;
 	bool m_saved;
  };

@@ -58,7 +58,7 @@ void Tunefish4Music::processAudio(void *outputBuffer, unsigned int nBufferFrames
 
 
 
-bool Tunefish4Music::load()
+bool Tunefish4Music::loadFromDisk()
 {
 	QFile file(m_path.absoluteFilePath());
 	eTfPlayerUnloadSong(m_player);

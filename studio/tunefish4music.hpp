@@ -27,7 +27,7 @@ public:
 										double _streamTime, RtAudioStreamStatus _status) override;
 
 public slots:
-	bool load() override;
+	bool loadFromDisk() override;
 	void setPosition(qreal _time) override;
 	void updateTextures() override;
 

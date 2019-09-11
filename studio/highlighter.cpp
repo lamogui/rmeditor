@@ -46,31 +46,6 @@ Highlighter::Highlighter(QTextDocument *parent)
     : QSyntaxHighlighter(parent)
 {
   defineGLSLFragmentShaderRules();
-
-
-}
-
-void Highlighter::defineXMLRule()
-{
-    highlightingRules.clear();
-    //XML
-    HighlightingRule rule;
-
-    XMLNameFormat.setForeground(QColor(249,38,114));
-    rule.pattern = QRegExp("([A-Za-z_:]|[^\\x00-\\x7F])([A-Za-z0-9_:.-]|[^\\x00-\\x7F])*");
-    rule.format = XMLNameFormat;
-    highlightingRules.append(rule);
-
-    XMLAttributeFormat.setForeground(QColor(166,226,46));
-    rule.pattern = QRegExp("\\b[A-Za-z0-9_]+(?=\\=)");
-    rule.format = XMLAttributeFormat;
-    highlightingRules.append(rule);
-
-    XMLParamFormat.setForeground(QColor(230,219,116));
-    rule.pattern = QRegExp("\"[^<\"]*\"|'[^<']*'");
-    rule.format = XMLParamFormat;
-    highlightingRules.append(rule);
-
 }
 
 void Highlighter::defineGLSLFragmentShaderRules()
@@ -91,9 +66,9 @@ void Highlighter::defineGLSLFragmentShaderRules()
                   << "\\buniform\\b" << "\\bvarying\\b" << "\\battribute\\b" << "\\bstruct\\b" << "\\bsmooth\\b"
                   << "\\bsampler1D\\b" << "\\bsampler2D\\b" << "\\bsampler3D\\b" << "\\bgl_FragColor\\b";
   foreach (const QString &pattern, typePatterns) {
-      rule.pattern = QRegExp(pattern);
-      rule.format = typeFormat;
-      highlightingRules.append(rule);
+		rule.pattern = QRegExp(pattern);
+		rule.format = typeFormat;
+		highlightingRules.append(rule);
   }
 
   keywordFormat.setForeground(QColor(249,38,114));
@@ -102,9 +77,9 @@ void Highlighter::defineGLSLFragmentShaderRules()
                      "\\bbreak\\b" << "\\breturn\\b" << "\\bif\\b" <<
                      "\\belse\\b" << "\\bconst\\b" << "\\bswitch\\b" << "\\bcase\\b"<< "\\bdiscard\\b";
   foreach (const QString &pattern, keywordPatterns) {
-      rule.pattern = QRegExp(pattern);
-      rule.format = keywordFormat;
-      highlightingRules.append(rule);
+		rule.pattern = QRegExp(pattern);
+		rule.format = keywordFormat;
+		highlightingRules.append(rule);
   }
 
   singleLineCommentFormat.setForeground(Qt::darkGray);
@@ -153,32 +128,33 @@ void Highlighter::highlightBlock(const QString &text)
     return;
   }
 
-    foreach (const HighlightingRule &rule, highlightingRules) {
-        QRegExp expression(rule.pattern);
-        int index = expression.indexIn(text);
-        while (index >= 0) {
-            int length = expression.matchedLength();
-            setFormat(index, length, rule.format);
-            index = expression.indexIn(text, index + length);
-        }
-    }
-    setCurrentBlockState(0);
+	foreach (const HighlightingRule &rule, highlightingRules) {
+		QRegExp expression(rule.pattern);
+		int index = expression.indexIn(text);
+		while (index >= 0) {
+			int length = expression.matchedLength();
+			setFormat(index, length, rule.format);
+			index = expression.indexIn(text, index + length);
+		}
+	}
+	setCurrentBlockState(0);
 
-    int startIndex = 0;
-    if (previousBlockState() != 1)
-        startIndex = commentStartExpression.indexIn(text);
+	int startIndex = 0;
+	if (previousBlockState() != 1) {
+		startIndex = commentStartExpression.indexIn(text);
+	}
 
-    while (startIndex >= 0) {
-        int endIndex = commentEndExpression.indexIn(text, startIndex);
-        int commentLength;
-        if (endIndex == -1) {
-            setCurrentBlockState(1);
-            commentLength = text.length() - startIndex;
-        } else {
-            commentLength = endIndex - startIndex
-                            + commentEndExpression.matchedLength();
-        }
-        setFormat(startIndex, commentLength, multiLineCommentFormat);
-        startIndex = commentStartExpression.indexIn(text, startIndex + commentLength);
-    }
+	while (startIndex >= 0) {
+		int endIndex = commentEndExpression.indexIn(text, startIndex);
+		int commentLength;
+		if (endIndex == -1) {
+				setCurrentBlockState(1);
+				commentLength = text.length() - startIndex;
+		} else {
+				commentLength = endIndex - startIndex
+												+ commentEndExpression.matchedLength();
+		}
+		setFormat(startIndex, commentLength, multiLineCommentFormat);
+		startIndex = commentStartExpression.indexIn(text, startIndex + commentLength);
+	}
 }

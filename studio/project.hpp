@@ -39,7 +39,7 @@ public:
 	void exportGifsSources(const QDir& dir) const;
 
 public slots:
-	bool load() override;
+	bool loadFromDisk() override;
 
 protected:
 	qreal m_framerate;

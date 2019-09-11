@@ -26,7 +26,7 @@ public:
 
 
 public slots:
-	virtual bool load() = 0; // FIXME : one day make a reload slot which should call "reset" before load and put this as protected load virtual
+	virtual bool loadFromDisk() = 0; // FIXME : one day make a reload slot which should call "reset" before load and put this as protected load virtual
 };
 
 #endif // !MEDIAFILE_HPP

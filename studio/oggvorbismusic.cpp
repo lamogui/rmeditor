@@ -35,7 +35,7 @@ void OggVorbisMusic::exportMusicCData(const QFile& _source, const QFile& _header
 	ptodo( "OggVorbisMusic::exportMusicCData" );
 }
 
-bool OggVorbisMusic::load()
+bool OggVorbisMusic::loadFromDisk()
 {
 	ov_clear(&m_vorbisFile);
 	m_file.close();

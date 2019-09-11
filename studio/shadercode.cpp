@@ -1,22 +1,17 @@
 
 #include "shadercode.hpp"
 
-#include "logwidget.hpp"
+#include "logmanager.hpp"
 #include "shaderminifier.hpp"
 
 /*
 ** GLSLShaderCode
 */
 
-GLSLShaderCode::GLSLShaderCode(QObject* parent) :
-  TextEditable(parent)
+GLSLShaderCode::GLSLShaderCode(QObject* _parent, const QFileInfo& _path) :
+	TextEditable(_parent, _path)
 {
 
-}
-
-const QString &GLSLShaderCode::getText() const
-{
-	return m_shaderCode;
 }
 
 QString GLSLShaderCode::getShaderCodeRecursive() const
@@ -25,29 +20,30 @@ QString GLSLShaderCode::getShaderCodeRecursive() const
   {
 		return m_framework->getShaderCodeRecursive() + getText();
   }
-  return getText();
+	return getText();
 }
 
 QString GLSLShaderCode::minifiedShaderCode(const ShaderMinifier& minifier) const
 {
-	return minifier.minifiedShaderCode(getPath().fileName(), m_shaderCode);
+	return minifier.minifiedShaderCode(m_path.fileName(), getText());
 }
 
 QString GLSLShaderCode::cFormatedShaderCode(const ShaderMinifier& minifier) const
 {
   QString variable_name = QString("fs_") + this->objectName();
-  return minifier.cFormatedShaderCode(getPath().fileName(),variable_name,minifiedShaderCode(minifier));
+	return minifier.cFormatedShaderCode(m_path.fileName(),variable_name,minifiedShaderCode(minifier));
 }
 
 bool GLSLShaderCode::handleShaderCompileResult(const QString& shaderCode, ShaderProgram& program, QOpenGLShader::ShaderType type)
 {
   if (!program.addShaderFromSourceCode(type, shaderCode))
   {
-    Log::Error(getPath().fileName() + " (at compile): " + program.log());
+		perror(Log::Shader, this, program.log());
     return false;
   }
-  else if (!program.log().isEmpty())
-   Log::Warning(getPath().fileName() + " (at compile): " + program.log());
+	else if (!program.log().isEmpty()) {
+	 pwarning(Log::Shader, this, program.log());
+	}
   return true;
 }
 
@@ -55,12 +51,12 @@ bool GLSLShaderCode::handleShaderLinkResult(ShaderProgram& program)
 {
   if (!program.link())
   {
-    Log::Error(getPath().fileName() + " (at link): " + program.log());
+		perror(Log::Shader, this, program.log());
     return false;
   }
 	else if (!program.log().isEmpty())
 	{
-    Log::Warning(getPath().fileName() + " (at link): " + program.log());
+		pwarning(Log::Shader, this, program.log());
 	}
   return true;
 }

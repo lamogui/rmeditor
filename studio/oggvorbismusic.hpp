@@ -24,7 +24,7 @@ public:
 
 	public slots:
 	//MediaFile
-	bool load() override;
+	bool loadFromDisk() override;
 
 	//Music
 	void setPosition(double time) override;

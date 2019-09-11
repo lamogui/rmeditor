@@ -7,7 +7,7 @@ TextEditable::TextEditable(QObject* _parent, const QFileInfo& _path) :
 {
 }
 
-bool TextEditable::load()
+bool TextEditable::loadFromDisk()
 {
 	QString text;
 	QFile file(m_path.absoluteFilePath());
@@ -38,10 +38,15 @@ bool TextEditable::load()
 		}
 	}
 	file.close();
-	return readSuccess && build(text);
+	if ( readSuccess )
+	{
+		m_text = text;
+		emit textChanged(m_text);
+	}
+	return readSuccess;
 }
 
-bool TextEditable::save(const QString& _text)
+bool TextEditable::saveToDisk(const QString& _text)
 {
 	QFile file(m_path.absoluteFilePath());
 	if (!file.open(QIODevice::WriteOnly))
@@ -58,9 +63,8 @@ bool TextEditable::save(const QString& _text)
 	return true;
 }
 
-
-bool TextEditable::save()
+bool TextEditable::saveToDisk()
 {
-	return save(m_text);
+	return saveToDisk(m_text);
 }
 

@@ -14,13 +14,10 @@ class GLSLShaderCode : public TextEditable
   Q_OBJECT
 
 public:
-	GLSLShaderCode(QObject* parent = nullptr);
+	GLSLShaderCode(QObject* _parent, const QFileInfo& _path);
 
 	// Links
 	QPointer<GLSLShaderCode> m_framework;
-
-	// TextEditable
-	const QString& getText() const override;
 
 	QString getShaderCodeRecursive() const;
 
@@ -32,9 +29,6 @@ protected:
 	// Utils
 	bool handleShaderCompileResult(const QString& _shaderCode, ShaderProgram& _program, QOpenGLShader::ShaderType _type);
 	bool handleShaderLinkResult(ShaderProgram& _program);
-
-	QString m_shaderCode;
-
 };
 
 #endif // SCENE_H

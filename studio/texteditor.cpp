@@ -13,7 +13,7 @@ TextEditor::TextEditor(QWidget *_parent, TextEditable& _te) :
   m_startLineNumber(0),
   m_saved(true)
 {
-	lineNumberArea = new LineNumberArea(this);
+	m_lineNumberArea = new LineNumberArea(this);
 
 	connect(this, &TextEditor::textChanged, this, &TextEditor::onTextEdited);
 	connect(this, &TextEditor::blockCountChanged, this, &TextEditor::updateLineNumberAreaWidth);
@@ -21,15 +21,15 @@ TextEditor::TextEditor(QWidget *_parent, TextEditable& _te) :
 	connect(this, &TextEditor::updateRequest, this, &TextEditor::updateLineNumberArea);
 	connect(this, &TextEditor::cursorPositionChanged, this, &TextEditor::highlightCurrentLine);
 	connect(&m_object, &QObject::destroyed,this,&TextEditor::onDestroyTextEditable,Qt::DirectConnection);
-	connect(&m_object,&TextEditable::objectTextChanged, this, &TextEditor::setPlainText);
+	connect(&m_object,&TextEditable::textChanged, this, &TextEditor::setPlainText);
 
 	updateLineNumberAreaWidth(0);
 	highlightCurrentLine();
 
 	QFont font("consolas",9);
-	const int tabStop = 2;  // 4 characters
+	const int tabStop = 2;
 	QFontMetrics metrics(font);
-	setTabStopWidth(tabStop * metrics.width(' '));
+	setTabStopDistance(tabStop * metrics.horizontalAdvance(' '));
 	setFont(font);
 	setLineWrapMode(QPlainTextEdit::NoWrap);
 
@@ -38,36 +38,25 @@ TextEditor::TextEditor(QWidget *_parent, TextEditable& _te) :
 
 
 	m_timer->setSingleShot(true);
-	if (dynamic_cast<GLSLShaderCode*>(&textObject) != nullptr)
+	//if (dynamic_cast<GLSLShaderCode*>(&textObject) != nullptr)
 	{
 		m_highlighter->defineGLSLFragmentShaderRules();
 		m_timer->setInterval(1000);  //1 second because we want see our result as fast as possible
-		connect(m_timer, SIGNAL(timeout()), this, SLOT(build()));
-		connect(this, SIGNAL(textChanged()), this, SLOT(resetTimer()));
-	}
-	else if (dynamic_cast<Project*>(&textObject) != nullptr)
-	{
-		m_highlighter->defineXMLRule();
+
+		// TODO add a checkbox to disble this functionality
+		//connect(m_timer, &QTimer::timeout, this, &TextEditable::build);
+		//connect(this, &TextEditable::textChanged, m_timer, &QTimer::reset);
 	}
 
-	this->setPlainText(m_object->text());
+	this->setPlainText(m_object.getText());
 
 	setUndoRedoEnabled(true);
 }
 
-/*
-void TextEditor::refresh()
-{
-  if (m_object->needTextRefresh())
-  {
-    this->setPlainText(m_object->text());
-  }
-}*/
-
 bool TextEditor::save()
 {
   build();
-  m_saved = m_object->save();
+	m_saved = m_object.saveToDisk();
   if (m_saved)
   {
     emit saved(this,m_saved);
@@ -77,100 +66,102 @@ bool TextEditor::save()
 
 bool TextEditor::build()
 {
-  return m_object->build(this->toPlainText());
+	return m_object.build();
 }
 
 int TextEditor::lineNumberAreaWidth()
 {
-    int digits = 1;
-    int max = qMax(1, blockCount() + m_startLineNumber);
-    while (max >= 10) {
-        max /= 10;
-        ++digits;
-    }
+	int digits = 1;
+	int max = qMax(1, blockCount() + m_startLineNumber);
+	while (max >= 10) {
+		max /= 10;
+		++digits;
+	}
 
-    int space = 5 + fontMetrics().width(QLatin1Char('9')) * digits;
+	int space = 5 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
 
-    return space;
+	return space;
 }
 
 
 
 void TextEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 {
-    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+	setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
 
 
-void TextEditor::updateLineNumberArea(const QRect &rect, int dy)
+void TextEditor::updateLineNumberArea(const QRect& _rect, int _dy)
 {
-    if (dy)
-        lineNumberArea->scroll(0, dy);
-    else
-        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+	if (_dy) {
+		m_lineNumberArea->scroll(0, _dy);
+	}
+	else {
+		m_lineNumberArea->update(0, _rect.y(), m_lineNumberArea->width(), _rect.height());
+	}
 
-    if (rect.contains(viewport()->rect()))
-        updateLineNumberAreaWidth(0);
+	if (_rect.contains(viewport()->rect())){
+		updateLineNumberAreaWidth(0);
+	}
 }
 
 
 
 void TextEditor::resizeEvent(QResizeEvent *e)
 {
-    QPlainTextEdit::resizeEvent(e);
+	QPlainTextEdit::resizeEvent(e);
 
-    QRect cr = contentsRect();
-    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+	QRect cr = contentsRect();
+	m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
 
 
 void TextEditor::highlightCurrentLine()
 {
-    QList<QTextEdit::ExtraSelection> extraSelections;
+	QList<QTextEdit::ExtraSelection> extraSelections;
 
-    if (!isReadOnly()) {
-        QTextEdit::ExtraSelection selection;
+	if (!isReadOnly()) {
+		QTextEdit::ExtraSelection selection;
 
-        QColor lineColor = QColor(Qt::darkGray).darker(300);
+		QColor lineColor = QColor(Qt::darkGray).darker(300);
 
-        selection.format.setBackground(lineColor);
-        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-        selection.cursor = textCursor();
-        selection.cursor.clearSelection();
-        extraSelections.append(selection);
-    }
+		selection.format.setBackground(lineColor);
+		selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+		selection.cursor = textCursor();
+		selection.cursor.clearSelection();
+		extraSelections.append(selection);
+	}
 
-    setExtraSelections(extraSelections);
+	setExtraSelections(extraSelections);
 }
 
 
 
 void TextEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
-    QPainter painter(lineNumberArea);
-   // painter.fillRect(event->rect(), Qt::black);
+	QPainter painter(m_lineNumberArea);
+	// painter.fillRect(event->rect(), Qt::black);
 
 
-    QTextBlock block = firstVisibleBlock();
-    int blockNumber = block.blockNumber();
-    int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
-    int bottom = top + (int) blockBoundingRect(block).height();
+	QTextBlock block = firstVisibleBlock();
+	int blockNumber = block.blockNumber();
+	int top = static_cast<int>(blockBoundingGeometry(block).translated(contentOffset()).top());
+	int bottom = top + static_cast<int>(blockBoundingRect(block).height());
 
-    while (block.isValid() && top <= event->rect().bottom()) {
-        if (block.isVisible() && bottom >= event->rect().top()) {
-            QString number = QString::number(blockNumber + m_startLineNumber + 1);
-            painter.setPen(Qt::darkGray);
-            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
-                             Qt::AlignRight, number);
-        }
-
-        block = block.next();
-        top = bottom;
-        bottom = top + (int) blockBoundingRect(block).height();
-        ++blockNumber;
-    }
+	while (block.isValid() && top <= event->rect().bottom()) {
+		if (block.isVisible() && bottom >= event->rect().top()) {
+			QString number = QString::number(blockNumber + m_startLineNumber + 1);
+			painter.setPen(Qt::darkGray);
+			painter.drawText(0, top, m_lineNumberArea->width(), fontMetrics().height(),
+											 Qt::AlignRight, number);
+		}
+		block = block.next();
+		top = bottom;
+		bottom = top + static_cast<int>(blockBoundingRect(block).height());
+		++blockNumber;
+	}
 }
 
 void TextEditor::resetTimer()
@@ -183,13 +174,11 @@ void TextEditor::resetTimer()
 
 void TextEditor::onTextEdited()
 {
-
-  if (m_saved)
-  {
-    m_saved = false;
-  }
-  emit saved(this,m_saved);
-
+	if (m_saved)
+	{
+		m_saved = false;
+	}
+	emit saved(this,m_saved);
 }
 
 void TextEditor::onDestroyTextEditable(QObject* _obj)
@@ -202,5 +191,5 @@ void TextEditor::setStartLineNumber(int n)
 {
   m_startLineNumber = n;
   updateLineNumberAreaWidth(n);
-  lineNumberArea->repaint();
+	m_lineNumberArea->repaint();
 }
