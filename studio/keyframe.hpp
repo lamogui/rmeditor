@@ -1,12 +1,40 @@
 ﻿#ifndef KEYFRAME_HPP
 #define KEYFRAME_HPP
 
-#include <QColor>
-#include <QGraphicsObject>
-#include <QPolygonF>
-#include <QPainterPath>
+#include <QObject>
+class Sequence;
+class Keyframe : public QObject
+{
+	Q_OBJECT
 
-#include "undocommands.hpp"
+public:
+	Keyframe(Sequence * _parent, qint64 _relativePosition);
+
+	bool loadFromData(quint16 _version, QByteStream & _buffer);
+	qint64 getRelativePosition() const { return m_relativePosition; }
+
+signals:
+	// update the view
+	void relativePositionChanged(Keyframe*);
+
+protected:
+	// local control
+	void setRelativePosition(qint64 _position);
+
+	// property
+	qint64 m_relativePosition;
+};
+
+
+#include <QWidget>
+class KeyframeWidget : public QWidget
+{
+	Q_OBJECT
+
+public:
+
+
+};
 
 class QDomElement;
 class Keyframe : public QGraphicsObject
