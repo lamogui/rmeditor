@@ -1,25 +1,226 @@
 ﻿#include "sequence.hpp"
+#include "demotimeline.hpp"
+#include "logmanager.hpp"
+#include "project.hpp"
 
-#include <QApplication>
-#include <QPainter>
-#include <QGraphicsSceneMouseEvent>
-#include <QGraphicsSceneHoverEvent>
+/*
+ *  Sequence
+ */
 
-#include "render.hpp" // for rendering preview
-#include "mediafile.hpp"
-#include "renderfunctionscache.hpp"
-#include "demotimelinewidget.hpp" // fucking scale
-#include "undocommands.hpp"
+PROUT_DIFFFLAGS_8(Sequence)
 
-Sequence::Sequence(QGraphicsObject* _parent) :
-	QGraphicsObject(_parent),
-	m_startFrame(-1), // invalid position
-	m_length(2), // minimal length is 1 frame else the sequence doesn't "exists", but actual impl only support at least 2 frames
-	m_height(60),
-	m_renderCache(nullptr)
+Sequence::Sequence( DemoTimeline & _parent ) :
+	QObject( &_parent ),
+	m_startFrame(0),
+	m_length(60 * 5)
 {
-	setFlags(QGraphicsItem::ItemIsSelectable);
-	setAcceptHoverEvents(true);
+}
+
+bool Sequence::loadSceneFromStream(QDataStream & _stream)
+{
+	qint16 sceneIndex = -1;
+	_stream >> sceneIndex;
+
+	const Project& project = *static_cast<Project*>(parent()->parent());
+	m_scene = project.getRmScene(sceneIndex);
+	emit sceneChanged(*this);
+
+	return true;
+}
+
+bool Sequence::loadInsertKeyframeFromStream(QDataStream & _stream, bool _fromFile, quint16 _version)
+{
+	const Log::Category category = _fromFile ? Log::File : Log::Network;
+	quint16 keyframeCount = 0;
+	preadstream(category, this, keyframeCount)
+
+	bool needSort = false;
+	qint64 previousFrame=-1;
+	for (quint16 i = 0; i < keyframeCount; ++i )
+	{
+		Keyframe* keyframe = new Keyframe( *this );
+		if (!keyframe->loadFromFileStream(_version, _stream))
+		{
+			delete keyframe;
+			return false;
+		}
+		else if (controlInsertKeyframe(keyframe->getPosition()))
+		{
+			perrorp(category, this, keyframe->getPosition(), tr( "Sequence contains duplicate keyframe at frame " ) + QString::number( keyframe->getPosition() ));
+			delete keyframe;
+		}
+		else
+		{
+			if (keyframe->getPosition() < previousFrame)
+			{
+				needSort = true;
+			}
+			previousFrame = keyframe->getPosition();
+			m_cameraKeyframes.push_back( keyframe );
+			if ( !_fromFile ) {
+				emit cameraKeyframeInserted(*this, *keyframe);
+			}
+		}
+	}
+	if (needSort || !_fromFile)
+	{
+		if ( _fromFile ) {
+			pwarning(Log::File, this, tr("Keyframes not sorted in the file !"));
+		}
+		std::sort( m_cameraKeyframes.begin(),  m_cameraKeyframes.end(),
+		[](QList<Keyframe*>::iterator _a, QList<Keyframe*>::iterator _b)
+		{
+			return (*_a)->getPosition() < (*_b)->getPosition();
+		} );
+	}
+	if ( _fromFile ) {
+		emit cameraKeyframesLoaded(*this);
+	}
+}
+
+bool Sequence::loadFromFileStream( quint16 _version, QDataStream & _stream )
+{
+	// clear
+	emit cameraKeyframesAllDeleted( *this );
+	qDeleteAll(m_cameraKeyframes);
+	m_cameraKeyframes.clear();
+
+	// load
+	preadstream( Log::Network, this, m_length )
+	emit lengthChanged( *this );
+
+	preadstream( Log::Network, this, m_startFrame )
+	emit startFrameChanged( *this );
+
+	if (!loadSceneFromStream( _stream )) {
+		return false;
+	}
+
+	if (!loadInsertKeyframeFromStream( _stream, true, _version )) {
+		return false;
+	}
+
+	return true;
+}
+
+void Sequence::writeToFileStream( QDataStream & _stream ) const
+{
+	_stream << m_length;
+	_stream << m_startFrame;
+
+	const Project& project = *static_cast<Project*>(parent()->parent());
+	int indexOfRmScene = project.indexOfRmScene( m_scene.data() );
+	passertmsg( Log::Code, this, indexOfRmScene < 1 << 15, tr("Limit of scenes number reached !") );
+	_stream << static_cast<qint16>(indexOfRmScene);
+
+	passertmsg( Log::Code, this, m_cameraKeyframes.size() < (1 << 16), tr( "Limit of keyframes number reached !" ) );
+
+	_stream << static_cast<quint16>(m_cameraKeyframes.size());
+
+	for (auto it = m_cameraKeyframes.cbegin(); it != m_cameraKeyframes.cend(); ++it)
+	{
+		(*it)->writeToFileStream(_stream);
+	}
+}
+
+bool Sequence::loadFromDiffStream( QDataStream & _stream )
+{
+	DiffFlags flags;
+	preadstream( Log::Network, this, flags)
+
+	if (flags & DiffFlags::LENTGH) {
+		preadstream( Log::Network, this, m_length)
+		emit lengthChanged(*this);
+	}
+
+	if (flags & DiffFlags::START_FRAME) {
+		preadstream( Log::Network, this, m_startFrame )
+		emit startFrameChanged( *this );
+	}
+
+	if (flags & DiffFlags::SCENE) {
+		if (!loadSceneFromStream( _stream )) {
+			return false;
+		}
+	}
+
+	if (flags & DiffFlags::CAMERA_KEYFRAMES_DELETED) {
+		qint16 keyframeCount = 0;
+		preadstream(Log::Network,this, keyframeCount)
+
+		for (qint16 i = 0; i < keyframeCount; ++i ) {
+			qint64 keyframeFrame = -1;
+			preadstream(Log::Network,this, keyframeFrame)
+			Keyframe* keyframe = findCameraKeyframe( keyframeFrame );
+			if ( !keyframe ){
+				perror(Log::Network,this, tr("Unable to find the keyframe to delete at frame ") + QString::number(keyframeFrame));
+				return false;
+			}
+
+
+			emit cameraKeyframeDeleted(*this, *keyframe);
+			m_cameraKeyframes.removeOne( keyframe );
+			delete keyframe;
+		}
+	}
+
+	if ( flags & DiffFlags::CAMERA_KEYFRAMES_INSERTED ) {
+		if (!loadInsertKeyframeFromStream( _stream, false, static_cast<quint16>(-1))) {
+			return false;
+		}
+	}
+
+	if ( flags & DiffFlags::CAMERA_KEYFRAMES_MODIFIED ) {
+		qint16 keyframeCount = 0;
+		preadstream(Log::Network,this, keyframeCount)
+
+		for (qint16 i = 0; i < keyframeCount; ++i ) {
+			qint64 keyframeFrame = -1;
+			preadstream(Log::Network,this, keyframeFrame)
+			Keyframe* keyframe = findCameraKeyframe( keyframeFrame );
+			if ( !keyframe ){
+				perror(Log::Network,this, tr("Unable to find the keyframe to update at frame ") + QString::number(keyframeFrame));
+				return false;
+			}
+			if (!keyframe->loadFromDiffStream(_stream) ) {
+				return false;
+			}
+		}
+	}
+}
+
+void Sequence::writeLocalDiffToStream( DiffFlags _flags, QDataStream & _stream ) const
+{
+	_stream << _flags;
+	pWriteDiffStreamMember( DiffFlags::LENTGH, m_length )
+	pWriteDiffStreamMember( DiffFlags::START_FRAME, m_startFrame )
+
+	const Project& project = *static_cast<Project*>(parent()->parent());
+	qint16 sceneIndex = static_cast<qint16>( project.indexOfRmScene(m_scene) );
+	pWriteDiffStreamMember( DiffFlags::SCENE, sceneIndex )
+}
+
+
+bool Sequence::controlKeyframeDiff( QDataStream & _stream ) const
+{
+
+}
+
+bool Sequence::controlInsertKeyframe( qint64 _frame ) const
+{
+	return findCameraKeyframe( _frame ) == nullptr;
+}
+
+QList<Keyframe *>::const_iterator Sequence::upperCameraKeyframe( qint64 _value ) const {
+	return std::lower_bound(m_cameraKeyframes.cbegin(), m_cameraKeyframes.cend(), _value, Keyframe::compare );
+}
+
+Keyframe* Sequence::findCameraKeyframe(qint64 _value) const {
+	QList<Keyframe *>::const_iterator it = upperCameraKeyframe( _value );
+	if ( it == m_cameraKeyframes.cend() || (*it)->getPosition() != _value) {
+		return nullptr;
+	}
+	return *it;
 }
 
 void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*_option*/, QWidget* _widget)
@@ -49,9 +250,9 @@ void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*_optio
 	textFont.setStretch(static_cast<int>(100*scale));
 	painter->setFont(textFont);
 	QRectF textRect = QRectF(previewRect.right() + 5*scale,previewRect.top(), previewRect.right()-(previewRect.right()+5*scale), rect.height());
-	if (!m_media.isNull())
+	if (!m_scene.isNull())
 	{
-		painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,m_media.data()->objectName() + " (" + m_media->getPath().fileName() + ")");
+		painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,m_scene.data()->objectName() + " (" + m_scene->getPath().fileName() + ")");
 	}
 	else
 	{

@@ -1,35 +1,93 @@
 ﻿#ifndef SEQUENCE_HPP
 #define SEQUENCE_HPP
 
-#include <QGraphicsObject>
-#include <QBrush>
+#include <QObject>
+#include <QPointer>
 
-#include "undocommands.hpp"
-#include "renderfunctionscache.hpp"
+#include "keyframe.hpp"
+#include "scene.hpp"
 
-
-class CameraKeyframe;
-class MediaFile;
-class Renderer;
-class Camera;
-class Sequence : public QGraphicsObject 
+class DemoTimeline;
+class Sequence : public QObject
 {
   Q_OBJECT
   
 public:
-	Sequence(QGraphicsObject* parent = nullptr);
+	Sequence( DemoTimeline & _parent );
 
-	// MediaFile
-	QPointer<MediaFile> m_media; // TODO make this editable and notify..., maybe use an intex ?
+	enum class DiffFlags
+	{
+		LENTGH = 1 << 0,
+		START_FRAME = 1 << 1,
+		SCENE = 1 << 2,
+		CAMERA_KEYFRAMES_DELETED = 1 << 3,
+		CAMERA_KEYFRAMES_INSERTED = 1 << 4,
+		CAMERA_KEYFRAMES_MODIFIED = 1 << 5,
+	};
+
+	// Data
+	bool loadFromFileStream( quint16 _version, QDataStream & _stream );
+	void writeToFileStream( QDataStream & _stream ) const;
+	bool loadFromDiffStream( QDataStream & _stream );
+	void writeLocalDiffToStream( DiffFlags _flags, QDataStream & _stream ) const; // This can't exist and must be deleted
+
+	// Control
+	bool controlKeyframeDiff( QDataStream & _stream ) const; // network
+	bool controlInsertKeyframe( qint64 _frame ) const; // local
+
+	// Accesssors
+	qint64 getStartFrame() const { return m_startFrame; }
+	quint64 getLength() const { return m_length; }
 
 	// Utils
-	inline qint64 getEndFrame() const { return m_startFrame; }
-	inline bool isInside(qint64 _frame) const { return (_frame >= m_startFrame && _frame < getEndFrame()); }
-	inline bool overlap(const Sequence& _seq) const { return (isInside(_seq.m_startFrame)||
-																													 isInside(_seq.getEndFrame())||
-																													 (_seq.m_startFrame < m_startFrame && _seq.getEndFrame() > getEndFrame())); }
+	qint64 getEndFrame() const { return m_startFrame + static_cast<qint64>(m_length) - 1; } // in parent space
+	bool isInside(qint64 _frame) const { return (_frame >= m_startFrame && _frame <= getEndFrame()); }
+	bool overlap(const Sequence& _seq) const { return (isInside(_seq.m_startFrame)||
+																										 isInside(_seq.getEndFrame())||
+																											(_seq.m_startFrame < m_startFrame && _seq.getEndFrame() > getEndFrame())); }
 	// Time position
-	void setFramePosition(qint64 _framePosition);
+	void setFramePosition(qint64 _framePosition); // local space ?
+
+signals:
+	void startFrameChanged( const Sequence & );
+	void lengthChanged( const Sequence & );
+	void sceneChanged( const Sequence & );
+
+	// diff
+	void cameraKeyframeInserted( const Sequence &, const Keyframe & );
+	void cameraKeyframeDeleted( const Sequence &, const Keyframe & );
+
+	// make a pass on all keyframes for view no search
+	void cameraKeyframesLoaded( const Sequence & );
+	void cameraKeyframesAllDeleted( const Sequence & );
+
+private:
+	// Data
+	bool loadSceneFromStream(QDataStream & _stream);
+	bool loadInsertKeyframeFromStream(QDataStream & _stream, bool _fromFile, quint16 _version);
+
+	// Find
+	QList<Keyframe *>::const_iterator upperCameraKeyframe( qint64 _value ) const;
+	Keyframe* findCameraKeyframe( qint64 _value ) const;
+
+	// attributes
+	qint64 m_startFrame;
+	quint64 m_length;
+	QPointer<const RaymarchingScene> m_scene; // TODO make this editable and notify...
+	QList<Keyframe*> m_cameraKeyframes; // only usage for now is to avoid duplicate
+};
+
+PROUT_DECLARE_DIFFFLAGS(Sequence)
+
+#include <QWidget>
+class DemoTimelineWidget;
+class SequenceWidget : public QWidget
+{
+	Q_OBJECT
+
+public:
+
+	SequenceWidget( DemoTimelineWidget & _parent, const Sequence & _target );
 
 	// Graphics
 	QBrush selectedBrush() { return QBrush(QColor(200, 200, 255)); }
@@ -39,7 +97,6 @@ public:
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *_option, QWidget *_widget) override;
 	QRectF boundingRect() const override;
 
-	inline QMap<qint64, CameraKeyframe*> getCameraKeyframes() const { return m_cameraKeyframes; }
 	// GL
 	void initializeGL(RenderFunctionsCache& _renderCache);
 
@@ -85,18 +142,15 @@ protected slots:
 	void keyframePropertyChanged(QObject* _owner, const QString& _propertyName, const QVariant& _oldValue, const QVariant& _newValue);
 	void keyframeRequestFramePosition(qint64 _position);
 
-private:
-	// properties
-	qint64 m_startFrame;
-	quint64 m_length;
-	QMap<qint64, CameraKeyframe*> m_cameraKeyframes;
+
+
 
 	// Internal
 	Renderer* m_renderer;
 
 	// Graphical
 	QImage m_preview;
-	qreal m_height;
+
 
 	// Render
 	RenderFunctionsCache* m_renderCache; // fucking opengl context

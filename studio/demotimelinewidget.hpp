@@ -7,7 +7,7 @@
 class Renderer;
 class Project;
 
-class DemoTimelineWidget : public QGraphicsView
+class DemoTimelineWidget : public QWidget
 {
   Q_OBJECT
 

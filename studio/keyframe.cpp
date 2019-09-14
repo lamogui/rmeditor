@@ -1,106 +1,106 @@
 ﻿
 #include "keyframe.hpp"
-
-#include <QApplication>
-#include <QBrush>
-#include <QColor>
-#include <QGraphicsSceneMouseEvent>
-#include <QGraphicsSceneHoverEvent>
-#include <QPainter>
-
-#include "project.hpp"
+#include "logmanager.hpp"
 #include "sequence.hpp"
+
 
 /*
 ** Keyframe
 */
 
-Keyframe::Keyframe(QGraphicsObject* parent) :
-  QGraphicsObject(parent),  // set GraphicsItem parent
-  color(255, 195, 77, 255),
-  selectedColor(255, 105, 0, 255),
-  mouseCapture(false),
-	m_relativeFrame(-1)
-{
-  float l = 5;
-  shape.append(QPointF(-l, 0));
-  shape.append(QPointF(0, -l));
-  shape.append(QPointF(l, 0));
-  shape.append(QPointF(0, l));
-  painterPath.addPolygon(shape);
+PROUT_DIFFFLAGS_8(Keyframe)
 
-  setParent(parent); // set Object parent 
+Keyframe::Keyframe(Sequence & _parent) :
+	QObject( &_parent )
+{
+
 }
 
-void Keyframe::setRelativeFrame(qint64 newrelativeFrame)
+bool Keyframe::loadFromFileStream(quint16 _version, QDataStream & _stream)
 {
-  if (newrelativeFrame != relativeFrame)
-  {
-    qint64 oldValue = relativeFrame;
-    relativeFrame = newrelativeFrame;
-    setX(relativeFrame); // set graphical position
-    emit propertyChanged(this, "relativeFrame", oldValue, relativeFrame);
-  }
+	(void) _version;
+	preadstream( Log::File, this, m_position )
+	emit positionChanged( *this );
+
+	preadstream( Log::File, this, m_content )
+	emit contentChanged( *this );
+	return true;
 }
 
-void Keyframe::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void Keyframe::writeToFileStream( QDataStream & _stream ) const
 {
-  QGraphicsItem::mousePressEvent(event);
-  
-  m_mousePressPos = event->scenePos();
-  if (shape.containsPoint(event->pos(), Qt::OddEvenFill))
-  {
-    mousePressRelativeFrame = getRelativeFrame();
-    mouseCapture = true;
-  }
+	_stream << m_position;
+	_stream << m_content;
 }
 
-void Keyframe::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+bool Keyframe::loadFromDiffStream( QDataStream &_stream )
 {
-  QGraphicsItem::mouseMoveEvent(event);
-  if (m_mouseCapture)
-    setRelativeFrame(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x());
+	DiffFlags flags;
+	preadstream( Log::Network, this, flags )
+
+	if ( flags & DiffFlags::POSITION )
+	{
+		preadstream( Log::Network, this, m_position )
+		emit positionChanged( *this );
+	}
+
+	if ( flags & DiffFlags::CONTENT )
+	{
+		preadstream( Log::Network, this, m_content )
+		emit contentChanged( *this );
+	}
 }
 
-void Keyframe::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void Keyframe::writeLocalDiffToStream( DiffFlags _flags, QDataStream & _stream ) const
 {
-  QGraphicsItem::mouseReleaseEvent(event);
-  if (m_mouseCapture)
-  {
-    UndoStack::assertSendUndoCommand(*this, new ModifyPropertyCommand(*this, "relativeFrame", mousePressRelativeFrame, (qint64)(event->scenePos().x() - mousePressPos.x() + parentItem()->scenePos().x())));
-  }
-  m_mouseCapture = false;
+	_stream << _flags;
+
+	pWriteDiffStreamMember( DiffFlags::POSITION, m_position )
+	pWriteDiffStreamMember( DiffFlags::CONTENT, m_content )
 }
 
-QRectF Keyframe::boundingRect() const
-  {return painterPath.boundingRect();}
+#include <QPainter>
 
-void Keyframe::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+/*
+ * KeyframeWidget
+ */
+
+KeyframeWidget::KeyframeWidget( SequenceWidget & _parent, const Keyframe & _target, int _y ) :
+	QWidget( &_parent ),
+	m_target( _target ),
+	m_y( _y )
 {
-  (void)option; (void) widget;
-  QBrush fillBrush(mouseCapture || isSelected() ? selectedColor : color);
-  QPen pen(QColor(255,64,35));
+	setSizePolicy( QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed );
 
-  painter->fillPath(painterPath, fillBrush);
-  painter->strokePath(painterPath, pen);
-  //painter->fillRect(boundingRect(),fillBrush);
-  //painter->drawRect(boundingRect());
+	connect(&m_target, &Keyframe::positionChanged, this, &KeyframeWidget::onTargetChanged );
+	onTargetChanged();
 }
 
-void Keyframe::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+void KeyframeWidget::onTargetChanged()
 {
-  QGraphicsItem::mouseDoubleClickEvent(event);
-  emit requestFramePosition((qint64)scenePos().x()); // FIXME : use parent
+	setPosition( m_target.getPosition(), static_cast<SequenceWidget*>(parent())->getZoomLevel() );
 }
 
-void Keyframe::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+void KeyframeWidget::onZoomLevelChanged(qreal _zoomLevel)
 {
-  QGraphicsItem::hoverEnterEvent(event);
- // QApplication::setOverrideCursor(Qt::UpArrowCursor);
+	setPosition( m_target.getPosition(), _zoomLevel );
 }
 
-void Keyframe::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+void KeyframeWidget::setPosition( qint64 _relativePosition, qreal _zoomLevel )
 {
-  QGraphicsItem::hoverLeaveEvent(event);
- // QApplication::restoreOverrideCursor();
+	setGeometry( QRect( QPoint( static_cast<int>( _relativePosition * _zoomLevel ) - c_width / 2 , m_y ) , sizeHint() ) );
 }
+
+QSize KeyframeWidget::sizeHint() const
+{
+	return QSize( c_width, c_height );
+}
+
+void KeyframeWidget::paintEvent(QPaintEvent* /*_event*/)
+{
+	QPainter painter( this );
+	painter.setPen(QColor(0,0,0));
+	painter.setBrush(QBrush(QColor(42,166,40)));
+	painter.drawPolygon( c_vertices, c_numVertices );
+}
+

@@ -1,11 +1,12 @@
 
 #include "scene.hpp"
+#include "project.hpp"
 
 /*
 ** RaymarchingScene
 */
-RaymarchingScene::RaymarchingScene(QObject* parent) :
-  QuadFragmentShaderCode(parent)
+RaymarchingScene::RaymarchingScene(Project& _parent) :
+	QuadFragmentShaderCode(&parent)
 {
 
 }

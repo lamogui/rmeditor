@@ -18,6 +18,7 @@ HEADERS += \
   demotimeline.hpp \
   demotimelinedockwidget.hpp \
   demotimelinewidget.hpp \
+  diffflags.hpp \
   fast2dquad.hpp \
   ffmpegencoder.hpp \
   gif.h \

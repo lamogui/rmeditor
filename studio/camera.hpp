@@ -23,19 +23,6 @@ public:
 	inline QVector3D ro() const { return m_position; }
 };
 
-#include "keyframe.hpp"
-
-class CameraKeyframe : public Keyframe
-{
-  Q_OBJECT
-
-public:
-	CameraKeyframe(QGraphicsObject* _parent);
-	CameraState m_cameraState;
-
-	// Deprecated !
-	void load(const QDomElement& _node);
-};
-
+Q_DECLARE_METATYPE(CameraState);
 
 #endif

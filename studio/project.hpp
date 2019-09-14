@@ -29,6 +29,9 @@ public:
 	qreal getFramerate() const { return m_framerate; }
 	qint64 getNumFrames() const;
 
+	const RaymarchingScene* getRmScene( qint16 _index ) const; // should return nullptr id the index is invalid
+	int indexOfRmScene( const RaymarchingScene* ) const;
+
 	// Datas
 	Music* m_music; // TODO do not make a pointer for this, use an aggregation and hide impl
 	DemoTimeline m_demoTimeline;

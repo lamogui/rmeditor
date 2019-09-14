@@ -2,74 +2,87 @@
 #define KEYFRAME_HPP
 
 #include <QObject>
+#include <QVariant>
+
+#include "diffflags.hpp"
+
 class Sequence;
 class Keyframe : public QObject
 {
 	Q_OBJECT
 
 public:
-	Keyframe(Sequence * _parent, qint64 _relativePosition);
+	Keyframe(Sequence & _parent);
 
-	bool loadFromData(quint16 _version, QByteStream & _buffer);
-	qint64 getRelativePosition() const { return m_relativePosition; }
+	enum class DiffFlags
+	{
+		POSITION = 1 << 0,
+		CONTENT = 1 << 1
+	};
+
+	// Data
+	bool loadFromFileStream( quint16 _version, QDataStream & _stream );
+	void writeToFileStream( QDataStream & _stream ) const;
+	bool loadFromDiffStream( QDataStream & _stream );
+	void writeLocalDiffToStream( DiffFlags _flags, QDataStream & _stream ) const;
+
+	// Accessors
+	qint64 getPosition() const { return m_position; }
+	const QVariant & getContent() const { return m_content; }
+
+	// Utils
+	static bool compare(QList<Keyframe *>::const_iterator & _a, qint64 _b) {
+		return (*_a)->getPosition() < _b;
+	}
 
 signals:
 	// update the view
-	void relativePositionChanged(Keyframe*);
+	void positionChanged(const Keyframe&);
+	void contentChanged(const Keyframe&);
 
 protected:
-	// local control
-	void setRelativePosition(qint64 _position);
-
 	// property
-	qint64 m_relativePosition;
+	qint64 m_position; // In frames, relative to parent
+	QVariant m_content;
 };
 
+PROUT_DECLARE_DIFFFLAGS(Keyframe);
 
 #include <QWidget>
-class KeyframeWidget : public QWidget
+class SequenceWidget;
+class KeyframeWidget final : public QWidget
 {
 	Q_OBJECT
 
 public:
+	KeyframeWidget( SequenceWidget & _parent, const Keyframe & _target, int _y );
 
+	static const int c_width = 10;
+	static const int c_height = 15;
+	static const size_t c_numVertices = 6;
+	static constexpr QPointF c_vertices[ c_numVertices ]  = {
+		QPointF( c_width * 0.5,  0.0 ),
+		QPointF( c_width , c_height / 3.0 ),
+		QPointF( c_width , c_height * 2.0 / 3.0 ),
+		QPointF( c_width * 0.5, c_height ),
+		QPointF( 0.0,  c_height * 2.0 / 3.0 ),
+		QPointF( 0.0,  c_height / 3.0 ),
+	} ;
 
-};
+protected slots:
+	void onTargetChanged();
+	void onZoomLevelChanged(qreal _zoomLevel);
 
-class QDomElement;
-class Keyframe : public QGraphicsObject
-{
-	Q_OBJECT
+protected:
+	void setPosition(qint64 _relativePosition, qreal _zoomLevel);
 
-  public:
-		Keyframe(QGraphicsObject* parent = nullptr);
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    virtual QRectF boundingRect() const;
+	// QWidget
+	QSize sizeHint() const override;
+	void paintEvent(QPaintEvent *event) override;
 
-		void load(const QDomElement& _node); // deprecated !!!
-
-  protected:
-    virtual void 	hoverEnterEvent(QGraphicsSceneHoverEvent *event);
-    virtual void 	hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
-
-  signals:
-    void requestFramePosition(qint64 absoluteFrame);
-
-  protected:
-    // Aspect 
-    QColor color;
-    QColor selectedColor;
-    QPolygonF shape;
-    QPainterPath painterPath;
-
-    // Movement
-    qint64 mousePressRelativeFrame;
-    QPointF mousePressPos;
-    bool mouseCapture;
-
-  private:
-    // Property
-		qint64 m_relativeFrame;
+private:
+	const Keyframe & m_target;
+	const int m_y;
 };
 
 #endif

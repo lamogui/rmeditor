@@ -1,9 +1,7 @@
 ﻿
 
 #include "project.hpp"
-#include "music.hpp"
-#include "mediafile.hpp"
-#include "renderfunctionscache.hpp"
+#include "logmanager.hpp"
 
 #include <QDir>
 
@@ -23,6 +21,21 @@ QDir Project::getDir() const
 qint64 Project::getNumFrames() const
 {
 	return m_music ? static_cast< qint64 >(m_music->getLength() * m_framerate) : 0;
+}
+
+const RaymarchingScene* Project::getRmScene( qint16 _index ) const
+{
+	if (_index < 0 || _index >= m_rmScenes.size() )
+	{
+		perror(Log::File, this, tr( "Invalid RayMarching Scene id " ) + QString::number(_index) );
+		return nullptr;
+	}
+	return m_rmScenes[_index];
+}
+
+int Project::indexOfRmScene( const RaymarchingScene* _scene ) const
+{
+	return m_rmScenes.indexOf( const_cast< RaymarchingScene* >( _scene ));
 }
 
 //#include "tunefish4music.hpp"

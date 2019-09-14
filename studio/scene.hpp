@@ -3,16 +3,18 @@
 
 #include "quadfragmentshader.hpp"
 
+class Project;
+
 /*
 ** RaymarchingScene : textfile media that contains a fragment shader using an external camera 
 */
 class RaymarchingScene : public QuadFragmentShaderCode
 {
   Q_OBJECT
-class Project;
+
 
 public:
-	RaymarchingScene(QObject* parent = nullptr);
+	RaymarchingScene(Project & _parent);
 
   void initializeGL(RenderFunctionsCache& gl) override;
 
