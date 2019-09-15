@@ -116,20 +116,14 @@ extern Log::Manager g_logManager; // global instance
 #define passert( _category, _sender, _cond ) passertmsg( _category, _sender, _cond, tr("ASSERTION FAILED !") )
 #define ptodo( _what ) passertmsg( Log::Code, nullptr, false, tr("TODO: ") + _what )
 
+bool pVerify( Log::Category _category, const QObject* _sender, bool _cond, const char* _condStr, const Log::CppCodeOrigin& _cppOrigin );
+#define pverify( _category, _sender, _cond ) pVerify( _category, _sender, _cond, #_cond, PROUT_MAKE_CPP_ORIGIN() )
+
 // Errors
 #define perrorp( _category, _sender, _param, _what ) PROUT_BLOCK_WITH_FORCED_SEMICOLON( Log::Manager::Error( _category, _sender, QString( _what ), _param, PROUT_MAKE_CPP_ORIGIN()); )
 #define perrorpf( _category, _sender, _param, _what, ... ) perrorp( _category, _sender, _param, QString::asprinf( _what, __VA_ARGS__ ) )
 #define perror( _category, _sender, _what ) perrorp( _category, _sender, -1, _what )
 #define perrorf( _category, _sender, _what, ... ) perror( _category, _sender, QString::asprinf( _what, __VA_ARGS__ ) )
-
-// Corrupted datas
-#define preadstream( _category, _sender, _property )  \
-	_stream >> _property; \
-	if ( _stream.status() != QDataStream::Status::Ok ) { \
-		perror( _category, _sender, tr("Failed to read ") + _sender->objectName() + " " + QString(_sender->metaObject()->className()) + "::"#_property + tr("(corrupted stream)"));  \
-		return false; \
-	}
-
 
 // Warning
 #define pwarningp( _category, _sender, _param, _what ) PROUT_BLOCK_WITH_FORCED_SEMICOLON( Log::Manager::Warning( _category, _sender, QString( _what ), _param, PROUT_MAKE_CPP_ORIGIN()); )

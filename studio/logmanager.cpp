@@ -128,3 +128,14 @@ void Log::Manager::handleNewEntry( Entry _entry )
 	qDebug() << type << category << name << _entry.m_what;
 }
 
+bool pVerify( Log::Category _category, const QObject* _sender, bool _cond, const char* _condStr, const Log::CppCodeOrigin& _cppOrigin )
+{
+	if ( !_cond ) {
+		if (PROUT_IS_DEBUGGER_PRESENT) {
+			PROUT_DEBUG_BREAK;
+		}
+		Log::Manager::Assertion( _category, _sender, QString("VERIFY FAILED !") + " (" + QString(_condStr) + ")", _cppOrigin );
+	}
+	return _cond;
+}
+

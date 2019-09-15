@@ -19,11 +19,8 @@ Keyframe::Keyframe(Sequence & _parent) :
 bool Keyframe::loadFromFileStream(quint16 _version, QDataStream & _stream)
 {
 	(void) _version;
-	preadstream( Log::File, this, m_position )
-	emit positionChanged( *this );
-
-	preadstream( Log::File, this, m_content )
-	emit contentChanged( *this );
+	pReadFileStream( this, m_position, positionChanged );
+	pReadFileStream( this, m_content, contentChanged );
 	return true;
 }
 
@@ -33,22 +30,12 @@ void Keyframe::writeToFileStream( QDataStream & _stream ) const
 	_stream << m_content;
 }
 
-bool Keyframe::loadFromDiffStream( QDataStream &_stream )
+bool Keyframe::loadOrControlFromDiffStream( QDataStream & _stream, QDataStream * _undoStream, bool(*controlMoveKeyframe)(qint64,qint64) )
 {
-	DiffFlags flags;
-	preadstream( Log::Network, this, flags )
-
-	if ( flags & DiffFlags::POSITION )
-	{
-		preadstream( Log::Network, this, m_position )
-		emit positionChanged( *this );
-	}
-
-	if ( flags & DiffFlags::CONTENT )
-	{
-		preadstream( Log::Network, this, m_content )
-		emit contentChanged( *this );
-	}
+	auto undoFlags = [](DiffFlags _f){return _f;};
+	pReadDiffStreamFlags( undoFlags )
+	pReadDiffStreamControled( DiffFlags::POSITION, qint64, m_position, positionChanged, controlMoveKeyframe )
+	pReadDiffStream( DiffFlags::CONTENT, QVariant, m_content, contentChanged )
 }
 
 void Keyframe::writeLocalDiffToStream( DiffFlags _flags, QDataStream & _stream ) const

@@ -23,8 +23,10 @@ public:
 	// Data
 	bool loadFromFileStream( quint16 _version, QDataStream & _stream );
 	void writeToFileStream( QDataStream & _stream ) const;
-	bool loadFromDiffStream( QDataStream & _stream );
-	void writeLocalDiffToStream( DiffFlags _flags, QDataStream & _stream ) const;
+	// if _undoStream is set this function only control the stream appliability and generate the _undoStream for undo/redo
+	bool loadOrControlFromDiffStream(QDataStream & _stream, QDataStream * _undoStream = nullptr, bool(*controlMoveKeyframe)(qint64, qint64) = nullptr);
+	void writeDiffToThis( QDataStream & _stream ) const;
+	void writeLocalDiffToStream( DiffFlags _flags, QDataStream & _stream ) const; // TODO delete this
 
 	// Accessors
 	qint64 getPosition() const { return m_position; }

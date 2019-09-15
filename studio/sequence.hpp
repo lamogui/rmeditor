@@ -15,42 +15,55 @@ class Sequence : public QObject
 public:
 	Sequence( DemoTimeline & _parent );
 
+	struct Block_t
+	{
+		qint64 m_startFrame;
+		quint64 m_length;
+
+		Block_t() : m_startFrame(0), m_length(60 * 5) {}
+		qint64 getEndFrame() const { return m_startFrame + static_cast<qint64>(m_length) - 1; }
+		bool isInside( qint64 _frame )  const { return (_frame >= m_startFrame && _frame <= getEndFrame()); }
+		bool overlap(const Block_t& _seq) const
+		{
+			return (isInside(_seq.m_startFrame)||
+							isInside(_seq.getEndFrame())||
+							(_seq.m_startFrame < m_startFrame && _seq.getEndFrame() > getEndFrame()));
+		}
+	};
+
 	enum class DiffFlags
 	{
-		LENTGH = 1 << 0,
-		START_FRAME = 1 << 1,
-		SCENE = 1 << 2,
-		CAMERA_KEYFRAMES_DELETED = 1 << 3,
-		CAMERA_KEYFRAMES_INSERTED = 1 << 4,
-		CAMERA_KEYFRAMES_MODIFIED = 1 << 5,
+		SEQUENCE_BLOCK = 1 << 0,
+		SCENE = 1 << 1,
+		CAMERA_KEYFRAMES_DELETED = 1 << 2,
+		CAMERA_KEYFRAMES_INSERTED = 1 << 3,
+		CAMERA_KEYFRAMES_MODIFIED = 1 << 4
 	};
 
 	// Data
 	bool loadFromFileStream( quint16 _version, QDataStream & _stream );
 	void writeToFileStream( QDataStream & _stream ) const;
-	bool loadFromDiffStream( QDataStream & _stream );
+	bool loadOrControlFromDiffStream(QDataStream & _stream, QDataStream * _undoStream = nullptr , bool(*controlMoveSequence)(Block_t&, Block_t&) = nullptr);
 	void writeLocalDiffToStream( DiffFlags _flags, QDataStream & _stream ) const; // This can't exist and must be deleted
 
 	// Control
-	bool controlKeyframeDiff( QDataStream & _stream ) const; // network
-	bool controlInsertKeyframe( qint64 _frame ) const; // local
+	bool controlDeleteCameraKeyframe(qint64 _frame, QList<qint64>* _deletedKeyframes = nullptr) const;
+	bool controlInsertCameraKeyframe( qint64 _frame, QList<qint64>* _insertedKeyframes = nullptr ) const;
+	bool controlMoveCameraKeyframe(qint64 _before, qint64 _after, QList<qint64>* _deletedKeyframes = nullptr, QList<qint64>* _insertedKeyframes = nullptr) const;
 
 	// Accesssors
-	qint64 getStartFrame() const { return m_startFrame; }
-	quint64 getLength() const { return m_length; }
+	qint64 getStartFrame() const { return m_sequenceBlock.m_startFrame; }
+	quint64 getLength() const { return m_sequenceBlock.m_length; }
 
 	// Utils
-	qint64 getEndFrame() const { return m_startFrame + static_cast<qint64>(m_length) - 1; } // in parent space
-	bool isInside(qint64 _frame) const { return (_frame >= m_startFrame && _frame <= getEndFrame()); }
-	bool overlap(const Sequence& _seq) const { return (isInside(_seq.m_startFrame)||
-																										 isInside(_seq.getEndFrame())||
-																											(_seq.m_startFrame < m_startFrame && _seq.getEndFrame() > getEndFrame())); }
+	qint64 getEndFrame() const { return m_sequenceBlock.getEndFrame(); } // in parent space
+	bool isInside(qint64 _frame) const { return m_sequenceBlock.isInside( _frame ); }
+
 	// Time position
 	void setFramePosition(qint64 _framePosition); // local space ?
 
 signals:
-	void startFrameChanged( const Sequence & );
-	void lengthChanged( const Sequence & );
+	void sequenceBlockChanged( const Sequence & );
 	void sceneChanged( const Sequence & );
 
 	// diff
@@ -63,19 +76,24 @@ signals:
 
 private:
 	// Data
-	bool loadSceneFromStream(QDataStream & _stream);
-	bool loadInsertKeyframeFromStream(QDataStream & _stream, bool _fromFile, quint16 _version);
+	void loadSceneFromIndex( qint16 _index );
+	bool loadOrControlInsertCameraKeyframe(QDataStream & _stream,
+	 quint16 _version = static_cast<quint16>(-1),  // -1 mean loading from diff
+	 QDataStream * _undoStream = nullptr,					 // not nullptr = control
+	 QList<qint64>* _insertedKeyframes = nullptr); // should probably be setted in case of control
 
 	// Find
 	QList<Keyframe *>::const_iterator upperCameraKeyframe( qint64 _value ) const;
 	Keyframe* findCameraKeyframe( qint64 _value ) const;
 
 	// attributes
-	qint64 m_startFrame;
-	quint64 m_length;
+	Block_t m_sequenceBlock;
 	QPointer<const RaymarchingScene> m_scene; // TODO make this editable and notify...
 	QList<Keyframe*> m_cameraKeyframes; // only usage for now is to avoid duplicate
 };
+
+QDataStream& operator<<( QDataStream & _stream, const Sequence::Block_t& _seq  ) { _stream << _seq.m_length << _seq.m_startFrame; return _stream; }
+QDataStream& operator>>( QDataStream & _stream, Sequence::Block_t& _seq ) { _stream >> _seq.m_length >> _seq.m_startFrame; return _stream; }
 
 PROUT_DECLARE_DIFFFLAGS(Sequence)
 
