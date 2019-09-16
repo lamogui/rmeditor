@@ -43,7 +43,7 @@ public:
 	// Data
 	bool loadFromFileStream( quint16 _version, QDataStream & _stream );
 	void writeToFileStream( QDataStream & _stream ) const;
-	bool loadOrControlFromDiffStream(QDataStream & _stream, QDataStream * _undoStream = nullptr , bool(*controlMoveSequence)(Block_t&, Block_t&) = nullptr);
+	bool loadOrControlFromDiffStream(QDataStream & _stream, QDataStream * _undoStream = nullptr , const std::function<bool(Block_t&, Block_t&)> * _controlMoveSequence = nullptr);
 	void writeLocalDiffToStream( DiffFlags _flags, QDataStream & _stream ) const; // This can't exist and must be deleted
 
 	// Control

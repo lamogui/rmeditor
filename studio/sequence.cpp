@@ -23,15 +23,20 @@ void Sequence::loadSceneFromIndex( qint16 _index )
 	emit sceneChanged(*this);
 }
 
+// This one is quite complex and is used to avoid duplicate 2 or 3 time the nearly similar code...
 bool Sequence::loadOrControlInsertCameraKeyframe(QDataStream & _stream, quint16 _version, QDataStream * _undoStream, QList<qint64>* _insertedKeyframes )
 {
 	bool fromFile = !_undoStream && (_version != static_cast<quint16>(-1));
 	passert(Log::Code, this, (!_undoStream && !_insertedKeyframes) || (_undoStream && _insertedKeyframes ));
 
-	pReadDiffStreamSize( qint16, keyframeCount )
+	pReadDiffStreamSize( quint16, keyframeCount )
 
 	bool needSort = (!fromFile && !_undoStream);
 	qint64 previousFrame=-1;
+
+	if ( _insertedKeyframes ) {
+		_insertedKeyframes->reserve( keyframeCount );
+	}
 
 	for (quint16 i = 0; i < keyframeCount; ++i )
 	{
@@ -99,20 +104,24 @@ bool Sequence::loadFromFileStream( quint16 _version, QDataStream & _stream )
 
 void Sequence::writeToFileStream( QDataStream & _stream ) const
 {
-	_stream << m_sequenceBlock;
+	pWriteFileStream( m_sequenceBlock )
+
 	const Project& project = *static_cast<Project*>(parent()->parent());
 	int indexOfRmScene = project.indexOfRmScene( m_scene.data() );
 	passertmsg( Log::Code, this, indexOfRmScene < 1 << 15, tr("Limit of scenes number reached !") );
-	_stream << static_cast<qint16>(indexOfRmScene);
-	passertmsg( Log::Code, this, m_cameraKeyframes.size() < (1 << 16), tr( "Limit of keyframes number reached !" ) );
-	_stream << static_cast<quint16>(m_cameraKeyframes.size());
+	pWriteFileStream( static_cast<qint16>(indexOfRmScene) )
+
+	int cameraKeyframeCount = m_cameraKeyframes.size();
+	passertmsg( Log::Code, this, cameraKeyframeCount  < (1 << 16), tr( "Limit of keyframes number reached !" ) );
+	pWriteFileStream( static_cast<qint16>(cameraKeyframeCount) )
+
 	for (auto it = m_cameraKeyframes.cbegin(); it != m_cameraKeyframes.cend(); ++it)
 	{
 		(*it)->writeToFileStream(_stream);
 	}
 }
 
-bool Sequence::loadOrControlFromDiffStream( QDataStream & _stream, QDataStream * _undoStream, bool(*controlMoveSequence)(Block_t&, Block_t&) )
+bool Sequence::loadOrControlFromDiffStream(QDataStream & _stream, QDataStream * _undoStream, const std::function<bool(Block_t&, Block_t&)>* _controlMoveSequence )
 {
 	auto undoFlags = [](DiffFlags _f) {
 		DiffFlags f = static_cast<DiffFlags>(0);
@@ -128,46 +137,67 @@ bool Sequence::loadOrControlFromDiffStream( QDataStream & _stream, QDataStream *
 		return false;
 	}
 
-	pReadDiffStreamControled( DiffFlags::SEQUENCE_BLOCK, Block_t, m_sequenceBlock, sequenceBlockChanged, controlMoveSequence )
+	pReadDiffStreamControled( DiffFlags::SEQUENCE_BLOCK, Block_t, m_sequenceBlock, sequenceBlockChanged, _controlMoveSequence )
 	pReadDiffStreamPointer( DiffFlags::SCENE, qint16, m_scene, loadSceneFromIndex, static_cast<Project*>(parent()->parent())->indexOfRmScene )
+
+	QList<qint64> _insertedKeyframes;
+	QList<qint64> _deletedKeyframes;
 
 	if (flags & DiffFlags::CAMERA_KEYFRAMES_DELETED) {
 		pReadDiffStreamSize( qint16, keyframeCount )
 
 		for (qint16 i = 0; i < keyframeCount; ++i ) {
 			qint64 keyframeFrame = -1;
-			preadstream(Log::Network,this, keyframeFrame)
+			pReadStreamKey( keyframeFrame )
+
 			Keyframe* keyframe = findCameraKeyframe( keyframeFrame );
 			if ( !keyframe ){
 				perror(Log::Network,this, tr("Unable to find the keyframe to delete at frame ") + QString::number(keyframeFrame));
-				return false;
+				if ( _undoStream ) { // Control failed !
+					return false;
+				}
+				continue;
 			}
 
-
-			emit cameraKeyframeDeleted(*this, *keyframe);
-			m_cameraKeyframes.removeOne( keyframe );
-			delete keyframe;
+			if ( _undoStream ) {
+				keyframe->writeToFileStream( *_undoStream ); // undoStream will insert keyframes instead of delete thems...
+				if ( !controlDeleteCameraKeyframe( keyframe->getPosition(), &_deletedKeyframes ) ) {
+					perror(Log::Network,this, tr("Unable to find the keyframe to delete at frame ") + QString::number(keyframe->getPosition()));
+					return false;
+				}
+			}
+			else if ( keyframe ){
+				emit cameraKeyframeDeleted(*this, *keyframe);
+				m_cameraKeyframes.removeOne( keyframe );
+				delete keyframe;
+			}
 		}
 	}
 	else if ( flags & DiffFlags::CAMERA_KEYFRAMES_INSERTED ) {
-		if (!loadOrControlInsertCameraKeyframe( _stream, static_cast<quint16>(-1), _undoStream, )) {
+		if (!loadOrControlInsertCameraKeyframe( _stream, static_cast<quint16>(-1), _undoStream, &_insertedKeyframes)) {
 			return false;
 		}
 	}
 
 	if ( flags & DiffFlags::CAMERA_KEYFRAMES_MODIFIED ) {
-		qint16 keyframeCount = 0;
-		preadstream(Log::Network,this, keyframeCount)
+		pReadDiffStreamSize( qint16, keyframeCount )
+
+		auto controlKeyframeMove = [&](qint64 _before, qint64 _after){
+			return controlMoveCameraKeyframe( _before, _after, &_deletedKeyframes, &_insertedKeyframes );
+		};
+		std::function<bool(qint64, qint64)> controlKeyframeMoveFunction(controlKeyframeMove);
 
 		for (qint16 i = 0; i < keyframeCount; ++i ) {
 			qint64 keyframeFrame = -1;
-			preadstream(Log::Network,this, keyframeFrame)
+			pReadStreamKey( keyframeFrame )
+
 			Keyframe* keyframe = findCameraKeyframe( keyframeFrame );
 			if ( !keyframe ){
 				perror(Log::Network,this, tr("Unable to find the keyframe to update at frame ") + QString::number(keyframeFrame));
-				return false;
+				return false; // can't read the stream following...
 			}
-			if (!keyframe->loadFromDiffStream(_stream) ) {
+
+			if (!keyframe->loadOrControlFromDiffStream(_stream, _undoStream, &controlKeyframeMoveFunction) ) { // Delegate the rest to child objects !
 				return false;
 			}
 		}

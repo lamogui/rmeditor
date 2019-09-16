@@ -30,11 +30,11 @@ void Keyframe::writeToFileStream( QDataStream & _stream ) const
 	_stream << m_content;
 }
 
-bool Keyframe::loadOrControlFromDiffStream( QDataStream & _stream, QDataStream * _undoStream, bool(*controlMoveKeyframe)(qint64,qint64) )
+bool Keyframe::loadOrControlFromDiffStream(QDataStream & _stream, QDataStream * _undoStream, const std::function<bool(qint64, qint64)>* _controlMoveKeyframe )
 {
 	auto undoFlags = [](DiffFlags _f){return _f;};
 	pReadDiffStreamFlags( undoFlags )
-	pReadDiffStreamControled( DiffFlags::POSITION, qint64, m_position, positionChanged, controlMoveKeyframe )
+	pReadDiffStreamControled( DiffFlags::POSITION, qint64, m_position, positionChanged, _controlMoveKeyframe )
 	pReadDiffStream( DiffFlags::CONTENT, QVariant, m_content, contentChanged )
 }
 

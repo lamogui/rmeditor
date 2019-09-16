@@ -13,7 +13,13 @@
 	QDataStream& operator<<( QDataStream & _stream, _class::DiffFlags _flags ) { _stream << static_cast<qint8>( _flags ) ; return _stream; } \
 	QDataStream& operator>>( QDataStream & _stream, _class::DiffFlags & _flags ) { qint8 value = 0; _stream >> value; _flags = static_cast<_class::DiffFlags>( value ); return _stream; }
 
+#define pReadStreamKey( _key ) \
+	_stream >> _key;
+
 // File
+#define pWriteFileStream( _member ) \
+	_stream << _member;
+
 #define pReadFileStream( _sender, _property, _signal )  PROUT_BLOCK_WITH_FORCED_SEMICOLON( \
 	_stream >> _property; \
 	if ( _stream.status() != QDataStream::Status::Ok ) { \
@@ -53,7 +59,7 @@
 			_propertyType new_##_property; \
 			_stream >> new_##_property; \
 			*_undoStream << _property; \
-			if (_control( _property, new_##_property ) ) { \
+			if ( (*_control)( _property, new_##_property ) ) { \
 				perror(Log::Network, this, tr( "Could not resolve diff for ") +  objectName() +  " member " + metaObject()->className() + "::" + #_property ); \
 				return false; \
 			} \
