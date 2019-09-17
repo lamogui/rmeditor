@@ -6,13 +6,12 @@
 
 #include "diffflags.hpp"
 
-class Sequence;
 class Keyframe : public QObject
 {
 	Q_OBJECT
 
 public:
-	Keyframe(Sequence & _parent);
+	Keyframe(QObject & _parent);
 
 	enum class DiffFlags
 	{
@@ -51,13 +50,13 @@ protected:
 PROUT_DECLARE_DIFFFLAGS(Keyframe);
 
 #include <QWidget>
-class SequenceWidget;
+class DemoTimelineWidget;
 class KeyframeWidget final : public QWidget
 {
 	Q_OBJECT
 
 public:
-	KeyframeWidget( SequenceWidget & _parent, const Keyframe & _target, int _y );
+	KeyframeWidget( QWidget & _parent, const Keyframe & _target, int _y );
 
 	static const int c_width = 10;
 	static const int c_height = 15;
@@ -77,10 +76,15 @@ protected slots:
 
 protected:
 	void setPosition(qint64 _relativePosition, qreal _zoomLevel);
+	DemoTimelineWidget& getTimelineWidget() const;
 
 	// QWidget
 	QSize sizeHint() const override;
 	void paintEvent(QPaintEvent *event) override;
+	void 	mouseDoubleClickEvent(QMouseEvent* _event) override;
+	void 	mouseMoveEvent(QMouseEvent* _event) override;
+	void 	mousePressEvent(QMouseEvent* _event) override;
+	void 	mouseReleaseEvent(QMouseEvent* _event) override;
 
 private:
 	const Keyframe & m_target;

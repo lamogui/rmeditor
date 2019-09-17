@@ -143,9 +143,13 @@ signals:
 protected:
 	void renderImages();
 
-	void mousePressEvent(QGraphicsSceneMouseEvent* _event) override;
-	void mouseMoveEvent(QGraphicsSceneMouseEvent* _event) override;
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent* _event) override;
+	// QWidget
+	QSize sizeHint() const override;
+	void paintEvent(QPaintEvent *event) override;
+	void 	mouseDoubleClickEvent(QMouseEvent* _event) override;
+	void 	mouseMoveEvent(QMouseEvent* _event) override;
+	void 	mousePressEvent(QMouseEvent* _event) override;
+	void 	mouseReleaseEvent(QMouseEvent* _event) override;
 
 	void 	hoverEnterEvent(QGraphicsSceneHoverEvent* _event) override;
 	void 	hoverLeaveEvent(QGraphicsSceneHoverEvent* _event) override;
