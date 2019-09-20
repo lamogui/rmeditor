@@ -261,7 +261,21 @@ Keyframe* Sequence::findCameraKeyframe(qint64 _value) const {
 	return *it;
 }
 
-void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*_option*/, QWidget* _widget)
+/*
+ * SequenceWidget
+ */
+
+SequenceWidget::SequenceWidget(DemoTimelineWidget & _parent, const Sequence& _target) : QWidget( &_parent ), m_target(_target) {
+
+	connect( &m_target, &Sequence::sequenceBlockChanged, this, &SequenceWidget:: );
+	//connect( &_target, &Sequence::sceneChanged, this, SequenceWidget:: );
+	connect( &m_target, &Sequence::cameraKeyframeInserted, this, &SequenceWidget:: );
+	connect( &m_target, &Sequence::cameraKeyframeDeleted, this, &SequenceWidget:: );
+	connect( &m_target, &Sequence::cameraKeyframesLoaded, this, &SequenceWidget:: );
+	connect( &m_target, &Sequence::cameraKeyframesAllDeleted, this, &SequenceWidget:: );
+}
+
+void SequenceWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*_option*/, QWidget* _widget)
 {  
 	QBrush fillBrush(isSelected() ? selectedBrush() : idleBrush());
 	QRectF rect = boundingRect();
@@ -298,12 +312,12 @@ void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*_optio
 	}
 }
 
-QRectF Sequence::boundingRect() const
+QRectF SequenceWidget::boundingRect() const
 {
 	return QRectF(0, 0, m_length, m_height);
 }
 
-void Sequence::initializeGL(RenderFunctionsCache& _renderCache)
+void SequenceWidget::initializeGL(RenderFunctionsCache& _renderCache)
 {
 	this->m_renderCache = &_renderCache;
 	renderImages();
@@ -312,7 +326,7 @@ void Sequence::initializeGL(RenderFunctionsCache& _renderCache)
 	}
 }
 
-void Sequence::renderImages()
+void SequenceWidget::renderImages()
 {
 	jassert(m_renderCache);
 	if ( m_renderer )
@@ -325,7 +339,7 @@ void Sequence::renderImages()
   }
 }
 
-void Sequence::setStartFrame(qint64 _frame)
+void SequenceWidget::setStartFrame(qint64 _frame)
 {
   qint64 previous_frame = getStartFrame();
   if (frame < 0)
@@ -339,7 +353,7 @@ void Sequence::setStartFrame(qint64 _frame)
   }
 }
 
-void Sequence::setLength(quint64 length)
+void SequenceWidget::setLength(quint64 length)
 {
   /*qint64 maxlength = timeline->maxSequenceLengthBeforeOverlap(this);
   if (length > maxlength)
@@ -360,7 +374,7 @@ void Sequence::setLength(quint64 length)
   }
 }
 
-void Sequence::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void SequenceWidget::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
   BaseClass::mousePressEvent(event);
   mousePressPos = event->scenePos();
@@ -386,7 +400,7 @@ void Sequence::mousePressEvent(QGraphicsSceneMouseEvent* event)
   }
 }
 
-void Sequence::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+void SequenceWidget::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
   BaseClass::mouseMoveEvent(event);
   qint64 delta = event->scenePos().x() - mousePressPos.x();
@@ -407,7 +421,7 @@ void Sequence::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
   }
 }
 
-void Sequence::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void SequenceWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
   BaseClass::mouseReleaseEvent(event);
   qint64 delta = event->scenePos().x() - mousePressPos.x();
@@ -454,7 +468,7 @@ qint64 Sequence::nearestFrameAvailableForKeyframe(qint64 rel_frame) const
   return rel_frame;
 }
 */
-void Sequence::setFramePosition(qint64 framePosition)
+void SequenceWidget::setFramePosition(qint64 framePosition)
 {
   CameraKeyframe* begin = nullptr;
   CameraKeyframe* end = nullptr;
@@ -533,41 +547,6 @@ void Sequence::deleteCameraKeyframe(CameraKeyframe *key)
   delete it.value();
   m_cameraKeyframes.erase(it);
   m_project->notifyDocumentChanged();
-}
-
-
-void Sequence::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
-{
-  BaseClass::hoverEnterEvent(event);
-  qreal scale = getScaleFromWidget(event->widget());
-  if (isInsideRightExtend(event->pos(),scale) || isInsideLeftExtend(event->pos(), scale))
-  {
-    QApplication::setOverrideCursor(Qt::SizeHorCursor);
-  }
-  else
-  {
-    QApplication::setOverrideCursor(Qt::OpenHandCursor);
-  }
-}
-
-void Sequence::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
-{
-  BaseClass::hoverMoveEvent(event);
-  qreal scale = getScaleFromWidget(event->widget());
-  if (isInsideRightExtend(event->pos(),scale) || isInsideLeftExtend(event->pos(), scale))
-  {
-    QApplication::changeOverrideCursor(Qt::SizeHorCursor);
-  }
-  else
-  {
-    QApplication::changeOverrideCursor(Qt::OpenHandCursor);
-  }
-}
-
-void Sequence::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
-{
-  BaseClass::hoverLeaveEvent(event);
-  QApplication::restoreOverrideCursor();
 }
 
 bool Sequence::isInsideRightExtend(QPointF rel_pos, qreal scale) const
