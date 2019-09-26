@@ -111,10 +111,6 @@ public:
 	QBrush selectedBrush() { return QBrush(QColor(200, 200, 255)); }
 	QBrush idleBrush() { return QBrush(QColor(200, 200, 200)); }
 
-	// GraphicsItem
-	void paint(QPainter *painter, const QStyleOptionGraphicsItem *_option, QWidget *_widget) override;
-	QRectF boundingRect() const override;
-
 	// GL
 	void initializeGL(RenderFunctionsCache& _renderCache);
 
@@ -151,10 +147,6 @@ protected:
 	void 	mousePressEvent(QMouseEvent* _event) override;
 	void 	mouseReleaseEvent(QMouseEvent* _event) override;
 
-	void 	hoverEnterEvent(QGraphicsSceneHoverEvent* _event) override;
-	void 	hoverLeaveEvent(QGraphicsSceneHoverEvent* _event) override;
-	void 	hoverMoveEvent(QGraphicsSceneHoverEvent* _event) override;
-
 	bool isInsideRightExtend(QPointF _rel_pos, qreal _scale) const;
 	bool isInsideLeftExtend(QPointF _rel_pos, qreal _scale) const;
 	qreal getScaleFromWidget(const QWidget* _widget) const;
@@ -165,7 +157,8 @@ protected slots:
 	void keyframeRequestFramePosition(qint64 _position);
 
 
-
+protected:
+	Sequence & m_target;
 
 	// Internal
 	Renderer* m_renderer;
@@ -182,9 +175,6 @@ protected slots:
 	qint64 m_mousePressStartFrame;
 	qint64 m_mousePressLength;
 	MouseAction m_currentAction;
-
-private:
-	typedef QGraphicsObject BaseClass;
 };
 
 #endif

@@ -261,7 +261,18 @@ Keyframe* Sequence::findCameraKeyframe(qint64 _value) const {
 	return *it;
 }
 
-void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*_option*/, QWidget* _widget)
+/*
+ * SequenceWidget
+ */
+
+SequenceWidget::SequenceWidget(DemoTimelineWidget & _parent, const Sequence & _target) :
+	QWidget(&_parent),
+	m_target(_target)
+{
+
+}
+
+void SequenceWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*_option*/, QWidget* _widget)
 {  
 	QBrush fillBrush(isSelected() ? selectedBrush() : idleBrush());
 	QRectF rect = boundingRect();
