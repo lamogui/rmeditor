@@ -111,6 +111,7 @@ public:
 	QBrush selectedBrush() { return QBrush(QColor(200, 200, 255)); }
 	QBrush idleBrush() { return QBrush(QColor(200, 200, 200)); }
 
+
 	// GL
 	void initializeGL(RenderFunctionsCache& _renderCache);
 
@@ -153,12 +154,12 @@ protected:
 
 
 protected slots:
-	void keyframePropertyChanged(QObject* _owner, const QString& _propertyName, const QVariant& _oldValue, const QVariant& _newValue);
-	void keyframeRequestFramePosition(qint64 _position);
+	void onTargetChanged();
+	void onZoomLevelChanged(qreal _zoomLevel);
 
 
 protected:
-	Sequence & m_target;
+	const  Sequence & m_target;
 
 	// Internal
 	Renderer* m_renderer;
