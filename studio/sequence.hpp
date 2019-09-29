@@ -54,6 +54,9 @@ public:
 	// Accesssors
 	qint64 getStartFrame() const { return m_sequenceBlock.m_startFrame; }
 	quint64 getLength() const { return m_sequenceBlock.m_length; }
+	QPointer<const RaymarchingScene> getScene() const { return m_scene; }
+	int getNumCameraKeyframes() const { return m_cameraKeyframes.size(); }
+	const Keyframe& getCameraKeyframe(int _index) const { return *m_cameraKeyframes[ _index ]; }
 
 	// Utils
 	qint64 getEndFrame() const { return m_sequenceBlock.getEndFrame(); } // in parent space
@@ -67,8 +70,8 @@ signals:
 	void sceneChanged( const Sequence & );
 
 	// diff
-	void cameraKeyframeInserted( const Sequence &, const Keyframe & );
-	void cameraKeyframeDeleted( const Sequence &, const Keyframe & );
+	void cameraKeyframeInserted( const Keyframe &, const Sequence & );
+	void cameraKeyframeDeleted( const Keyframe &, const Sequence & );
 
 	// make a pass on all keyframes for view no search
 	void cameraKeyframesLoaded( const Sequence & );
@@ -138,28 +141,33 @@ signals:
 	void requestFramePosition(const Sequence* source, qint64 position);
 
 protected:
+	DemoTimelineWidget& getTimelineWidget() const;
+	void setPosition(qint64 _relativePosition, qreal _zoomLevel);
+
 	void renderImages();
 
 	// QWidget
 	QSize sizeHint() const override;
-	void paintEvent(QPaintEvent *event) override;
-	void 	mouseDoubleClickEvent(QMouseEvent* _event) override;
-	void 	mouseMoveEvent(QMouseEvent* _event) override;
-	void 	mousePressEvent(QMouseEvent* _event) override;
-	void 	mouseReleaseEvent(QMouseEvent* _event) override;
-
-	bool isInsideRightExtend(QPointF _rel_pos, qreal _scale) const;
-	bool isInsideLeftExtend(QPointF _rel_pos, qreal _scale) const;
-	qreal getScaleFromWidget(const QWidget* _widget) const;
-
+	void paintEvent(QPaintEvent* _event) override;
+	void mouseDoubleClickEvent(QMouseEvent* _event) override;
+	void mouseMoveEvent(QMouseEvent* _event) override;
+	void mousePressEvent(QMouseEvent* _event) override;
+	void mouseReleaseEvent(QMouseEvent* _event) override;
 
 protected slots:
 	void onTargetChanged();
 	void onZoomLevelChanged(qreal _zoomLevel);
+	void onInsertCameraKeyframe(const Keyframe & _keyframe);
+	void onDeleteCameraKeyframe(const Keyframe & _keyframe);
+	void onDeleteAllKeyframes();
+	void onLoadAllKeyframes();
 
 
 protected:
 	const  Sequence & m_target;
+	QList< KeyframeWidget* > m_cameraKeyframes;
+	int m_height;
+	int m_y;
 
 	// Internal
 	Renderer* m_renderer;

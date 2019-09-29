@@ -68,7 +68,7 @@ bool Sequence::loadOrControlInsertCameraKeyframe(QDataStream & _stream, quint16 
 				delete keyframe;
 			} else {
 				m_cameraKeyframes.push_back( keyframe );
-				emit cameraKeyframeInserted(*this, *keyframe);
+				emit cameraKeyframeInserted(*keyframe,*this);
 			}
 		}
 	}
@@ -167,7 +167,7 @@ bool Sequence::loadOrControlFromDiffStream(QDataStream & _stream, QDataStream * 
 				}
 			}
 			else if ( keyframe ){
-				emit cameraKeyframeDeleted(*this, *keyframe);
+				emit cameraKeyframeDeleted(*keyframe,*this);
 				m_cameraKeyframes.removeOne( keyframe );
 				delete keyframe;
 			}
@@ -261,60 +261,197 @@ Keyframe* Sequence::findCameraKeyframe(qint64 _value) const {
 	return *it;
 }
 
+#include "demotimelinewidget.hpp"
+
 /*
  * SequenceWidget
  */
 
-SequenceWidget::SequenceWidget(DemoTimelineWidget & _parent, const Sequence& _target) : QWidget( &_parent ), m_target(_target) {
+SequenceWidget::SequenceWidget(DemoTimelineWidget & _parent, const Sequence& _target) :
+	QWidget( &_parent ), m_target(_target), m_height( 80 ), m_y( 0 )
+{
 
-	connect( &m_target, &Sequence::sequenceBlockChanged, this, &SequenceWidget:: );
+	setSizePolicy( QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed );
+
+	connect( &m_target, &Sequence::sequenceBlockChanged, this, &SequenceWidget::onTargetChanged );
 	//connect( &_target, &Sequence::sceneChanged, this, SequenceWidget:: );
-	connect( &m_target, &Sequence::cameraKeyframeInserted, this, &SequenceWidget:: );
-	connect( &m_target, &Sequence::cameraKeyframeDeleted, this, &SequenceWidget:: );
-	connect( &m_target, &Sequence::cameraKeyframesLoaded, this, &SequenceWidget:: );
-	connect( &m_target, &Sequence::cameraKeyframesAllDeleted, this, &SequenceWidget:: );
+	connect( &m_target, &Sequence::cameraKeyframeInserted, this, &SequenceWidget::onInsertCameraKeyframe );
+	connect( &m_target, &Sequence::cameraKeyframeDeleted, this, &SequenceWidget::onDeleteCameraKeyframe );
+	connect( &m_target, &Sequence::cameraKeyframesLoaded, this, &SequenceWidget::onLoadAllKeyframes );
+	connect( &m_target, &Sequence::cameraKeyframesAllDeleted, this, &SequenceWidget::onDeleteAllKeyframes );
+
+	onTargetChanged();
+	onLoadAllKeyframes();
 }
 
-void SequenceWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem* /*_option*/, QWidget* _widget)
-{  
-	QBrush fillBrush(isSelected() ? selectedBrush() : idleBrush());
-	QRectF rect = boundingRect();
-	painter->fillRect(rect, fillBrush);
-	painter->drawRect(rect);
+DemoTimelineWidget& SequenceWidget::getTimelineWidget() const {
+	return *static_cast<DemoTimelineWidget *>( parent() );
+}
 
-	qreal scale = getScaleFromWidget(_widget);
-	QRectF previewRect(QPointF(5*scale,5),QSizeF(m_preview.size()));
-	previewRect.setWidth(previewRect.width()*scale);
+QSize SequenceWidget::sizeHint() const {
+	const qreal zoomLevel = getTimelineWidget().getZoomLevel();
+	return QSize( static_cast<int>( m_target.getLength() * zoomLevel ), m_height );
+}
+
+void SequenceWidget::paintEvent(QPaintEvent *_event) {
+	QPainter painter(this);
+
+	QBrush fillBrush(/*isSelected() ? selectedBrush() :*/ idleBrush());
+	const qreal zoomLevel = getTimelineWidget().getZoomLevel();
+	QRectF rect( QPointF(m_target.getStartFrame() * zoomLevel, m_y ) , sizeHint() );
+	painter.fillRect(rect, fillBrush);
+	painter.drawRect(rect);
+
+	QRectF previewRect(QPointF(5*zoomLevel,5),QSizeF(m_preview.size()));
+	previewRect.setWidth(previewRect.width()*zoomLevel);
 	if (previewRect.bottom() > rect.bottom() - 5)
 	{
 		previewRect.setBottom(rect.bottom() - 5);
 		previewRect.setWidth(rect.width() * previewRect.height() / static_cast<qreal>(m_preview.size().height()));
 	}
-	if (previewRect.width() > (rect.width() - 10*scale))
+	if (previewRect.width() > (rect.width() - 10*zoomLevel))
 	{
-		previewRect.setWidth((rect.width() - 10*scale));
+		previewRect.setWidth((rect.width() - 10*zoomLevel));
 	}
-	if (m_length > 10)
+	if (m_target.getLength() * zoomLevel > 10.0 )
 	{
-		painter->drawImage(previewRect, m_preview);
+		painter.drawImage(previewRect, m_preview);
 	}
 	QFont textFont;
-	textFont.setStretch(static_cast<int>(100*scale));
-	painter->setFont(textFont);
-	QRectF textRect = QRectF(previewRect.right() + 5*scale,previewRect.top(), previewRect.right()-(previewRect.right()+5*scale), rect.height());
-	if (!m_scene.isNull())
+	painter.setFont(textFont);
+	QRectF textRect = QRectF(previewRect.right() + 5*zoomLevel,previewRect.top(), previewRect.right()-(previewRect.right()+5*zoomLevel), rect.height());
+	if (!m_target.getScene().isNull())
 	{
-		painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,m_scene.data()->objectName() + " (" + m_scene->getPath().fileName() + ")");
+		painter.drawText(textRect,Qt::AlignLeft|Qt::AlignTop,m_target.getScene().data()->objectName() + " (" + m_target.getScene()->getPath().fileName() + ")");
 	}
 	else
 	{
-		painter->drawText(textRect,Qt::AlignLeft|Qt::AlignTop,QString("Missing media"));
+		painter.drawText(textRect,Qt::AlignLeft|Qt::AlignTop,QString("Missing media"));
 	}
 }
 
-QRectF SequenceWidget::boundingRect() const
+void 	SequenceWidget::mouseDoubleClickEvent(QMouseEvent* _event) {
+	QWidget::mouseDoubleClickEvent(_event);
+}
+
+void 	SequenceWidget::mouseMoveEvent(QMouseEvent* _event) {
+	QWidget::mouseMoveEvent(_event);
+	/*
+	qint64 delta = event->scenePos().x() - mousePressPos.x();
+	if (m_currentAction==Move)
+	{
+		setStartFrame(mousePressStartFrame + delta);
+	}
+	else if (m_currentAction==RightExtend)
+	{
+		qint64 v = mousePressLength + delta;
+		setLength(v < 0 ? 0 : v);
+	}
+	else if (currentAction==LeftExtend)
+	{
+		qint64 v = mousePressStartFrame - delta;
+		setStartFrame(mousePressStartFrame + delta);
+		setLength(v < 0 ? 0: v);
+	}
+	*/
+}
+
+void 	SequenceWidget::mousePressEvent(QMouseEvent* _event) {
+	QWidget::mousePressEvent(_event);
+	/*
+	mousePressPos = event->scenePos();
+	mousePressStartFrame = getStartFrame();
+	mousePressLength = getLength();
+	qreal scale = getScaleFromWidget(event->widget());
+
+	if (isInsideRightExtend(event->pos(),scale))
+	{
+		m_currentAction = RightExtend;
+		QApplication::setOverrideCursor(Qt::SizeHorCursor);
+
+	}
+	else if (isInsideLeftExtend(event->pos(), scale))
+	{
+		currentAction = LeftExtend;
+		QApplication::setOverrideCursor(Qt::SizeHorCursor);
+	}
+	else
+	{
+		m_currentAction = Move;
+		QApplication::setOverrideCursor(Qt::ClosedHandCursor);
+	}
+	*/
+}
+
+void 	SequenceWidget::mouseReleaseEvent(QMouseEvent* _event) {
+	QWidget::mouseReleaseEvent(_event);
+	/*
+	qint64 delta = event->scenePos().x() - mousePressPos.x();
+	if (m_currentAction==Move)
+	{
+		UndoStack::assertSendUndoCommand(*this, new ModifyPropertyCommand(*this, "startFrame", mousePressStartFrame, mousePressStartFrame + delta));
+	}
+	else if (m_currentAction==RightExtend)
+	{
+		qint64 v = mousePressStartFrame - delta;
+		UndoStack::assertSendUndoCommand(*this, new ModifyPropertyCommand(*this, "length", mousePressLength, v < 0 ? 0 : v));
+	}
+	else if (currentAction == LeftExtend)
+	{
+		{
+			qint64 v = mousePressStartFrame - delta;
+			QUndoCommand* cmd = new QUndoCommand("Extend sequence");
+			QUndoCommand* startFrameCmd = new ModifyPropertyCommand(*this, "startFrame", mousePressStartFrame, mousePressStartFrame + delta, cmd);
+			QUndoCommand* lengthCmd = new ModifyPropertyCommand(*this, "length", mousePressLength, v < 0 ? 0 : v, cmd);
+			UndoStack::assertSendUndoCommand(*this, cmd);
+		}
+	}
+	QApplication::restoreOverrideCursor();
+	*/
+}
+
+void SequenceWidget::setPosition(qint64 _relativePosition, qreal _zoomLevel)
 {
-	return QRectF(0, 0, m_length, m_height);
+	setGeometry( QRect( QPoint( static_cast<int>( _relativePosition * _zoomLevel ), m_y ) , sizeHint() ) );
+}
+
+void SequenceWidget::onTargetChanged() {
+	setPosition( m_target.getStartFrame(), getTimelineWidget().getZoomLevel() );
+}
+
+void SequenceWidget::onZoomLevelChanged(qreal _zoomLevel) {
+	setPosition( m_target.getStartFrame(), _zoomLevel );
+}
+
+void SequenceWidget::onInsertCameraKeyframe(const Keyframe & _keyframe) {
+	m_cameraKeyframes.append( new KeyframeWidget( *this, _keyframe, 50 ) );
+}
+
+void SequenceWidget::onDeleteCameraKeyframe(const Keyframe & _keyframe) {
+	const int numKeyframes = m_cameraKeyframes.size();
+	for ( int i = 0; i < numKeyframes; ++i ) {
+		if ( &_keyframe == &( m_cameraKeyframes[ i ]->getTarget() ) ) {
+			delete m_cameraKeyframes[ i ];
+			m_cameraKeyframes.removeAt( i );
+			return;
+		}
+	}
+}
+
+void SequenceWidget::onDeleteAllKeyframes() {
+	for ( int i = 0; i < m_cameraKeyframes.size(); ++i ) {
+		delete m_cameraKeyframes[ i ];
+	}
+	m_cameraKeyframes.clear();
+}
+
+void SequenceWidget::onLoadAllKeyframes() {
+	onDeleteAllKeyframes();
+	const int numKeyframes = m_target.getNumCameraKeyframes();
+	m_cameraKeyframes.reserve( numKeyframes );
+	for ( int i = 0; i < numKeyframes; ++i ) {
+		onInsertCameraKeyframe( m_target.getCameraKeyframe( i ) );
+	}
 }
 
 void SequenceWidget::initializeGL(RenderFunctionsCache& _renderCache)
@@ -328,123 +465,17 @@ void SequenceWidget::initializeGL(RenderFunctionsCache& _renderCache)
 
 void SequenceWidget::renderImages()
 {
-	jassert(m_renderCache);
+	passert( Log::Code, this, m_renderCache );
 	if ( m_renderer )
   {
+		/*
 		int height = static_cast<int>(m_height - 10);
     RenderTexture2D render;
 		render.initializeGL(*m_renderCache, QSize(4 * height / 3, height));
 		m_preview = render.getImage();
 		render.render(*m_renderCache, *m_renderer);
+		*/
   }
-}
-
-void SequenceWidget::setStartFrame(qint64 _frame)
-{
-  qint64 previous_frame = getStartFrame();
-  if (frame < 0)
-  {
-    frame = 0;
-  }
-  if (frame != previous_frame)
-  {
-    startFrame = frame;
-    emit propertyChanged(this, "startFrame", previous_frame, startFrame);
-  }
-}
-
-void SequenceWidget::setLength(quint64 length)
-{
-  /*qint64 maxlength = timeline->maxSequenceLengthBeforeOverlap(this);
-  if (length > maxlength)
-  {
-    length = maxlength;
-  }*/
-  if (length < 2)
-  {
-    length = 2;
-  }
-  
-  quint64 oldLength = getLength();
-  if (oldLength != length)
-  {
-    this->length = length;
-    update(QRect(startFrame, 0, length, height));
-    emit propertyChanged(this, "length", oldLength, length);
-  }
-}
-
-void SequenceWidget::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-  BaseClass::mousePressEvent(event);
-  mousePressPos = event->scenePos();
-  mousePressStartFrame = getStartFrame();
-  mousePressLength = getLength();
-  qreal scale = getScaleFromWidget(event->widget());
-
-  if (isInsideRightExtend(event->pos(),scale))
-  {
-    m_currentAction = RightExtend;
-    QApplication::setOverrideCursor(Qt::SizeHorCursor);
-
-  }
-  else if (isInsideLeftExtend(event->pos(), scale))
-  {
-    currentAction = LeftExtend;
-    QApplication::setOverrideCursor(Qt::SizeHorCursor);
-  }
-  else
-  {
-    m_currentAction = Move;
-    QApplication::setOverrideCursor(Qt::ClosedHandCursor);
-  }
-}
-
-void SequenceWidget::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-  BaseClass::mouseMoveEvent(event);
-  qint64 delta = event->scenePos().x() - mousePressPos.x();
-  if (m_currentAction==Move)
-  {
-    setStartFrame(mousePressStartFrame + delta);
-  }
-  else if (m_currentAction==RightExtend)
-  {
-    qint64 v = mousePressLength + delta;
-    setLength(v < 0 ? 0 : v);
-  }
-  else if (currentAction==LeftExtend)
-  {
-    qint64 v = mousePressStartFrame - delta;
-    setStartFrame(mousePressStartFrame + delta);
-    setLength(v < 0 ? 0: v);
-  }
-}
-
-void SequenceWidget::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
-{
-  BaseClass::mouseReleaseEvent(event);
-  qint64 delta = event->scenePos().x() - mousePressPos.x();
-  if (m_currentAction==Move)
-  {
-    UndoStack::assertSendUndoCommand(*this, new ModifyPropertyCommand(*this, "startFrame", mousePressStartFrame, mousePressStartFrame + delta));
-  }
-  else if (m_currentAction==RightExtend)
-  {
-    qint64 v = mousePressStartFrame - delta;
-    UndoStack::assertSendUndoCommand(*this, new ModifyPropertyCommand(*this, "length", mousePressLength, v < 0 ? 0 : v));
-  }
-  else if (currentAction == LeftExtend)
-  {
-    {
-      qint64 v = mousePressStartFrame - delta;
-      QUndoCommand* cmd = new QUndoCommand("Extend sequence");
-      QUndoCommand* startFrameCmd = new ModifyPropertyCommand(*this, "startFrame", mousePressStartFrame, mousePressStartFrame + delta, cmd);
-      QUndoCommand* lengthCmd = new ModifyPropertyCommand(*this, "length", mousePressLength, v < 0 ? 0 : v, cmd);
-      UndoStack::assertSendUndoCommand(*this, cmd);
-    }
-  }
-  QApplication::restoreOverrideCursor();
 }
 
 /*
@@ -467,7 +498,7 @@ qint64 Sequence::nearestFrameAvailableForKeyframe(qint64 rel_frame) const
   }
   return rel_frame;
 }
-*/
+
 void SequenceWidget::setFramePosition(qint64 framePosition)
 {
   CameraKeyframe* begin = nullptr;
@@ -539,79 +570,5 @@ void Sequence::insertCameraKeyframe(qint64 rel_frame, const QVector3D &pos, cons
     renderImages();
   }
 }
+*/
 
-void Sequence::deleteCameraKeyframe(CameraKeyframe *key)
-{
-  QMap<qint64,CameraKeyframe*>::iterator it = m_cameraKeyframes.find(key->relativeFrame());
-  m_cameraNode.removeChild(it.value()->node()).clear();
-  delete it.value();
-  m_cameraKeyframes.erase(it);
-  m_project->notifyDocumentChanged();
-}
-
-bool Sequence::isInsideRightExtend(QPointF rel_pos, qreal scale) const
-{
-  return (rel_pos.x()>=getLength()-3.0*scale); //Ugly
-}
-
-bool Sequence::isInsideLeftExtend(QPointF rel_pos, qreal scale) const
-{
-	return (rel_pos.x()<=3.0*scale); //Ugly
-}
-
-qreal Sequence::getScaleFromWidget(const QWidget *widget) const
-{
-  const TimelineWidget* w = qobject_cast<const TimelineWidget*>(widget);
-  if (!w)
-  {
-    w = qobject_cast<const TimelineWidget*>(widget->parent());
-  }
-  return w ? 1.0 / w->scale().x() : 1.0;
-}
-
-void Sequence::keyframePropertyChanged(QObject* owner, const QString& propertyName, const QVariant& oldValue, const QVariant& newValue)
-{
-  if (propertyName == "relativeFrame")
-  {
-    CameraKeyframe* keyframe = qobject_cast<CameraKeyframe*>(owner);
-    qint64 oldFrame = oldValue.toInt();
-    qint64 newFrame = newValue.toInt();
-    if (cameraKeyframes.contains(oldFrame) && cameraKeyframes[oldFrame] == keyframe)
-      cameraKeyframes.remove(oldFrame); 
-
-    if (cameraKeyframes.contains(newFrame)) // fuck !
-    {
-      // search around the keyframe a free space avaiable
-      qint64 newFrameLeft = newFrame;
-      while (cameraKeyframes.contains(newFrameLeft))
-        newFrameLeft--;
-
-      qint64 newFrameRight;
-      while (cameraKeyframes.contains(newFrameRight))
-        newFrameRight--;
-
-      if (newFrameLeft >= 0 && newFrameRight <= (qint64)getLength())
-      {
-        if (newFrame - newFrameLeft < newFrameRight - newFrame)
-          newFrame = newFrameLeft;
-        else
-          newFrame = newFrameRight;
-      }
-      else if (newFrameLeft >= 0)
-        newFrame = newFrameLeft;
-      else if (newFrameRight <= (qint64)getLength())
-        newFrame = newFrameRight;
-      else
-        jassertfalse;
-
-      keyframe->setRelativeFrame(newFrame);
-    }
-    else
-      cameraKeyframes.insert(newFrame, keyframe); // avoid re-entrancy 
-  }
-}
-
-void Sequence::keyframeRequestFramePosition(qint64 position)
-{
-  emit requestFramePosition(this, position);
-}

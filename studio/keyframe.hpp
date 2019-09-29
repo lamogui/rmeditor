@@ -70,6 +70,8 @@ public:
 		QPointF( 0.0,  c_height / 3.0 ),
 	} ;
 
+	const Keyframe& getTarget() const { return m_target; }
+
 protected slots:
 	void onTargetChanged();
 	void onZoomLevelChanged(qreal _zoomLevel);
