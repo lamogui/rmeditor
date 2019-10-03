@@ -25,6 +25,8 @@ protected:
 	Project& m_project;
 };
 
+#include "sequence.hpp"
+
 class Project;
 class QDir;
 class DemoTimeline : public QGraphicsScene
@@ -36,6 +38,24 @@ public:
   virtual ~DemoTimeline();
 
 	DemoTimelineRenderer m_renderer;
+
+	enum class DiffFlags
+	{
+		SEQUENCE_DELETED = 1 << 0,
+		SEQUENCE_INSERTED = 1 << 1,
+		SEQUENCE_MODIFIED = 1 << 2
+	};
+
+	// Data
+	bool loadFromFileStream( quint16 _version, QDataStream & _stream );
+	void writeToFileStream( QDataStream & _stream ) const;
+	bool loadOrControlFromDiffStream(QDataStream & _stream, QDataStream * _undoStream = nullptr);
+
+	// Control
+	bool controlDeleteSequence(const Sequence::Block_t& _sequence, QList<Sequence::Block_t>* _deletedSequences = nullptr) const;
+	bool controlInsertSequence( const Sequence::Block_t& _sequence, QList<Sequence::Block_t>* _insertedSequence = nullptr ) const;
+	bool controlMoveSequence(const Sequence::Block_t& _before, const Sequence::Block_t& _after, QList<Sequence::Block_t>* _deletedSequences = nullptr, QList<qint64>* _insertedSequences = nullptr) const;
+
 
   /*
   qint64 sequenceStartFrameChanged(qint64 previous_frame,  Sequence* seq); //return the correct start frame of the seq
@@ -51,9 +71,14 @@ public:
   virtual void updateTime();
 
 signals:
-	// property
-	void framerateChanged(double); // meta compiler doesn't support signal declaration inside macros...
-	void requestPosition(double _position);
+	// diff
+	void sequenceInserted( const Keyframe &, const Sequence & );
+	void sequenceDeleted( const Keyframe &, const Sequence & );
+
+	// make a pass on all sequence for view no search
+	void sequencesLoaded( const Sequence & );
+	void sequencesAllDeleted( const Sequence & );
+
 
 public slots:
 	/*
@@ -79,8 +104,11 @@ public slots:
 protected slots:
   //void addSequenceAction(QAction* action);
   void trackRequestFramePosition(qint64 position);
-  /*
+
 protected:
+	QList<Sequence*> m_sequences;
+
+	/*
   void keyReleaseEvent(QKeyEvent *keyEvent) override;
 
   void load();

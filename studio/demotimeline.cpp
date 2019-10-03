@@ -26,6 +26,34 @@ DemoTimeline::~DemoTimeline()
 {
 }
 
+bool DemoTimeline::loadFromFileStream( quint16 _version, QDataStream & _stream )
+{
+	// clear
+	emit sequencesAllDeleted( *this );
+	qDeleteAll(m_sequences);
+	m_sequences.clear();
+
+	// load
+	pReadFileStream( this, m_sequenceBlock, sequenceBlockChanged );
+	pReadFileStreamPointer( this, qint16, m_scene, loadSceneFromIndex );
+
+	if (!loadOrControlInsertCameraKeyframe( _stream, _version )) {
+		return false;
+	}
+
+	return true;
+}
+
+void DemoTimeline::writeToFileStream( QDataStream & _stream ) const
+{
+
+}
+
+bool DemoTimeline::loadOrControlFromDiffStream(QDataStream & _stream, QDataStream * _undoStream /*= nullptr*/)
+{
+
+}
+
 
 void DemoTimeline::trackRequestFramePosition(qint64 position)
 {
