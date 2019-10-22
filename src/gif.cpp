@@ -1,11 +1,5 @@
 
-#include "gif.h"
-
-#ifdef __cplusplus
-   extern "C" {
-#endif
-
-
+#include "gif.hpp"
 
 static int gif_error=0;
 
@@ -18,16 +12,12 @@ gif* new_gif(void)
 {  
    gif* g = (gif*) malloc(sizeof(gif));
    g->global_color_table_size=0;
-   g->global_color_table=NULL;
+	 g->global_color_table=nullptr;
    g->images_count=0;
-   g->images=NULL;
-   g->application=NULL;
-   g->screen=NULL;;
-   g->previous=NULL;
-   #ifdef GIF_WINAPI
-   g->transparent = 0x00FF00FF; /*defaut purple*/
-   g->hBitmap=NULL;
-   #endif
+	 g->images=nullptr;
+	 g->application=nullptr;
+	 g->screen=nullptr;
+	 g->previous=nullptr;
    return g;
 }
 
@@ -35,9 +25,9 @@ gif_image* new_gif_image(void)
 {  
    gif_image* i = (gif_image*) malloc(sizeof(gif_image));
    i->local_color_table_size = 0;
-   i->local_color_table = NULL;
-   i->pixels=NULL;
-   i->control=NULL;
+	 i->local_color_table = nullptr;
+	 i->pixels=nullptr;
+	 i->control=nullptr;
    return i;
 }
 
@@ -46,7 +36,7 @@ gif_application_extension* new_gif_app_ext(void)
 {
    gif_application_extension* ae = 
       (gif_application_extension*) malloc(sizeof(gif_application_extension));
-   ae->data=NULL;
+	 ae->data=nullptr;
    return ae;
 }
 
@@ -98,12 +88,8 @@ void delete_gif(gif* g)
    {
       delete_gif_app_ext(g->application);
    }
-   #if defined GIF_WINAPI
-   if (g->screen && !g->hBitmap) free(g->screen);
-   if (g->hBitmap) DeleteObject(g->hBitmap);
-   #else
-   if (g->screen) free(g->screen);
-   #endif
+
+	 if (g->screen) free(g->screen);
    if (g->previous) free(g->previous);
    free((void*)g);
 }
@@ -114,65 +100,11 @@ void gif_init_screen(gif* g, int mode, void* hdc)
    if (g)
    {
       const unsigned s = g->screen_descriptor.height*g->screen_descriptor.width*4;
-      #if defined GIF_WINAPI
-      unsigned i=0;
-      if (g->screen && !g->hBitmap) free(g->screen);
-      if (g->hBitmap) DeleteObject(g->hBitmap);
-      #else
       (void) hdc;
-      if (g->screen) free(g->screen);
-      #endif
-      g->previous=malloc(s);
-      if (mode == GIF_MODE_BITMAP)
-      {
-         #ifdef GIF_WINAPI
-         if (hdc)
-         {
-            BITMAPINFO bitmapHeader;
-            bitmapHeader.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);
-            bitmapHeader.bmiHeader.biWidth=g->screen_descriptor.width;
-            bitmapHeader.bmiHeader.biHeight=g->screen_descriptor.height;
-            bitmapHeader.bmiHeader.biPlanes=1;
-            bitmapHeader.bmiHeader.biBitCount=32;
-            bitmapHeader.bmiHeader.biCompression=BI_RGB;
-            bitmapHeader.bmiHeader.biSizeImage=0;
-            bitmapHeader.bmiHeader.biXPelsPerMeter=0;
-            bitmapHeader.bmiHeader.biYPelsPerMeter=0;
-            bitmapHeader.bmiHeader.biClrUsed=0;
-            bitmapHeader.bmiHeader.biClrImportant=0;
-            g->screen=NULL;
-            g->hBitmap = CreateDIBSection((HDC) hdc,
-                                       &bitmapHeader,
-                                       DIB_RGB_COLORS,
-                                       (void**)&(g->screen),
-                                       0,0);
-            if (g->hBitmap) printf("Bitmap created with sucess\n"); 
-            else printf("Failed to create bitmap\n"); 
-            
-         }
-         else
-         {
-            g->screen=malloc(s);
-            printf("Warning hdc must be not NULL if you want use HBitmap\n");
-         }
-         for (i=0;i<s;)
-         {
-            g->screen[i++]=g->transparent & 0xFF;
-            g->screen[i++]=(g->transparent >> 8) & 0xFF;
-            g->screen[i++]=(g->transparent >> 16) & 0xFF;
-            g->screen[i++]=0;
-         }
-         #else
-         g->screen=malloc(s);
-         memset((void*)g->screen,0,s);
-         #endif
-      }
-      else
-      {
-        g->screen=malloc(s);
-        memset((void*)g->screen,0,s);
-      }
-      
+			if (g->screen) free(g->screen);
+			g->previous=(uint8_t*)malloc(s);
+			g->screen=(uint8_t*)malloc(s);
+			memset((void*)g->screen,0,s);
       memcpy((void*)g->previous,(void*)g->screen,s);
       
    }
@@ -366,7 +298,7 @@ int gif_read_sub_blocks(uint8_t* stream,
    */
 
   data_length = 0;
-  *data = NULL;
+	*data = nullptr;
   index = 0;
 
    while (1)
@@ -406,11 +338,11 @@ int gif_read_sub_blocks(uint8_t* stream,
 }
 
 
-gif_graphic_control_extension* process_gif_control_stream(int8_t* const stream, 
+gif_graphic_control_extension* process_gif_control_stream(const int8_t* stream,
                                                           unsigned int size,
                                                           unsigned int *pos)
 {
-   gif_graphic_control_extension* gce = NULL;
+	 gif_graphic_control_extension* gce = nullptr;
    uint8_t fields;
    if (size < *pos + 5) {
       gif_error=GIF_ERROR_SIZE;
@@ -439,7 +371,7 @@ gif_application_extension* process_gif_appext_stream(int8_t* const stream,
                                                      unsigned int size,
                                                      unsigned int *pos)
 {
-   gif_application_extension* gae=NULL;
+	 gif_application_extension* gae=nullptr;
    if (size < *pos + 12) {
       gif_error=GIF_ERROR_SIZE;
    } else if (stream[(*pos)] != 11){
@@ -458,14 +390,14 @@ gif_application_extension* process_gif_appext_stream(int8_t* const stream,
    return gae;
 }
 
-gif_image* process_gif_image_stream(int8_t* const stream, 
+gif_image* process_gif_image_stream(const int8_t* stream,
                                     unsigned int size,
                                     unsigned int *pos)
 {
    gif_image* gi = new_gif_image();
    unsigned int compressed_data_length;
    unsigned int uncompressed_data_length;
-   uint8_t *compressed_data = NULL;
+	 uint8_t *compressed_data = nullptr;
    int error;
    uint8_t lzw_code_size;
    if (*pos + 9 < size)
@@ -477,7 +409,7 @@ gif_image* process_gif_image_stream(int8_t* const stream,
    {
       delete_gif_image(gi);
       gif_error=GIF_ERROR_SIZE;
-      return NULL;
+			return nullptr;
    }
    /*Load the local color table if exists... */
    if ( gi->descriptor.fields & 0x80 )
@@ -498,7 +430,7 @@ gif_image* process_gif_image_stream(int8_t* const stream,
       else {
          delete_gif_image(gi);
          gif_error=GIF_ERROR_SIZE;
-         return NULL;
+				 return nullptr;
       }
    }
    
@@ -511,7 +443,7 @@ gif_image* process_gif_image_stream(int8_t* const stream,
    {
       delete_gif_image(gi);
       gif_error=GIF_ERROR_SIZE;
-      return NULL;
+			return nullptr;
    }
    
    compressed_data_length = gif_read_sub_blocks( (uint8_t*)stream,
@@ -523,7 +455,7 @@ gif_image* process_gif_image_stream(int8_t* const stream,
       printf("Data sub block error ! here we are offset 0x%X ,byte 0x%X\n",*pos,stream[*pos]);
       delete_gif_image(gi);
       free((void*)compressed_data);
-      return NULL;
+			return nullptr;
    }
    
    uncompressed_data_length = gi->descriptor.width * gi->descriptor.height;
@@ -538,7 +470,7 @@ gif_image* process_gif_image_stream(int8_t* const stream,
       gif_error=error;
       delete_gif_image(gi);
       free((void*)compressed_data);
-      return NULL;
+			return nullptr;
    }
    return gi;
 }
@@ -547,12 +479,12 @@ gif_image* process_gif_image_stream(int8_t* const stream,
 gif* load_gif_from_stream(const int8_t*  stream,
                         unsigned int size)
 {
-   gif* p_gif=NULL;
+	 gif* p_gif=nullptr;
    unsigned int pos=0;
    uint8_t block_type = 0x0;
    uint8_t ext_label = 0x0;
-   gif_image* current_image=NULL;
-   gif_graphic_control_extension* current_control=NULL;
+	 gif_image* current_image=nullptr;
+	 gif_graphic_control_extension* current_control=nullptr;
    
    if (size < 23)
    {
@@ -575,7 +507,7 @@ gif* load_gif_from_stream(const int8_t*  stream,
    {
       gif_error=GIF_ERROR_SIGNATURE;
       delete_gif(p_gif);
-      return NULL;
+			return nullptr;
    }
 
    /* 
@@ -614,7 +546,7 @@ gif* load_gif_from_stream(const int8_t*  stream,
       else {
          delete_gif(p_gif);
          gif_error=GIF_ERROR_SIZE;
-         return NULL;
+				 return nullptr;
       }
    } 
    
@@ -626,7 +558,7 @@ gif* load_gif_from_stream(const int8_t*  stream,
          delete_gif(p_gif);
          if (current_control)
             free((void*)current_control);
-         return NULL;
+				 return nullptr;
       }
       else
       {
@@ -644,7 +576,7 @@ gif* load_gif_from_stream(const int8_t*  stream,
                if (current_control)
                {
                   current_image->control=current_control;
-                  current_control=NULL;
+									current_control=nullptr;
                }
                p_gif->images_count++;
                printf("Image added !\n");
@@ -656,7 +588,7 @@ gif* load_gif_from_stream(const int8_t*  stream,
             else
             {
                delete_gif(p_gif);
-               return NULL;
+							 return nullptr;
             }
             break;
             
@@ -668,7 +600,7 @@ gif* load_gif_from_stream(const int8_t*  stream,
                delete_gif(p_gif);
                if (current_control)
                   free((void*)current_control);
-               return NULL;
+							 return nullptr;
             }
             else
             {
@@ -685,7 +617,7 @@ gif* load_gif_from_stream(const int8_t*  stream,
                   if (!current_control)
                   {
                      delete_gif(p_gif);
-                     return NULL;
+										 return nullptr;
                   }
                   break;
                   
@@ -708,7 +640,7 @@ gif* load_gif_from_stream(const int8_t*  stream,
                   delete_gif(p_gif);
                   if (current_control)
                      free((void*)current_control);
-                  return NULL;
+									return nullptr;
             }
             if (size < pos + 1 || stream[pos++])
             {
@@ -716,7 +648,7 @@ gif* load_gif_from_stream(const int8_t*  stream,
                delete_gif(p_gif);
                if (current_control)
                   free((void*)current_control);
-               return NULL;
+							 return nullptr;
             }
             break;
             
@@ -729,7 +661,7 @@ gif* load_gif_from_stream(const int8_t*  stream,
             delete_gif(p_gif);
             if (current_control)
                free((void*)current_control);
-            return NULL;
+						return nullptr;
       }
    }
    if (current_control)
@@ -760,7 +692,7 @@ int gif_draw_frame(uint8_t* screen,
    
    gif_image* f;
    if (!g) {
-      return GIF_ERROR_NULL;
+			return GIF_ERROR_NULL;
    }
    else if (g->images_count <= n) { /*Problem ?*/
       return GIF_ERROR_BAD_INDEX; /*Solution !*/
@@ -773,7 +705,7 @@ int gif_draw_frame(uint8_t* screen,
       w=f->descriptor.width;
       h=f->descriptor.height;
    } else {
-      return GIF_ERROR_NULL;
+			return GIF_ERROR_NULL;
    }
    
    /* convert table to rgba */
@@ -800,7 +732,7 @@ int gif_draw_frame(uint8_t* screen,
       }
    }
    else {
-      return GIF_ERROR_NULL;
+			return GIF_ERROR_NULL;
    }
    
    
@@ -820,7 +752,7 @@ int gif_draw_frame(uint8_t* screen,
       if (previous && screen)
          memcpy(screen,previous,sw*sh*4);
       else 
-         return GIF_ERROR_NULL;
+				 return GIF_ERROR_NULL;
       
    }
    if (mode == GIF_MODE_BITMAP)
@@ -881,246 +813,7 @@ int gif_draw_frame(uint8_t* screen,
       if (previous && screen)
          memcpy(previous,screen,sw*sh*4);
       else 
-         return GIF_ERROR_NULL;
+				 return GIF_ERROR_NULL;
    }
    return GIF_NO_ERROR;
 }
-
-#if defined(GIF_TEST)
-
-#include <stdio.h>
-
-gif* test_gif=NULL;
-#if defined(GIF_WINAPI)
-HWND gifWnd=NULL;
-
-BOOL CALLBACK TestWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{ 
-	switch (uMsg) {
-   
-      case WM_SIZE:
-         InvalidateRect(hWnd, NULL, TRUE);
-         UpdateWindow (hWnd);
-         break;
-  
-      
-		case WM_CLOSE:
-			PostQuitMessage(0);
-			break;
-            
-      case WM_PAINT:
-         {
-         
-            PAINTSTRUCT ps;
-            HDC hdcGif;
-            BeginPaint(hWnd,&ps);
-            hdcGif=CreateCompatibleDC(ps.hdc);
-            SelectObject(hdcGif,test_gif->hBitmap);
-            /* blit the skin */
-            TransparentBlt(ps.hdc, 0,0,test_gif->screen_descriptor.width
-                              ,test_gif->screen_descriptor.height, hdcGif, 
-                              0,0, 
-                              test_gif->screen_descriptor.width,
-                              test_gif->screen_descriptor.height,
-                              test_gif->transparent);
-            DeleteDC(hdcGif);
-            EndPaint(hWnd,&ps);
-         }
-         break;
-      
-	default:
-      return DefWindowProc(hWnd, uMsg, wParam, lParam);
-	}
-	return TRUE;
-}
-
-void registerTestGifWin(HINSTANCE instance)
-{
-  WNDCLASSEX wc;
-  wc.cbSize        = sizeof(WNDCLASSEX);
-  wc.style         = CS_HREDRAW | CS_VREDRAW;
-  wc.lpfnWndProc   = (WNDPROC) TestWinProc;
-  wc.cbClsExtra    = 0;
-  wc.cbWndExtra    = 0;
-  wc.hInstance     = instance;
-  wc.hIcon         = 0;
-  wc.hCursor       = 0;
-  wc.hbrBackground = (HBRUSH) CreateSolidBrush(RGB(42,42,42));
-  wc.lpszMenuName  = NULL;
-  wc.lpszClassName = "TestGifWin";
-  wc.hIconSm       = NULL;
-
-  if(!RegisterClassEx(&wc))
-  {
-      MessageBox(NULL, "Error! cannot register winclass","Gif Error",
-          MB_ICONEXCLAMATION | MB_OK);
-      ExitProcess(0xdead);
-  }
-}
-
-#elif defined(GIF_X11)
-Display *dis;
-Window win;
-#endif
-
-int main(int argc, char** argv)
-{
-   if (argc==1)
-   {
-      printf("Error need 1 argument\n");
-   }
-   else if (argc > 1) {
-      FILE* f=fopen(argv[1],"rb");
-      unsigned size=0;
-      char* b=NULL;
-      fseek(f,0,SEEK_END);
-      size=ftell(f);
-      fseek(f,0,SEEK_SET);
-      b=(char*)malloc(size);
-      size=fread((void*)b,1,size,f);
-      printf("Buffering %u bytes\n",size);
-      fclose(f);
-      test_gif=load_gif_from_stream((int8_t*)b,size);
-      
-      free(b);
-      
-      if (test_gif)
-      {
-         #if defined(GIF_WINAPI)
-         MSG msg;
-         BOOL quit=FALSE;
-         const int mode=GIF_MODE_BITMAP;
-         registerTestGifWin(GetModuleHandle(NULL));
-         gifWnd=CreateWindow("TestGifWin",
-                              argv[1],
-                              WS_OVERLAPPEDWINDOW,100,100,
-                              test_gif->screen_descriptor.width + 16,
-                              test_gif->screen_descriptor.height + 32,
-                              NULL,NULL,
-                              NULL,NULL);
-         
-         gif_init_screen(test_gif,mode,(void*)GetDC(gifWnd));        
-         #elif defined(GIF_X11)
-         /*XImage* ximg=NULL;*/
-         const int mode=GIF_MODE_RGBA;
-         int quit=0;
-         Atom wm_delete_window;
-         XEvent report;
-         gif_init_screen(test_gif,mode,NULL);
-         dis = XOpenDisplay(NULL);
-         win = XCreateSimpleWindow(dis, 
-                                   RootWindow(dis, 0), 
-                                   100, 
-                                   100, 
-                                   test_gif->screen_descriptor.width, 
-                                   test_gif->screen_descriptor.height,
-                                   0, 
-                                   0xFFFFFF, 
-                                   0x2A2A2A);
-         XMapWindow(dis, win);
-         XFlush(dis);
-         XSelectInput (dis, win, ExposureMask | KeyPressMask | ButtonPressMask);
-         XStoreName(dis, win, argv[1]);
-         wm_delete_window = XInternAtom (dis, "WM_DELETE_WINDOW", False);
-         /*ximg = XCreateImage(dis,
-                             NULL,
-                             0,
-                             XYPixmap,
-                             0,
-                             (char*) test_gif->screen,
-                             test_gif->screen_descriptor.width,
-                             test_gif->screen_descriptor.height,
-                             32,
-                             test_gif->screen_descriptor.width*test_gif->screen_descriptor.height*4);*/
-         
-         #endif  
-         switch (gif_draw_frame(test_gif->screen,test_gif, 0,test_gif->previous,mode))
-         {
-            case GIF_ERROR_NULL:
-               printf("Gif draw error : GIF NULL\n");
-               break;
-            case GIF_ERROR_BAD_INDEX:
-               printf("Gif draw error : GIF BAD INDEX\n");
-               break;
-         }
-
-         
-         printf("Load %s success !\n",argv[1]);
-         
-         #if defined(GIF_WINAPI)
-         ShowWindow(gifWnd,SW_SHOW);
-         while ( !quit )
-         {
-            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-            {
-               if ( msg.message == WM_QUIT )
-               {
-                  quit = TRUE;
-               }
-               TranslateMessage(&msg);
-               DispatchMessage(&msg);
-            }
-            Sleep(20);
-         }
-
-         DestroyWindow(gifWnd);
-         #elif defined(GIF_X11)
-         while ( !quit )  {
-           XNextEvent(dis, &report);
-           switch  (report.type) {
-             case ClientMessage :
-                if ((Atom) report.xclient.data.l[0] == wm_delete_window)
-                  quit = 1;
-                break;
-             case Expose:
-                XClearWindow (dis, win);
-                
-                break;
-             }
-         }
-         XDestroyWindow(dis,win);
-         #endif
-         delete_gif(test_gif);
-        
-      }
-      else
-      {
-         printf("Load %s error %d !\n",argv[1],gif_get_last_error());
-         switch (gif_get_last_error())
-         {
-            case GIF_ERROR_SIGNATURE:
-               printf("GIF_ERROR_SIGNATURE\n");
-               break;
-            case GIF_ERROR_BAD_BLOCK:
-               printf("GIF_ERROR_BAD_BLOCK\n");
-               break;
-            case GIF_ERROR_SIZE:
-               printf("GIF_ERROR_SIZE\n");
-               break;
-            case GIF_ERROR_BAD_COMPRESSION:
-               printf("GIF_ERROR_BAD_COMPRESSION\n");
-               break;
-            case GIF_ERROR_BAD_INDEX:
-               printf("GIF_ERROR_BAD_INDEX\n");
-               break;
-            case GIF_ERROR_NULL:
-               printf("GIF_ERROR_NULL\n");
-               break;
-            case GIF_ERROR_UNKNOW_EXTENSION:
-               printf("GIF_ERROR_UNKNOW_EXTENSION\n");
-               break;
-            default:
-               break;
-         }
-      }
-      
-   }
-   return 0;
-}
-
-
-#endif
-
-#ifdef __cplusplus
-   }
-#endif

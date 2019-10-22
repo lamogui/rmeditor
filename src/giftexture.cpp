@@ -1,6 +1,6 @@
 
 #include "giftexture.hpp"
-#include "gif.h"
+#include "gif.hpp"
 #include <QFile>
 
 Gif::Gif(const QString& uniformName, const QString& filename, QDomNode node, LogWidget& log,QObject* parent) :

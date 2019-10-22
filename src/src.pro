@@ -60,7 +60,7 @@ HEADERS += \
   ../include/tf4fx.hpp \
   ../include/tf4player.hpp \
   ../include/tunefish4music.hpp \
-  ../include/gif.h
+  ../include/gif.hpp
 
 SOURCES += \
   camera.cpp \
@@ -101,7 +101,7 @@ SOURCES += \
   tf4fx.cpp \
   tf4player.cpp \
   tunefish4music.cpp \
-  gif.c
+  gif.cpp
 
 FORMS += \
   ../ui/editorwidget.ui \

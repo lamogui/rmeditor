@@ -23,48 +23,10 @@
 #define GIF_MODE_RGBA              0x1
 #define GIF_MODE_BITMAP            0x2
 
-#include <stdlib.h> /*Malloc*/
-#include <stdio.h> /*Files*/
-#include <string.h> /*String compare*/
-
-
-
-
-#if defined(_WIN32) || defined(__WIN32__)
-
-#ifndef WINVER
-#define WINVER 0x500
-#endif
-#include <Windows.h>
-//#define GIF_WINAPI
-
-#include <stdint.h> /*needed for C89 compiler support*/
-
-#elif defined(__unix__) || defined(linux)
-
-#	if defined(GIF_TEST)
-#		include <X11/Xlib.h>
-#		include <X11/Xutil.h>
-#		include <X11/Xos.h>
-#		include <X11/Xatom.h>
-#		include <X11/keysym.h>
-#		define GIF_X11
-# endif // defined(GIF_TEST)
-
-#else
-
-#include "pstdint.h" /*needed for C89 compiler support*/
-
-#endif
-
-
-
-
-#ifdef __cplusplus
-   extern "C" {
-#endif
-
-
+#include <cstdlib> /*Malloc*/
+#include <cstdio> /*Files*/
+#include <cstring> /*String compare*/
+#include <cstdint>
 
 
 /**
@@ -302,11 +264,4 @@ int gif_draw_frame(uint8_t* screen,
                    int mode);
                    
                    
-
-
-                        
-#ifdef __cplusplus
-   }
-#endif
-
 #endif

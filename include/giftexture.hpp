@@ -4,7 +4,7 @@
 #include "nodefile.hpp"
 #include "texture.hpp"
 #include <QFileSystemWatcher>
-#include "gif.h"
+#include "gif.hpp"
 
 class Gif : public NodeFile
 {
