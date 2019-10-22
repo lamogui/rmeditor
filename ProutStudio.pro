@@ -1,9 +1,9 @@
 TEMPLATE = subdirs
 SUBDIRS = \
   dependencies \
-  src
+  studio
 
 dependencies.subdir = dependencies 
-src.subdir = src
+studio.subdir = studio
 
-src.depends = dependencies
+studio.depends = dependencies
