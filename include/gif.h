@@ -42,10 +42,6 @@
 
 #elif defined(__unix__) || defined(linux)
 
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned long int uint32_t;
-
 #	if defined(GIF_TEST)
 #		include <X11/Xlib.h>
 #		include <X11/Xutil.h>
