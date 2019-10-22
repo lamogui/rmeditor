@@ -3,10 +3,8 @@ QT += opengl xml network widgets core
 
 CONFIG += c++11
 
-LIBS += -L$$_PRO_FILE_PWD_/lib -ldependencies
-
-#release:LIBS += $$PWD/../lib/release/dependencies.lib
-#debug:LIBS += $$PWD/../lib/debug/dependencies.lib
+LIBS += -L$$_PRO_FILE_PWD_/../lib -ldependencies
+DESTDIR = $$_PRO_FILE_PWD_/../bin/
 
 win32: LIBS += \
   -luser32 -lAdvapi32 -luuid -lksuser -ldsound -lopengl32 -lkernel32 -lOle32

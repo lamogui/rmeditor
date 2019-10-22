@@ -46,13 +46,14 @@ typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned long int uint32_t;
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xos.h>
-#include <X11/Xatom.h>
-#include <X11/keysym.h>
-
-#define GIF_X11
+#	if defined(GIF_TEST)
+#		include <X11/Xlib.h>
+#		include <X11/Xutil.h>
+#		include <X11/Xos.h>
+#		include <X11/Xatom.h>
+#		include <X11/keysym.h>
+#		define GIF_X11
+# endif // defined(GIF_TEST)
 
 #else
 
