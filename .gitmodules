@@ -5,3 +5,7 @@
 	path = rtaudio
 	url = https://github.com/lamogui/rtaudio
 	branch = ProutStudio
+[submodule "tunefish"]
+	path = tunefish
+	url = https://github.com/lamogui/tunefish
+	branch = ProutStudio
