@@ -3,7 +3,7 @@ QT += opengl xml network widgets core
 
 CONFIG += c++11
 
-LIBS += -L$$_PRO_FILE_PWD_/../lib -ldependencies
+LIBS += -L$$_PRO_FILE_PWD_/../lib -lrtaudio
 DESTDIR = $$_PRO_FILE_PWD_/../bin/
 
 win32: LIBS += \
@@ -16,7 +16,7 @@ debug:DEFINES += eDEBUG
 win32: DEFINES += eWIN32
 
 INCLUDEPATH += \
-  ../dependencies/rtaudio/
+  ../rtaudio/
 
 HEADERS += \
   camera.hpp \
@@ -109,11 +109,10 @@ FORMS += \
   timelinedockwidget.ui
 
 RESOURCES += \
-  ../resources/res.qrc \
-  ../resources/qdarkstyle/style.qrc
+  ../icons/resources.qrc
 
 RC_FILE += \
-  ../resources/ressources.rc
+  resources.rc
 
 
 

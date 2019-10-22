@@ -14,8 +14,8 @@
    <string>Ray Marching Editor</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res.qrc">
-    <normaloff>:/res/img/vls.png</normaloff>:/res/img/vls.png</iconset>
+   <iconset resource="../icons/resources.qrc">
+    <normaloff>:/icons/logo.ico</normaloff>:/icons/logo.ico</iconset>
   </property>
   <property name="dockOptions">
    <set>QMainWindow::AllowTabbedDocks</set>
@@ -25,7 +25,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="RenderWidget" name="widget" native="true">
+       <widget class="RenderWidget" name="renderWidget" native="true">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -69,7 +69,7 @@
      <x>0</x>
      <y>0</y>
      <width>907</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -98,9 +98,16 @@
     <addaction name="actionInsert_camera_keyframe"/>
     <addaction name="actionReset_camera"/>
    </widget>
+   <widget class="QMenu" name="menuVisualizer">
+    <property name="title">
+     <string>Visualizer</string>
+    </property>
+    <addaction name="actionSwitch_displayed_texture"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuExport"/>
    <addaction name="menuCamera"/>
+   <addaction name="menuVisualizer"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <attribute name="toolBarArea">
@@ -113,8 +120,8 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/img/new.png</normaloff>:/res/img/new.png</iconset>
+    <iconset resource="../icons/resources.qrc">
+     <normaloff>:/icons/new.png</normaloff>:/icons/new.png</iconset>
    </property>
    <property name="text">
     <string>New</string>
@@ -125,8 +132,8 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/img/open.png</normaloff>:/res/img/open.png</iconset>
+    <iconset resource="../icons/resources.qrc">
+     <normaloff>:/icons/open.png</normaloff>:/icons/open.png</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -137,8 +144,8 @@
   </action>
   <action name="actionSaveAllShaders">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/img/save.png</normaloff>:/res/img/save.png</iconset>
+    <iconset resource="../icons/resources.qrc">
+     <normaloff>:/icons/save.png</normaloff>:/icons/save.png</iconset>
    </property>
    <property name="text">
     <string>Save shaders</string>
@@ -157,8 +164,8 @@
   </action>
   <action name="actionReset_camera">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/img/camera.png</normaloff>:/res/img/camera.png</iconset>
+    <iconset resource="../icons/resources.qrc">
+     <normaloff>:/icons/camera.png</normaloff>:/icons/camera.png</iconset>
    </property>
    <property name="text">
     <string>Reset camera</string>
@@ -166,8 +173,8 @@
   </action>
   <action name="actionTake_screenshot">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/img/screenshot.png</normaloff>:/res/img/screenshot.png</iconset>
+    <iconset resource="../icons/resources.qrc">
+     <normaloff>:/icons/screenshot.png</normaloff>:/icons/screenshot.png</iconset>
    </property>
    <property name="text">
     <string>Take screenshot</string>
@@ -178,8 +185,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/img/record_camera_keyframe.png</normaloff>:/res/img/record_camera_keyframe.png</iconset>
+    <iconset resource="../icons/resources.qrc">
+     <normaloff>:/icons/record_camera_keyframe.png</normaloff>:/icons/record_camera_keyframe.png</iconset>
    </property>
    <property name="text">
     <string>Insert camera keyframe</string>
@@ -193,8 +200,8 @@
   </action>
   <action name="actionExport_as_video">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/img/export_video.png</normaloff>:/res/img/export_video.png</iconset>
+    <iconset resource="../icons/resources.qrc">
+     <normaloff>:/icons/export_video.png</normaloff>:/icons/export_video.png</iconset>
    </property>
    <property name="text">
     <string>Export as Video</string>
@@ -205,11 +212,19 @@
   </action>
   <action name="actionExport_as_Linux_Demo">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/res/img/export_linux.ico</normaloff>:/res/img/export_linux.ico</iconset>
+    <iconset resource="../icons/resources.qrc">
+     <normaloff>:/icons/export_linux.ico</normaloff>:/icons/export_linux.ico</iconset>
    </property>
    <property name="text">
     <string>Export as Linux Demo</string>
+   </property>
+  </action>
+  <action name="actionSwitch_displayed_texture">
+   <property name="text">
+    <string>Switch displayed texture</string>
+   </property>
+   <property name="shortcut">
+    <string>X</string>
    </property>
   </action>
  </widget>
@@ -223,7 +238,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="res.qrc"/>
+  <include location="../icons/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

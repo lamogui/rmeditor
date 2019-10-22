@@ -3,19 +3,13 @@
 
 #include <QMainWindow>
 #include <QDir>
-
-
-namespace Ui {
-class MainWindow;
-}
+#include "ui_mainwindow.h"
 
 class EditorWidget;
 class LogDockWidget;
 class Project;
 class TimelineDockWidget;
 class Timeline;
-
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -46,10 +40,10 @@ private:
 
     Project* m_project;
 
-    Ui::MainWindow *ui;
-    LogDockWidget *m_info;
-    EditorWidget *m_editor;
-    TimelineDockWidget *m_timeline;
+		Ui::MainWindow m_ui;
+		LogDockWidget* m_info;
+		EditorWidget* m_editor;
+		TimelineDockWidget* m_timeline;
 };
 
 #endif // MAINWINDOW_H
