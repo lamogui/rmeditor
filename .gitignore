@@ -32,7 +32,8 @@
 build/
 build*/
 build-*/
-
+bin/
+lib/
 
 #qt .user
 *.user

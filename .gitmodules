@@ -1,3 +1,7 @@
 [submodule "tools/python-midi"]
 	path = tools/python-midi
 	url = https://github.com/vishnubob/python-midi
+[submodule "rtaudio"]
+	path = rtaudio
+	url = https://github.com/lamogui/rtaudio
+	branch = ProutStudio
