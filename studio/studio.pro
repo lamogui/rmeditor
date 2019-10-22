@@ -14,7 +14,7 @@ release:DEFINES += eRELEASE
 debug:DEFINES += eDEBUG
 win32: DEFINES += eWIN32
 
-INCLUDEPATH += ../rtaudio/
+INCLUDEPATH += ../rtaudio/ ../tunefish/
 
 HEADERS += \
   camera.hpp \
