@@ -25,5 +25,5 @@ script:
   #- mkdir build
   #- cd build
   #- cmake -DCMAKE_PREFIX_PATH:PATH=/opt/qt58/ -DCMAKE_BUILD_TYPE:STRING=Release -DAUDIO_LINUX_PULSE:BOOL=ON -DBUILD_TESTING:BOOL=OFF .. 
-  - /opt/qt58/bin/qmake PREFIX=/usr -makefile ProutStudio.pro
+  - /opt/qt58/bin/qmake -makefile ProutStudio.pro
   - make
