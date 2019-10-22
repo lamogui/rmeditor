@@ -56,7 +56,6 @@ HEADERS += \
   ../include/runtime.hpp \
   ../include/simd.hpp \
   ../include/system.hpp \
-  ../include/threading.hpp \
   ../include/tf4.hpp \
   ../include/tf4fx.hpp \
   ../include/tf4player.hpp \
@@ -98,7 +97,6 @@ SOURCES += \
   random.cpp \
   runtime.cpp \
   simd.cpp \
-  threading.cpp \
   tf4.cpp \
   tf4fx.cpp \
   tf4player.cpp \
