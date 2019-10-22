@@ -2,6 +2,8 @@ TEMPLATE = lib
 #I allow me a warn_off here since it's submodules and we want avoid modify source code...
 CONFIG += staticlib warn_off stl_off rtti_off
 
+DESTDIR = $$_PRO_FILE_PWD_/../lib/
+
 #RtAudio
 win32:DEFINES += __WINDOWS_DS__ __WINDOWS_WASAPI__ __WINDOWS_ASIO__
 unix:DEFINES += __LINUX_PULSE__
