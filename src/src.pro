@@ -9,7 +9,7 @@ DESTDIR = $$_PRO_FILE_PWD_/../bin/
 win32: LIBS += \
   -luser32 -lAdvapi32 -luuid -lksuser -ldsound -lopengl32 -lkernel32 -lOle32
 unix: LIBS += \
-  pulse pulse-simple asound
+  -lpulse -lpulse-simple -lasound
 
 release:DEFINES += eRELEASE
 debug:DEFINES += eDEBUG
