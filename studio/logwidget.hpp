@@ -2,8 +2,9 @@
 #define LOGWIDGET_HPP
 
 #include <QTextEdit>
+#include "logmanager.hpp"
 
-class LogWidget : public QTextEdit
+class LogWidget final : public QTextEdit
 {
     Q_OBJECT
 public:
@@ -13,14 +14,10 @@ public:
   static QString getDate();
 
 public slots:
-  //Log
-  void writeInfo(QString txt);
-  void writeWarning(QString txt);
-  void writeError(QString txt);
+	inline void setPrintTime(bool e) { m_printTime = e; }
 
-  inline void setPrintTime(bool e) { m_printTime = e; }
-
-signals:
+private slots:
+	void handleNewEntry( Log::Entry _newEntry );
 
 private:
   bool m_printTime;

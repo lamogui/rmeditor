@@ -13,8 +13,7 @@
 #include "project.hpp"
 #include "timelinewidget.hpp"
 #include "timelinedockwidget.hpp"
-
-
+#include "logmanager.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -75,20 +74,20 @@ void MainWindow::newProject()
   if (!d.isEmpty())
   {
     QDir dir = QDir(d);
-    if (!QDir::setCurrent(dir.path()))
-    {
-      m_info->getLogWidget()->writeError("Fatal Error: Cannot set the current directory to " + dir.path());
-    }
-    else
-    {
-      if (m_project)
-      {
-        delete m_project;
-      }
+		if (!QDir::setCurrent(dir.path()))
+		{
+			perror( Log::System, nullptr, tr( "Fatal Error: Cannot set the current directory to " ) + dir.path() );
+		}
+		else
+		{
+			if (m_project)
+			{
+				delete m_project;
+			}
 			m_project = new Project(dir,"demo.xml",this);
-      connectProject();
-      m_project->build(Project::getDefaultProjectText());
-    }
+			connectProject();
+			m_project->build(Project::getDefaultProjectText());
+		}
   }
 }
 
@@ -100,7 +99,7 @@ void MainWindow::open()
     QDir dir = QFileInfo(f).dir();
     if (!QDir::setCurrent(dir.path()))
     {
-      m_info->getLogWidget()->writeError("Fatal Error: Cannot set the current directory to " + dir.path());
+			perror( Log::System, nullptr, tr( "Fatal Error: Cannot set the current directory to " ) + dir.path() );
     }
     else
     {

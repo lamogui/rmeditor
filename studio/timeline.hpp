@@ -6,10 +6,8 @@
 #include <QPainter>
 #include <QRectF>
 
-class LogWidget;
 class Music;
 class Renderer;
-
 class Timeline : public QGraphicsScene
 {
 	Q_OBJECT

@@ -72,6 +72,9 @@ namespace Log {
 		static Entry Warning( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin );
 		static Entry Info( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin );
 
+		static const char* categoryTag( Category _category );
+		static const char* typeTag( Type _category );
+
 		Entry() {} // DO NOT CALL ! just used by QVector
 
 	private:

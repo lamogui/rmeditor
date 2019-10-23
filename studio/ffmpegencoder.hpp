@@ -10,11 +10,8 @@
 #include <QProcess>
 #include <QProgressBar>
 
-
 class DemoTimeline;
-class LogWidget;
 class Music;
-
 class FFmpegEncoder : public QThread
 {
 	Q_OBJECT

@@ -229,7 +229,7 @@ bool Project::parseTagFrameworks(QDomNode node)
       }
       else
       {
-				pinfo( Log::File, this, tr("loading framework ')") + name + "' (file: " + filename + ")" );
+				pinfo( Log::File, this, tr("loading framework '") + name + "' (file: " + filename + ")" );
 				m_frameworks[name] = new Framework(filename,element,this);
         m_frameworks[name]->setObjectName(name);
         emit appendTextEditable(m_frameworks[name]);

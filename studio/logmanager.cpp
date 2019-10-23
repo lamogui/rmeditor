@@ -82,6 +82,44 @@ Log::Entry Log::Entry::Info( Category _category, const QObject* _sender, QString
 	return Log::Entry( Log::Type::Info, _category, _sender, _what, _param, _cppOrigin );
 }
 
+const char* Log::Entry::categoryTag( Log::Category _category ) {
+	switch ( _category ){
+		case File:
+			return "[FILE]";
+		case System:
+			return "[SYSTEM]";
+		case Code:
+			return "[CODE]";
+		case Shader:
+			return "[SHADER]";
+		case OpenGL:
+			return "[OPENGL]";
+		case Audio:
+			return "[AUDIO]";
+		case Undefined:
+			return "";
+		default:
+			ptodo( "missing log entry category" );
+			return "[UNKNOWN]";
+	}
+}
+
+const char* Log::Entry::typeTag( Log::Type _type ) {
+	switch ( _type ) {
+		case Log::Type::Assertion:
+			return "[ASSERT]";
+		case Log::Type::Error:
+			return "[ERROR]";
+		case Log::Type::Warning:
+			return "[WARN]";
+		case Log::Type::Info:
+			return "[INFO]";
+		default:
+			ptodo( "missing log entry type" );
+			return "[UNKNOWN]";
+	}
+}
+
 /*
  * Manager
  */
@@ -125,50 +163,10 @@ void Log::Manager::handleOpengGLLoggedMessage(const QOpenGLDebugMessage& debugMe
 
 void Log::Manager::handleNewEntry( Entry _entry )
 {
-	QString type;
-	switch (_entry.m_type) {
-		case Log::Type::Assertion:
-			type = "[ASSERT]";
-			break;
-		case Log::Type::Error:
-			type = "[ERROR]";
-			break;
-		case Log::Type::Warning:
-			type = "[WARN]";
-			break;
-		case Log::Type::Info:
-			type = "[INFO]";
-			break;
-	}
-
-	QString category;
-	switch ( _entry.m_category ){
-		case File:
-			category = "[FILE]";
-			break;
-		case System:
-			category = "[SYSTEM]";
-			break;
-		case Code:
-			category = "[CODE]";
-			break;
-		case Shader:
-			category = "[SHADER]";
-			break;
-		case OpenGL:
-			category = "[OPENGL]";
-			break;
-		case Audio:
-			category = "[AUDIO]";
-			break;
-		case Undefined:
-			break;
-	}
-
 	m_entries.push_back( _entry );
 
-	QString name = _entry.m_sender ? QString("[") + _entry.m_sender->objectName() + "]" : "";
-	qDebug() << type << category << name << _entry.m_what;
+	QString name = _entry.m_sender && !_entry.m_sender->objectName().isEmpty() ? QString("[") + _entry.m_sender->objectName() + "]" : "";
+	qDebug() << Log::Entry::typeTag( _entry.m_type ) << Log::Entry::categoryTag( _entry.m_category ) << name.toLocal8Bit().constData() << _entry.m_what.toLocal8Bit().constData();
 }
 
 bool pVerify( Log::Category _category, bool _cond, const char* _condStr, const Log::CppCodeOrigin& _cppOrigin )

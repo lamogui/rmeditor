@@ -5,12 +5,9 @@
 
 #include "nodefile.hpp"
 
-class LogWidget;
 class Renderer;
-
 class TextEditable : public NodeFile
 {
-
 	Q_OBJECT
 
 public:
