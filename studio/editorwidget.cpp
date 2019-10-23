@@ -4,23 +4,16 @@
 #include <iostream>
 
 #include "framework.hpp"
-#include "logwidget.hpp"
+#include "logmanager.hpp"
 #include "project.hpp"
 #include "scene.hpp"
 #include "texteditor.hpp"
 #include "texteditable.hpp"
 
-EditorWidget::EditorWidget(LogWidget &log, QWidget *parent) :
-    QDockWidget(parent),
-    m_log(&log),
-    ui(new Ui::EditorWidget)
+EditorWidget::EditorWidget(QWidget * _parent) :
+		QDockWidget(_parent)
 {
-    ui->setupUi(this);
-}
-
-EditorWidget::~EditorWidget()
-{
-    delete ui;
+		m_ui.setupUi(this);
 }
 
 void EditorWidget::loadProject(Project &project)
@@ -40,64 +33,63 @@ void EditorWidget::loadProject(Project &project)
 
 void EditorWidget::on_saveButton_clicked(bool)
 {
-  TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->currentWidget());
-  if (te != nullptr)
-  {
-    if (te->save())
-    {
-      m_log->writeInfo(tr("saved ") + te->textObject()->fileName());
-    }
-    else
-    {
-     m_log->writeError(tr("unable to save the file ") + te->textObject()->fileName());
-    }
-  }
+	TextEditor* te = dynamic_cast<TextEditor*>(m_ui.tab->currentWidget());
+	if (te != nullptr)
+	{
+		if (te->save())
+		{
+			pinfo( Log::File, te->textObject(), tr("saved") );
+		}
+		else
+		{
+			perror( Log::File, te->textObject(), tr("unable to save the file") );
+		}
+	}
 }
 
 void EditorWidget::on_buildButton_clicked(bool)
 {
-  TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->currentWidget());
-  if (te != nullptr)
-  {
-    if (te->build())
-    {
-      m_log->writeInfo(QString("[") + te->textObject()->fileName() + tr("] build success !"));
-    }
-    else
-    {
-      m_log->writeError(QString("[") + te->textObject()->fileName() + tr("] build failure !"));
-    }
-  }
+	TextEditor* te = dynamic_cast<TextEditor*>(m_ui.tab->currentWidget());
+	if (te != nullptr)
+	{
+		if (te->build())
+		{
+			pinfo( Log::File, te->textObject(), tr("build success !") );
+		}
+		else
+		{
+			perror( Log::File, te->textObject(), tr("build failure !") );
+		}
+	}
 }
 
-void EditorWidget::on_tab_currentChanged(int index)
+void EditorWidget::on_tab_currentChanged(int _index)
 {
-  if (index < 0)
-  {
-    return;
-  }
+	if (_index < 0)
+	{
+		return;
+	}
 
-  TextEditor* te = dynamic_cast<TextEditor*>(ui->tab->widget(index));
-  Q_ASSERT(te != nullptr);
-  //te->refresh();
-  ui->buildButton->setEnabled(te->textObject()->buildable());
-  emit rendererChanged(te->textObject()->getRenderer());
-
+	TextEditor* te = dynamic_cast<TextEditor*>(m_ui.tab->widget(_index));
+	Q_ASSERT(te != nullptr);
+	//te->refresh();
+	m_ui.buildButton->setEnabled(te->textObject()->buildable());
+	emit rendererChanged(te->textObject()->getRenderer());
 }
 
 void EditorWidget::appendTextEditable(TextEditable *te)
 {
   Q_ASSERT(te);
   bool newWidget = true;
-  for (int i = 0; i < ui->tab->count(); i++)
+	for (int i = 0; i < m_ui.tab->count(); i++)
   {
-    QWidget* widget = ui->tab->widget(i);
+		QWidget* widget = m_ui.tab->widget(i);
     TextEditor* editor = dynamic_cast<TextEditor*>(widget);
     if (editor)
     {
       if (editor->textObject() == te)
       {
-        ui->tab->setTabText(i,te->fileName());
+				m_ui.tab->setTabText(i,te->fileName());
         //editor->refresh();
         newWidget = false;
         break;
@@ -106,8 +98,8 @@ void EditorWidget::appendTextEditable(TextEditable *te)
   }
   if (newWidget)
   {
-    TextEditor* editor = new TextEditor(*te,ui->tab);
-    ui->tab->addTab(editor,te->fileName());
+		TextEditor* editor = new TextEditor(*te,m_ui.tab);
+		m_ui.tab->addTab(editor,te->fileName());
     //editor->refresh();
     connect(editor,SIGNAL(saved(TextEditor*,bool)),this,SLOT(onTextEditorSaved(TextEditor*,bool)));
   }
@@ -118,9 +110,9 @@ void EditorWidget::saveAllShaders()
   QList<TextEditor*> frameworks;
   QList<TextEditor*> scenes;
 
-  for (int i = 0; i < ui->tab->count(); i++)
+	for (int i = 0; i < m_ui.tab->count(); i++)
   {
-    QWidget* widget = ui->tab->widget(i);
+		QWidget* widget = m_ui.tab->widget(i);
     TextEditor* editor = dynamic_cast<TextEditor*>(widget);
     if (editor)
     {
@@ -154,19 +146,19 @@ void EditorWidget::saveAllShaders()
 
 void EditorWidget::onTextEditorSaved(TextEditor* e, bool saved)
 {
-  for (int i = 0; i < ui->tab->count(); i++)
+	for (int i = 0; i < m_ui.tab->count(); i++)
   {
-    QWidget* widget = ui->tab->widget(i);
+		QWidget* widget = m_ui.tab->widget(i);
     TextEditor* editor = dynamic_cast<TextEditor*>(widget);
     if (editor == e)
     {
       if (saved)
       {
-        ui->tab->setTabText(i,editor->textObject()->fileName());
+				m_ui.tab->setTabText(i,editor->textObject()->fileName());
       }
       else
       {
-        ui->tab->setTabText(i,editor->textObject()->fileName() + "*");
+				m_ui.tab->setTabText(i,editor->textObject()->fileName() + "*");
       }
       break;
     }

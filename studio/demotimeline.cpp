@@ -5,6 +5,7 @@
 #include "scene.hpp"
 #include "shaderminifier.hpp"
 #include "project.hpp"
+#include "logmanager.hpp"
 
 
 #include <QAction>
@@ -17,12 +18,12 @@
 #include <QtMath>
 
 
-DemoTimeline::DemoTimeline(QDomElement &node, Project &project, double fps, LogWidget &log):
-  Timeline(*(project.music()),2*60.0,fps,log),
-  m_node(node),
+DemoTimeline::DemoTimeline(QDomElement &_node, Project &_project, double _fps):
+	Timeline(*(_project.music()),2*60.0,_fps),
+	m_node(_node),
   m_trackHeight(60.0),
-  m_project(project),
-  m_renderer(new DemoRenderer(project, *this,1280,720))
+	m_project(_project),
+	m_renderer(new DemoRenderer(_project, *this,1280,720))
 {
   m_renderer->setCamera(&m_camera);
   load();
@@ -39,45 +40,45 @@ DemoTimeline::~DemoTimeline()
 
 void DemoTimeline::load()
 {
-  QDomElement element = m_node.firstChildElement();
-  while (!element.isNull())
-  {
-    if (element.tagName() == "track")
-    {
-      if (!parseTrackNode(element))
-      {
-       // buildSuccess = false;
-      }
-    }
-    else
-    {
-      emit warning(QString("[") + m_project.fileName() + "]" + " <timeline> warning at line " + QString::number(element.lineNumber()) +
-                   + " unknown tag name '" + element.tagName() + "' ignoring the block");
-    }
-    element = element.nextSiblingElement();
-  }
+	QDomElement element = m_node.firstChildElement();
+	while (!element.isNull())
+	{
+		if (element.tagName() == "track")
+		{
+			if (!parseTrackNode(element))
+			{
+			 // buildSuccess = false;
+			}
+		}
+		else
+		{
+			pwarning( Log::File, &m_project, tr( "<timeline> warning at line ") + QString::number(element.lineNumber()) +
+									 + " unknown tag name '" + element.tagName() + "' ignoring the block" );
+		}
+		element = element.nextSiblingElement();
+	}
 }
 
 
-bool DemoTimeline::parseTrackNode(QDomElement& node)
+bool DemoTimeline::parseTrackNode(QDomElement& _node)
 {
-  QDomElement element = node.firstChildElement();
-  while (!element.isNull())
-  {
-    if (element.tagName() == "sequence")
-    {
-      Sequence* seq = new Sequence(m_project,*this,element,m_trackHeight);
-      addSequence(seq);
+	QDomElement element = _node.firstChildElement();
+	while (!element.isNull())
+	{
+		if (element.tagName() == "sequence")
+		{
+			Sequence* seq = new Sequence(m_project,*this,element,m_trackHeight);
+			addSequence(seq);
 
-    }
-    else
-    {
-        emit warning(QString(QString("[") + m_project.fileName() + "] <timeline> warning at line " + QString::number(element.lineNumber()) +
-                     + " unknown tag name '" + element.tagName() + "' ignoring the block"));
-    }
-    element = element.nextSiblingElement();
-  }
-  return true;
+		}
+		else
+		{
+				pwarning( Log::File, &m_project, tr( "<timeline> warning at line " ) + QString::number(element.lineNumber()) +
+										 + " unknown tag name '" + element.tagName() + "' ignoring the block" );
+		}
+		element = element.nextSiblingElement();
+	}
+	return true;
 }
 
 qint64 DemoTimeline::addSequence(Sequence *seq)
@@ -212,7 +213,7 @@ void DemoTimeline::insertCameraKeyframe(qint64 frame, const QVector3D &pos, cons
   }
   else
   {
-    emit warning("Warning cannot insert camera keyframes outside a sequence");
+		pwarning( Log::System, this, "cannot insert camera keyframes outside a sequence" );
   }
 }
 
@@ -338,7 +339,7 @@ void DemoTimeline::exportSources(const QDir &dir) const
       !sequences_header.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate) ||
       !sequences_source.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
   {
-    emit error(tr("error: cannot open files for writing"));
+		perror( Log::File, this, tr("cannot open files for writing") );
     return;
   }
 

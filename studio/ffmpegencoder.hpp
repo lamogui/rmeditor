@@ -17,47 +17,35 @@ class Music;
 
 class FFmpegEncoder : public QThread
 {
-    Q_OBJECT
+	Q_OBJECT
 
-  public:
-    FFmpegEncoder(QObject *parent,
-                  const QString& filename,
-                  DemoTimeline& timeline,
-                  const QSize& resolution,
-                  LogWidget&  log);
+public:
+	FFmpegEncoder(QObject *_parent,
+							const QString& m_filename,
+							DemoTimeline& m_timeline,
+							const QSize& m_resolution);
 
-   virtual void connectLog(LogWidget& log);
+public slots:
+	void cancel() { m_cancel = true; }
 
-  public slots:
-    void cancel() { _cancel = true; }
+protected slots:
+	void readStandardError();
+	void readStandardOutput();
+	void ffmpegFinished(int exitCode, QProcess::ExitStatus _exitStatus);
+	void ffmpegErrorOccurred(QProcess::ProcessError);
 
+signals:
+	void requestRendering(QSize _resolution, QImage* _target);
+	void newFrameEncoded(int _frame);
 
-  protected slots:
-    void readStandardError();
-    void readStandardOutput();
-    void ffmpegFinished(int exitCode, QProcess::ExitStatus exitStatus);
-    void ffmpegErrorOccurred(QProcess::ProcessError);
+protected:
+	virtual void run();
 
-  signals:
-    void logError(QString err);
-    void logWarning(QString warn);
-    void logInfo(QString txt);
-
-    void requestRendering(QSize resolution, QImage* target);
-    void newFrameEncoded(int frame);
-
-  protected:
-
-    virtual void run();
-
-
-    QString _filename;
-    QSize _resolution;
-    DemoTimeline* _timeline;
-    volatile bool _cancel;
-    QProcess* _ffmpeg;
-
-
+	QString m_filename;
+	QSize m_resolution;
+	DemoTimeline* m_timeline;
+	volatile bool m_cancel;
+	QProcess* m_ffmpeg;
 };
 
 #endif

@@ -17,44 +17,38 @@ class Music : public NodeFile
   Q_OBJECT
 
 public:
-  Music(const QString& filename, double length, QDomNode node ,LogWidget& log,QObject* parent);
-  virtual ~Music();
+	Music(const QString& _filename, double _length, QDomNode _node, QObject* _parent);
+	virtual ~Music();
+	virtual double getTime() const = 0;
 
-  virtual double getTime() const = 0;
+	inline double length() const { return m_length; }
+	inline Texture2D& noteVelocityTex() { return m_noteVelocityTex; }
+	inline Texture2D& maxNoteVelocityTex() { return m_maxNoteVelocityTex; }
 
-  inline double length() const { return m_length; }
-  inline Texture2D& noteVelocityTex() { return m_noteVelocityTex; }
-  inline Texture2D& maxNoteVelocityTex() { return m_maxNoteVelocityTex; }
+	bool playing() const { return m_playing; }
 
-  bool playing() const { return m_playing; }
+	virtual void exportMusicCData(const QFile& source, const QFile& header) const = 0;
 
-
-
-  virtual void exportMusicCData(const QFile& source, const QFile& header) const = 0;
-
-
-  /*
-    RtAudio stuff
-  */
-  virtual bool createRtAudioStream() = 0;
-  virtual void processAudio(void *outputBuffer, unsigned int nBufferFrames,
-                            double streamTime, RtAudioStreamStatus status) = 0;
+	/*
+		RtAudio stuff
+	*/
+	virtual bool createRtAudioStream() = 0;
+	virtual void processAudio(void *outputBuffer, unsigned int nBufferFrames,
+														double streamTime, RtAudioStreamStatus status) = 0;
 
 public slots:
-  virtual bool load() = 0;
-  virtual void setPosition(double time) = 0;
-  virtual void updateTextures() = 0;
+	virtual bool load() = 0;
+	virtual void setPosition(double time) = 0;
+	virtual void updateTextures() = 0;
 
-  inline void play() { m_playing = true; }
-  inline void pause() { m_playing = false;}
-
-
+	inline void play() { m_playing = true; }
+	inline void pause() { m_playing = false;}
 
 protected:
 
   //Use this callback
-  static int rtAudioCallback( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
-                              double streamTime, RtAudioStreamStatus status, void *userData );
+	static int rtAudioCallback( void * _outputBuffer, void * _inputBuffer, unsigned int _nBufferFrames,
+															double _streamTime, RtAudioStreamStatus _status, void * _userData );
 
   size_t m_bytesPerFrame; //Rt audio bytes per frame
   RtAudio m_audio;

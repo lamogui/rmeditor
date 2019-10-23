@@ -5,52 +5,51 @@
 
 #include <QThread>
 #include <QMessageBox>
-#include <QDebug>
 
 #include "timeline.hpp"
 #include "renderer.hpp"
+#include "logmanager.hpp"
 
-Music::Music(const QString &filename, double length, QDomNode node, LogWidget &log, QObject *parent):
-  NodeFile(filename,node,log,parent),
+Music::Music(const QString &_filename, double _length, QDomNode _node, QObject *_parent):
+	NodeFile(_filename,_node,_parent),
   m_audio(),
-  m_length(length),
+	m_length(_length),
   m_playing(false)
 {
-  if (m_length <= 0)
-  {
-    emit error("[" + filename + "] error: invalid length");
-  }
-  if (m_audio.getDeviceCount() < 1)
-  {
-    emit error("[" + filename + "] error: no audio device found");
-  }
-
+	if (m_length <= 0)
+	{
+		perror( Log::Code, this, tr( "invalid length" ) );
+	}
+	if (m_audio.getDeviceCount() < 1)
+	{
+		perror( Log::System, this, tr( "no audio device found" ) );
+	}
 }
 
 Music::~Music()
 {
 }
 
-int Music::rtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime, RtAudioStreamStatus status, void *userData)
+int Music::rtAudioCallback(void *_outputBuffer, void *_inputBuffer, unsigned int _nBufferFrames, double _streamTime, RtAudioStreamStatus _status, void *_userData)
 {
-  (void) inputBuffer;
+	(void) _inputBuffer;
+	Music* music = static_cast< Music* >( _userData );
+	passert( Log::Audio, music, _userData && _outputBuffer);
 
-  Q_ASSERT(userData && outputBuffer);
-  Music* music = (Music*) userData;
-  if (music->m_playing)
-  {
-    music->processAudio(outputBuffer,nBufferFrames,streamTime,status);
-    //for (int i = 0; i < nBufferFrames; i++)
-    //{
-    //    reinterpret_cast<short*>(outputBuffer)[i*2] = sin(static_cast<float>(i)/static_cast<float>(nBufferFrames)) * 16000;
-    //    reinterpret_cast<short*>(outputBuffer)[i*2+1] = cos(static_cast<float>(i)/static_cast<float>(nBufferFrames)) * 16000;
-    //}
-  }
-  else
-  {
-    memset(outputBuffer,0,nBufferFrames*music->m_bytesPerFrame);
-  }
-  return 0;
+	if (music->m_playing)
+	{
+		music->processAudio(_outputBuffer,_nBufferFrames,_streamTime,_status);
+		//for (int i = 0; i < nBufferFrames; i++)
+		//{
+		//    reinterpret_cast<short*>(outputBuffer)[i*2] = sin(static_cast<float>(i)/static_cast<float>(nBufferFrames)) * 16000;
+		//    reinterpret_cast<short*>(outputBuffer)[i*2+1] = cos(static_cast<float>(i)/static_cast<float>(nBufferFrames)) * 16000;
+		//}
+	}
+	else
+	{
+		memset(_outputBuffer,0,_nBufferFrames*music->m_bytesPerFrame);
+	}
+	return 0;
 }
 
 

@@ -38,7 +38,7 @@ class DemoTimeline : public Timeline
   Q_OBJECT
 
 public:
-  DemoTimeline(QDomElement& node, Project& project, double fps, LogWidget& log);
+	DemoTimeline(QDomElement& _node, Project& _project, double _fps);
   virtual ~DemoTimeline();
 
   inline QDomElement getNode() const { return m_node; }
@@ -85,7 +85,7 @@ protected:
   bool correctStartFrame(Sequence* seq); //seq must not be in m_sequences !
 
 
-  bool parseTrackNode(QDomElement& node);
+	bool parseTrackNode(QDomElement& _node);
 
   QDomElement m_node;
   Camera m_camera;

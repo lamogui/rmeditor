@@ -12,7 +12,7 @@ class Tunefish4Music : public Music
   Q_OBJECT
 
 public:
-  Tunefish4Music(const QString& filename, double length, QDomNode node ,LogWidget& log,QObject* parent);
+	Tunefish4Music(const QString& _filename, double _length, QDomNode _node, QObject* _parent);
   virtual ~Tunefish4Music();
 
   virtual double getTime() const;

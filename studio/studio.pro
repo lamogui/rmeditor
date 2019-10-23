@@ -29,6 +29,7 @@ HEADERS += \
   highlighter.hpp \
   keyframe.hpp \
   logdockwidget.hpp \
+  logmanager.hpp \
   logwidget.hpp \
   mainwindow.hpp \
   music.hpp \
@@ -61,6 +62,7 @@ SOURCES += \
   highlighter.cpp \
   keyframe.cpp \
   logdockwidget.cpp \
+  logmanager.cpp \
   logwidget.cpp \
   main.cpp \
   mainwindow.cpp \

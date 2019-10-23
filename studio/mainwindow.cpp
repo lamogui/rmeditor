@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_info = new LogDockWidget(this);
     m_info->getLogWidget()->setPrintTime(false);
 
-    m_editor = new EditorWidget(*(m_info->getLogWidget()),this);
+		m_editor = new EditorWidget(this);
     m_timeline = new TimelineDockWidget(this);
     addDockWidget(Qt::BottomDockWidgetArea, m_info);
     addDockWidget(Qt::BottomDockWidgetArea, m_timeline);
@@ -145,9 +145,9 @@ void MainWindow::insertCameraKeyframe()
 
 void MainWindow::exportAsVideo()
 {
-  if (m_project && m_project->demoTimeline())
-  {
-    freezeAll();
+	if (m_project && m_project->demoTimeline())
+	{
+		freezeAll();
 
 		m_ui.renderWidget->setRenderer(m_project->demoTimeline()->getRenderer());
 
@@ -161,20 +161,19 @@ void MainWindow::exportAsVideo()
 		disconnect(m_ui.cancelButton,SIGNAL(clicked(bool)),0,0);
 
 
-    FFmpegEncoder* encoder = new FFmpegEncoder(
-                               this,
-                               QString("render.mp4"),
-                               *(m_project->demoTimeline()),
-                               QSize(1920,1080),
-                               *(m_info->getLogWidget()));
+		FFmpegEncoder* encoder = new FFmpegEncoder(
+															 this,
+															 QString("render.mp4"),
+															 *(m_project->demoTimeline()),
+															 QSize(1920,1080));
 
 		connect(m_ui.cancelButton,SIGNAL(clicked(bool)),encoder,SLOT(cancel()));
 
 		connect(encoder,SIGNAL(newFrameEncoded(int)),m_ui.progressBar,SLOT(setValue(int)));
-    connect(encoder,SIGNAL(finished()),this,SLOT(unfreezeAll()));
-    connect(encoder,SIGNAL(finished()),encoder,SLOT(deleteLater()));
-    encoder->start(QThread::HighPriority);
-  }
+		connect(encoder,SIGNAL(finished()),this,SLOT(unfreezeAll()));
+		connect(encoder,SIGNAL(finished()),encoder,SLOT(deleteLater()));
+		encoder->start(QThread::HighPriority);
+	}
 }
 
 

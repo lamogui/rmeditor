@@ -417,7 +417,7 @@ bool Project::parseTagTimeline(QDomNode node)
               "(" + element.nodeName() +  ") invalid framerate '" + framerate_str + "'");
     return false;
   }
-  m_demoTimeline = new DemoTimeline(element,*this,framerate,*m_log);
+	m_demoTimeline = new DemoTimeline(element,*this,framerate);
   emit demoTimelineChanged(m_demoTimeline);
   return true;
 }
