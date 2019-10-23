@@ -24,7 +24,7 @@ bool prout_debuggerIsAttached();
 #include <csignal>
 
 #define PROUT_IS_DEBUGGER_PRESENT prout_debuggerIsAttached()
-#define PROUT_DEBUG_BREAK raise(SIGTRAP)
+#define PROUT_DEBUG_BREAK ::raise(SIGTRAP)
 
 #endif
 
