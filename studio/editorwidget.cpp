@@ -71,7 +71,7 @@ void EditorWidget::on_tab_currentChanged(int _index)
 	}
 
 	TextEditor* te = dynamic_cast<TextEditor*>(m_ui.tab->widget(_index));
-	Q_ASSERT(te != nullptr);
+	passert( Log::Code, te != nullptr );
 	//te->refresh();
 	m_ui.buildButton->setEnabled(te->textObject()->buildable());
 	emit rendererChanged(te->textObject()->getRenderer());
@@ -79,7 +79,7 @@ void EditorWidget::on_tab_currentChanged(int _index)
 
 void EditorWidget::appendTextEditable(TextEditable *te)
 {
-  Q_ASSERT(te);
+	passert( Log::Code, te );
   bool newWidget = true;
 	for (int i = 0; i < m_ui.tab->count(); i++)
   {

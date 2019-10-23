@@ -16,6 +16,7 @@
 #include "project.hpp"
 #include "scene.hpp"
 #include "timelinewidget.hpp"
+#include "logmanager.hpp"
 
 Sequence::Sequence(Project &project, DemoTimeline &timeline, QDomElement &node, qreal height):
   QGraphicsRectItem(nullptr),
@@ -78,7 +79,7 @@ void Sequence::load()
     while (!e.isNull())
     {
       CameraKeyframe* keyframe = new CameraKeyframe(*m_project,this,e);
-      Q_ASSERT(!m_cameraKeyframes.contains(keyframe->relativeFrame()));
+			passert( Log::Code, !m_cameraKeyframes.contains(keyframe->relativeFrame() ) );
       keyframe->setPos(keyframe->pos().x(), this->rect().height()-5);
       QObject::connect(keyframe,SIGNAL(requestFramePosition(qint64)),m_timeline,SLOT(requestFramePosition(qint64)));
       m_cameraKeyframes[keyframe->relativeFrame()] = keyframe;
@@ -293,8 +294,7 @@ qint64 Sequence::nearestFrameAvailableForKeyframe(qint64 rel_frame) const
 
 void Sequence::keyframePositionChanged(qint64 previous_frame, Keyframe* keyframe)
 {
-  //Q_ASSERT(m_cameraKeyframes.contains(previous_frame));
-  Q_ASSERT(!m_cameraKeyframes.contains(keyframe->relativeFrame()));
+	passert( Log::Code, !m_cameraKeyframes.contains(keyframe->relativeFrame() ) );
   m_cameraKeyframes.remove(previous_frame);
   m_cameraKeyframes[keyframe->relativeFrame()] = (CameraKeyframe*)keyframe;
 }

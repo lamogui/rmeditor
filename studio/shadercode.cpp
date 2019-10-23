@@ -4,19 +4,10 @@
 #include "logwidget.hpp"
 #include "shaderminifier.hpp"
 
-FragmentShaderCode::FragmentShaderCode(const QString &filename,QDomNode node,LogWidget& log, QObject *parent):
-  TextEditable(filename,node,log,parent)
+FragmentShaderCode::FragmentShaderCode(const QString &_filename, QDomNode _node, QObject *_parent):
+  TextEditable(_filename,_node,_parent)
 {
-  connectLog(log);
 }
-
-void FragmentShaderCode::connectLog(LogWidget &log)
-{
-  TextEditable::connectLog(log);
-  connect(&m_shader,SIGNAL(error(QString)),&log,SLOT(writeError(QString)));
-  connect(&m_shader,SIGNAL(warning(QString)),&log,SLOT(writeWarning(QString)));
-}
-
 
 const QString &FragmentShaderCode::text() const
 {
@@ -30,14 +21,14 @@ bool FragmentShaderCode::build(const QString &text)
 }
 
 
-QString FragmentShaderCode::minifiedShaderCode(const ShaderMinifier& minifier) const
+QString FragmentShaderCode::minifiedShaderCode() const
 {
-  return minifier.minifiedShaderCode(this->fileName(),m_fragmentcode);
+	return ShaderMinifier::minifiedShaderCode( *this );
 }
 
-QString FragmentShaderCode::cFormatedShaderCode(const ShaderMinifier& minifier) const
+QString FragmentShaderCode::cFormatedShaderCode() const
 {
   QString variable_name = QString("fs_") + this->objectName();
-  return minifier.cFormatedShaderCode(this->fileName(),variable_name,minifiedShaderCode(minifier));
+	return ShaderMinifier::cFormatedShaderCode( variable_name, minifiedShaderCode() );
 }
 

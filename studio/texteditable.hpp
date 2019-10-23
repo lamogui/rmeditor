@@ -11,33 +11,30 @@ class Renderer;
 class TextEditable : public NodeFile
 {
 
-  Q_OBJECT
+	Q_OBJECT
 
 public:
-  TextEditable(const QString& filename, QDomNode node ,LogWidget& log,QObject* parent);
+	TextEditable(const QString& _filename, QDomNode _node, QObject* _parent);
 
-  //The text to print in the editor and that will be saved in the file
-  virtual const QString& text() const = 0;
+	//The text to print in the editor and that will be saved in the file
+	virtual const QString& text() const = 0;
 
-
-  //Is the object buildable
-  virtual bool buildable() const {return false;}
-  inline virtual Renderer* getRenderer() const {return nullptr;}
+	//Is the object buildable
+	virtual bool buildable() const {return false;}
+	inline virtual Renderer* getRenderer() const {return nullptr;}
 
 public slots:
-  //Return true is the file is loaded or created (not if it build correctly)
-  bool load();
-  virtual bool save();
-  virtual bool build(const QString& text) = 0;
-
+	//Return true is the file is loaded or created (not if it build correctly)
+	bool load();
+	virtual bool save();
+	virtual bool build(const QString& _text) = 0;
 
 signals:
-  void startLineNumberChanged(int line);
-  void objectTextChanged(QString text);
-
+	void startLineNumberChanged(int _line);
+	void objectTextChanged(QString _text);
 
 protected:
-  bool save(const QString& text);
+	bool save(const QString& _text);
 
 };
 

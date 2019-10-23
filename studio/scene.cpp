@@ -5,10 +5,10 @@
 #include "renderer.hpp"
 #include "shaderminifier.hpp"
 
-Scene::Scene(const QString &filename, QDomNode node, Project& project, Framework *framework, LogWidget &log, QObject *parent):
-  FragmentShaderCode(filename,node,log,parent),
-  m_framework(framework),
-  m_sceneRenderer(new SceneRenderer(project, *this,1280,720,this))
+Scene::Scene(const QString &_filename, QDomNode _node, Project& _project, Framework *_framework, QObject *_parent):
+  FragmentShaderCode(_filename, _node, _parent),
+  m_framework(_framework),
+  m_sceneRenderer(new SceneRenderer(_project, *this,1280,720,this))
 {
   m_sceneRenderer->setCamera(&m_camera);
   load();

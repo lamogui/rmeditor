@@ -10,7 +10,7 @@
 
 #include "project.hpp"
 #include "sequence.hpp"
-
+#include "logmanager.hpp"
 
 Keyframe::Keyframe(Project &project, Sequence* seq, QDomElement &node):
   QObject(nullptr), //lol
@@ -133,7 +133,7 @@ qint64 Keyframe::checkFrameAvailable(qint64 rel_frame)
   }
   else
   {
-    Q_ASSERT(0 && "Not supported yet");
+		ptodo( "not supported yet" );
     return rel_frame;
   }
 }
@@ -167,7 +167,7 @@ void Keyframe::positionChanged(qint64 previous)
   }
   else
   {
-    Q_ASSERT(0 && "Not supported yet");
+		ptodo( "not supported yet" );
   }
 
 }

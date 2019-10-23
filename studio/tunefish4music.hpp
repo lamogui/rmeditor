@@ -23,8 +23,8 @@ public:
     RtAudio stuff
   */
   virtual bool createRtAudioStream();
-  virtual void processAudio(void *outputBuffer, unsigned int nBufferFrames,
-                            double streamTime, RtAudioStreamStatus status);
+	virtual void processAudio(void * _outputBuffer, unsigned int _nBufferFrames,
+														double _streamTime, RtAudioStreamStatus _status);
 
   size_t instrumentCount() const { return m_player.song.instrCount; }
 

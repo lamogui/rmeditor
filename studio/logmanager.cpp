@@ -69,8 +69,8 @@ Log::Entry::Entry( Type _type, Category _category, const QObject* _sender, QStri
 {
 }
 
-Log::Entry Log::Entry::Assertion( Category _category, const QObject* _sender, QString _what, const CppCodeOrigin& _cppOrigin ){
-	return Log::Entry( Log::Type::Assertion, _category, _sender, _what, static_cast<qint64>(-1), _cppOrigin );
+Log::Entry Log::Entry::Assertion( Category _category, QString _what, const CppCodeOrigin& _cppOrigin ){
+	return Log::Entry( Log::Type::Assertion, _category, nullptr, _what, static_cast<qint64>(-1), _cppOrigin );
 }
 Log::Entry Log::Entry::Error( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) {
 	return Log::Entry( Log::Type::Error, _category, _sender, _what, _param, _cppOrigin );
@@ -86,26 +86,26 @@ Log::Entry Log::Entry::Info( Category _category, const QObject* _sender, QString
  * Manager
  */
 
-Log::Manager g_logManager;
+std::unique_ptr< Log::Manager > g_logManager = nullptr;
 
 Log::Manager::Manager() {
 	connect( this, &Log::Manager::newEntry, this, &Log::Manager::handleNewEntry );
 }
 
-void Log::Manager::Assertion( Category _category, const QObject* _sender, QString _what, const CppCodeOrigin& _cppOrigin ) {
-	emit g_logManager.newEntry( Log::Entry::Assertion(_category, _sender, _what, _cppOrigin) );
+void Log::Manager::Assertion(Category _category, QString _what, const CppCodeOrigin& _cppOrigin ) {
+	emit g_logManager->newEntry( Log::Entry::Assertion(_category, _what, _cppOrigin) );
 }
 
 void Log::Manager::Error( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) {
-	emit g_logManager.newEntry( Log::Entry::Error(_category, _sender, _what, _param, _cppOrigin) );
+	emit g_logManager->newEntry( Log::Entry::Error(_category, _sender, _what, _param, _cppOrigin) );
 }
 
 void Log::Manager::Warning( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) {
-	emit g_logManager.newEntry( Log::Entry::Warning(_category, _sender, _what, _param, _cppOrigin) );
+	emit g_logManager->newEntry( Log::Entry::Warning(_category, _sender, _what, _param, _cppOrigin) );
 }
 
 void Log::Manager::Info( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin ) {
-	emit g_logManager.newEntry( Log::Entry::Info(_category, _sender, _what, _param, _cppOrigin) );
+	emit g_logManager->newEntry( Log::Entry::Info(_category, _sender, _what, _param, _cppOrigin) );
 }
 
 void Log::Manager::handleOpengGLLoggedMessage(const QOpenGLDebugMessage& debugMessage)
@@ -171,13 +171,13 @@ void Log::Manager::handleNewEntry( Entry _entry )
 	qDebug() << type << category << name << _entry.m_what;
 }
 
-bool pVerify( Log::Category _category, const QObject* _sender, bool _cond, const char* _condStr, const Log::CppCodeOrigin& _cppOrigin )
+bool pVerify( Log::Category _category, bool _cond, const char* _condStr, const Log::CppCodeOrigin& _cppOrigin )
 {
 	if ( !_cond ) {
 		if ( PROUT_IS_DEBUGGER_PRESENT ) {
 			PROUT_DEBUG_BREAK;
 		}
-		Log::Manager::Assertion( _category, _sender, QString("VERIFY FAILED !") + " (" + QString(_condStr) + ")", _cppOrigin );
+		Log::Manager::Assertion( _category, QString("VERIFY FAILED !") + " (" + QString(_condStr) + ")", _cppOrigin );
 	}
 	return _cond;
 }

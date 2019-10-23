@@ -70,7 +70,7 @@ public slots:
   void deleteItems(const QList<QGraphicsItem*> items);
   void deleteSequence(Sequence* seq);
 
-  void renderImage(const QSize& resolution, QImage* target);
+	void renderImage(const QSize& _resolution, QImage* _target);
 
   void exportSources(const QDir& dir) const;
 

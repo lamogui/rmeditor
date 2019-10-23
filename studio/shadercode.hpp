@@ -9,33 +9,27 @@
 
 
 class ShaderMinifier;
-
 class FragmentShaderCode : public TextEditable
 {
   Q_OBJECT
 
 public:
-  FragmentShaderCode(const QString& filename, QDomNode node,LogWidget& log,QObject* parent=nullptr);
+	FragmentShaderCode(const QString& _filename, QDomNode _node, QObject* _parent=nullptr);
 
-  virtual const QString& text() const;
-  inline Shader& getShader() { return m_shader;}
-  virtual void connectLog(LogWidget& log);
+	virtual const QString& text() const;
+	inline Shader& getShader() { return m_shader;}
 
-  virtual bool buildable() const { return true; }
+	virtual bool buildable() const { return true; }
 
-
-  virtual QString minifiedShaderCode(const ShaderMinifier& minifier) const;
-  virtual QString cFormatedShaderCode(const ShaderMinifier& minifier) const;
-
-
+	virtual QString minifiedShaderCode() const;
+	virtual QString cFormatedShaderCode() const;
 
 public slots:
-  virtual bool build(const QString& text);
-
+	virtual bool build(const QString& text);
 
 protected:
-    Shader m_shader;
-    QString m_fragmentcode;
+	Shader m_shader;
+	QString m_fragmentcode;
 
 };
 

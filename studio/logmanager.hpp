@@ -5,6 +5,7 @@
 #include <QPointer>
 #include <QString>
 #include <QVector>
+#include <memory>
 
 #define PROUT_BLOCK_WITH_FORCED_SEMICOLON(x) do { x } while (false)
 #ifdef _MSC_VER
@@ -66,7 +67,7 @@ namespace Log {
 		qint64 m_param; // line number for shader codes / text medias
 		CppCodeOrigin m_cppOrigin;
 
-		static Entry Assertion( Category _category, const QObject* _sender, QString _what, const CppCodeOrigin& _cppOrigin );
+		static Entry Assertion( Category _category, QString _what, const CppCodeOrigin& _cppOrigin );
 		static Entry Error( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin );
 		static Entry Warning( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin );
 		static Entry Info( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin );
@@ -86,7 +87,7 @@ namespace Log {
 	public:
 		Manager();
 
-		static void Assertion( Category _category, const QObject* _sender, QString _what, const CppCodeOrigin& _cppOrigin );
+		static void Assertion( Category _category, QString _what, const CppCodeOrigin& _cppOrigin );
 		static void Error( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin );
 		static void Warning( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin );
 		static void Info( Category _category, const QObject* _sender, QString _what, qint64 _param, const CppCodeOrigin& _cppOrigin );
@@ -103,25 +104,25 @@ namespace Log {
 	};
 }
 
-extern Log::Manager g_logManager; // global instance
+extern std::unique_ptr< Log::Manager > g_logManager; // global instance
 
 #define PROUT_MAKE_CPP_ORIGIN() Log::CppCodeOrigin( __FILE__, __LINE__ )
 
 // Asserts
-#define passertmsg( _category, _sender, _cond, _what) \
+#define passertmsg( _category, _cond, _what) \
 	PROUT_BLOCK_WITH_FORCED_SEMICOLON( \
 	if ( !(_cond) ) { \
 		if (PROUT_IS_DEBUGGER_PRESENT) { \
 			PROUT_DEBUG_BREAK;\
 		} \
-		Log::Manager::Assertion( _category, _sender, QString( _what ) + " (" + QString(#_cond) + ")", PROUT_MAKE_CPP_ORIGIN()); \
+		Log::Manager::Assertion( _category, QString( _what ) + " (" + QString(#_cond) + ")", PROUT_MAKE_CPP_ORIGIN()); \
 	} )
-#define passertmsgf( _category, _sender, _cond, _what, ... ) passertmsg( _category, _sender, _cond, QString::asprinf( _what, __VA_ARGS__ ) )
-#define passert( _category, _sender, _cond ) passertmsg( _category, _sender, _cond, tr("ASSERTION FAILED !") )
-#define ptodo( _what ) passertmsg( Log::Code, nullptr, false, tr("TODO: ") + _what )
+#define passertmsgf( _category, _cond, _what, ... ) passertmsg( _category, _cond, QString::asprinf( _what, __VA_ARGS__ ) )
+#define passert( _category, _cond ) passertmsg( _category, _cond, QObject::tr("ASSERTION FAILED !") );
+#define ptodo( _what ) passertmsg( Log::Code, false, QObject::tr("TODO: ") + _what )
 
-bool pVerify( Log::Category _category, const QObject* _sender, bool _cond, const char* _condStr, const Log::CppCodeOrigin& _cppOrigin );
-#define pverify( _category, _sender, _cond ) pVerify( _category, _sender, _cond, #_cond, PROUT_MAKE_CPP_ORIGIN() )
+bool pVerify( Log::Category _category, bool _cond, const char* _condStr, const Log::CppCodeOrigin& _cppOrigin );
+#define pverify( _category, _cond ) pVerify( _category, _cond, #_cond, PROUT_MAKE_CPP_ORIGIN() )
 
 // Errors
 #define perrorp( _category, _sender, _param, _what ) PROUT_BLOCK_WITH_FORCED_SEMICOLON( Log::Manager::Error( _category, _sender, QString( _what ), _param, PROUT_MAKE_CPP_ORIGIN()); )

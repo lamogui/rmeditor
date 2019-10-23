@@ -299,7 +299,7 @@ bool Project::parseTagResources(QDomNode node)
         element.setAttribute("name",name);
         if (m_textures.contains(name))
         {
-					peror( Log::File, this, tr("error at line ") + QString::number(element.lineNumber()) +
+					perror( Log::File, this, tr("error at line ") + QString::number(element.lineNumber()) +
                      "(" + element.nodeName() +  ") duplicate texture '" + name + "'");
           return false;
         }
@@ -314,7 +314,7 @@ bool Project::parseTagResources(QDomNode node)
 					pinfo( Log::File, this, tr("loading texture '") + name + "' (file: " + filename + ")" );
 					if (ext == "gif")
 					{
-						m_gifs[name] = new Gif(name, filename,element,*m_log,this);
+						m_gifs[name] = new Gif(name, filename,element,this);
 						m_textures[name] = &(m_gifs[name]->texture());
 					}
 					else
@@ -414,7 +414,7 @@ bool Project::parseTagTimeline(QDomNode _node)
 
 void Project::addMusicTextures()
 {
-	Q_ASSERT(m_music);
+	passert( Log::Code, m_music );
 	m_textures["notes_velocity"] = &(m_music->noteVelocityTex());
 	m_textures["max_notes_velocity"] = &(m_music->maxNoteVelocityTex());
 }
@@ -501,8 +501,8 @@ void Project::exportFrameworkSources(const QDir & _dir) const
 	QTextStream header_code(&header);
 	QTextStream source_code(&source);
 
-	source_code << ShaderMinifier::generatedSourceString();
-	header_code << ShaderMinifier::generatedHeaderString();
+	//source_code << ShaderMinifier::generatedSourceString();
+	//header_code << ShaderMinifier::generatedHeaderString();
 	source_code << "#include \"frameworks.hpp\"\n\n";
 
 	header_code << "#ifndef FRAMEWORKS_H\n";
@@ -511,12 +511,10 @@ void Project::exportFrameworkSources(const QDir & _dir) const
 	QMap<QString,Framework*>::const_iterator it;
 	for  (it = m_frameworks.constBegin(); it !=m_frameworks.constEnd(); it++)
 	{
-		ShaderMinifier minifier();
-
 		header_code << "extern const char* const fs_" << it.value()->objectName() << ";\n";
 		header_code << "extern const unsigned int fs_" << it.value()->objectName() << "_len;\n";
 
-		source_code << it.value()->cFormatedShaderCode(minifier);
+		source_code << it.value()->cFormatedShaderCode();
 	}
 
 	header_code << "#endif\n";
@@ -539,8 +537,8 @@ void Project::exportScenesSources(const QDir &_dir) const
 	QTextStream header_code(&header);
 	QTextStream source_code(&source);
 
-	source_code << ShaderMinifier::generatedSourceString();
-	header_code << ShaderMinifier::generatedHeaderString();
+	//source_code << ShaderMinifier::generatedSourceString();
+	//header_code << ShaderMinifier::generatedHeaderString();
 
 	source_code << "#include \"scenes.hpp\"\n\n";
 
@@ -566,11 +564,8 @@ void Project::exportScenesSources(const QDir &_dir) const
 	QMap<QString,Scene*>::const_iterator it;
 	for  (it = m_rmScenes.constBegin(); it !=m_rmScenes.constEnd(); it++)
 	{
-		ShaderMinifier minifier();
-		{
-			header_code << "extern const char* const fs_" << it.value()->objectName() << ";\n";
-			source_code << it.value()->cFormatedShaderCode(minifier);
-		}
+		header_code << "extern const char* const fs_" << it.value()->objectName() << ";\n";
+		source_code << it.value()->cFormatedShaderCode();
 
 		header_code << "extern GLuint fs_" << it.value()->objectName() << "_program;\n";
 		source_code << "GLuint fs_" << it.value()->objectName() << "_program;\n";
@@ -617,8 +612,8 @@ void Project::exportGifsSources(const QDir& _dir) const
 	QTextStream header_code(&header);
 	QTextStream source_code(&source);
 
-	source_code << ShaderMinifier::generatedSourceString();
-	header_code << ShaderMinifier::generatedHeaderString();
+	//source_code << ShaderMinifier::generatedSourceString();
+	//header_code << ShaderMinifier::generatedHeaderString();
 
 	source_code << "#include \"gifs.hpp\"\n\n";
 

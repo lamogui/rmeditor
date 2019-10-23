@@ -7,8 +7,8 @@
 class Framework : public FragmentShaderCode
 {  
   public:
-    Framework(const QString& filename, QDomNode node, LogWidget& log,QObject* parent):
-      FragmentShaderCode(filename,node,log,parent)
+		Framework(const QString& _filename, QDomNode _node, QObject* _parent):
+			FragmentShaderCode(_filename, _node, _parent)
     {
       load();
     }

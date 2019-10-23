@@ -33,9 +33,9 @@ Music::~Music()
 int Music::rtAudioCallback(void *_outputBuffer, void *_inputBuffer, unsigned int _nBufferFrames, double _streamTime, RtAudioStreamStatus _status, void *_userData)
 {
 	(void) _inputBuffer;
-	Music* music = static_cast< Music* >( _userData );
-	passert( Log::Audio, music, _userData && _outputBuffer);
+	passert( Log::Audio, _userData && _outputBuffer);
 
+	Music* music = static_cast< Music* >( _userData );
 	if (music->m_playing)
 	{
 		music->processAudio(_outputBuffer,_nBufferFrames,_streamTime,_status);

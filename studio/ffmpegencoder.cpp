@@ -81,12 +81,12 @@ void FFmpegEncoder::run()
 
 
 	Music* music = m_timeline->music();
-	Q_ASSERT(music);
+	passert( Log::FFMpeg, music );
 
 	qint64 startFrame = 0;
 	qint64 endFrame = m_timeline->length();
 
-	Q_ASSERT(startFrame < endFrame);
+	passert( Log::FFMpeg, startFrame < endFrame );
 
 	music->pause();
 
@@ -176,8 +176,8 @@ void FFmpegEncoder::run()
 		image = image.convertToFormat(QImage::Format_RGB888);
 		//image.save("0.png");
 
-		Q_ASSERT(image.size() == m_resolution);
-		Q_ASSERT(image.byteCount() == videoBufferSize);
+		passert( Log::FFMpeg, image.size() == m_resolution );
+		passert( Log::FFMpeg, image.byteCount() == videoBufferSize );
 
 		qint64 writted = 0;
 		size_t tot_writted = 0;
@@ -246,8 +246,8 @@ void FFmpegEncoder::run()
 		image = image.convertToFormat(QImage::Format_RGB888);
 		//image.save(QString::number(i) + ".png");
 
-		Q_ASSERT(image.size() == m_resolution);
-		Q_ASSERT(image.byteCount() == videoBufferSize);
+		passert( Log::FFMpeg, nullptr, image.size() == m_resolution );
+		passert( Log::FFMpeg, image.byteCount() == videoBufferSize);
 
 		qint64 writted = 0;
 		size_t tot_writted = 0;
