@@ -19,8 +19,11 @@
 
 #else  // TODO !
 
-#define PROUT_IS_DEBUGGER_PRESENT
-#define PROUT_DEBUG_BREAK
+bool prout_debuggerIsAttached();
+#include <csignal>
+
+#define PROUT_IS_DEBUGGER_PRESENT prout_debuggerIsAttached()
+#define PROUT_DEBUG_BREAK raise(SIGTRAP)
 
 #endif
 

@@ -85,7 +85,7 @@ void MainWindow::newProject()
       {
         delete m_project;
       }
-      m_project = new Project(dir,"demo.xml",*(m_info->getLogWidget()),this);
+			m_project = new Project(dir,"demo.xml",this);
       connectProject();
       m_project->build(Project::getDefaultProjectText());
     }
@@ -108,7 +108,7 @@ void MainWindow::open()
       {
         delete m_project;
       }
-      m_project = new Project(dir,QFileInfo(f).fileName(),*(m_info->getLogWidget()),this);
+			m_project = new Project(dir,QFileInfo(f).fileName(),this);
       connectProject();
     }
   }
