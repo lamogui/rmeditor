@@ -246,7 +246,7 @@ void FFmpegEncoder::run()
 		image = image.convertToFormat(QImage::Format_RGB888);
 		//image.save(QString::number(i) + ".png");
 
-		passert( Log::FFMpeg, nullptr, image.size() == m_resolution );
+		passert( Log::FFMpeg, image.size() == m_resolution );
 		passert( Log::FFMpeg, image.byteCount() == videoBufferSize);
 
 		qint64 writted = 0;
