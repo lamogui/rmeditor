@@ -9,3 +9,7 @@
 	path = tunefish
 	url = https://github.com/lamogui/tunefish
 	branch = ProutStudio
+[submodule "WaveSabre"]
+	path = WaveSabre
+	url = https://github.com/lamogui/WaveSabre
+	branch = ProutStudio
