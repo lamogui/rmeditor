@@ -23,4 +23,5 @@ build_script:
  - cmd: cd ProutStudio
  - cmd: dir C:\Qt\5.13.0\msvc2017\bin
  - cmd: qmake ProutStudio.pro
- - cmd: jom
+ - cmd: dir
+ - cmd: nmake
