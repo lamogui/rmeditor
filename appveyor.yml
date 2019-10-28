@@ -13,7 +13,7 @@ clone_script:
  - cmd: git clone --recursive https://github.com/lamogui/rmeditor ProutStudio
  
 init:
- - "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Auxiliary/Build/vcvarsall.bat" X86
+ - cmd: "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Auxiliary/Build/vcvarsall.bat" X86
  
 install:
  - set QTDIR=C:\Qt\5.13.0\msvc2017
