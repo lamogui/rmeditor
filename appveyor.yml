@@ -21,4 +21,4 @@ build_script:
  - cmd: dir C:\Qt\
  - cmd: dir C:\Qt\Tools\mingw730_32\
  - cmd: qmake ProutStudio.pro
- - cmd: mingw32-make
+ - cmd: mingw32-make 
