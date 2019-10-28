@@ -18,5 +18,5 @@ install:
  
 build_script:
  - cmd: cd ProutStudio
- - qmake ProutStudio.pro
- - mingw32-make
+ - cmd: qmake ProutStudio.pro
+ - cmd: mingw32-make
