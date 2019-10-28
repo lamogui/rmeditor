@@ -1,6 +1,6 @@
 version: '{branch}-1.0.{build}'
 image:
- - Visual Studio 2017
+ - Visual Studio 2019
 
 configuration:
  - Release
@@ -14,11 +14,11 @@ clone_script:
  
 install:
  - set QTDIR=C:\Qt\5.13.1\mingw73_64
- - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin
+ - set PATH=%PATH%;%QTDIR%\bin;C:\Qt\Tools\mingw730_32\bin
  
 build_script:
  - cmd: cd ProutStudio
  - cmd: dir C:\Qt\
- - cmd: dir C:\MinGW\bin\
- - cmd: C:\Qt\5.13.1\mingw73_64\bin\qmake.exe ProutStudio.pro
- - cmd: C:\MinGW\bin\mingw32-make
+ - cmd: dir C:\Qt\Tools\mingw730_32\
+ - cmd: qmake ProutStudio.pro
+ - cmd: mingw32-make
