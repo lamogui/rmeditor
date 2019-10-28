@@ -1,6 +1,6 @@
 version: '{branch}-1.0.{build}'
 image:
- - Visual Studio 2019
+ - Visual Studio 2017
 
 configuration:
  - Release
@@ -12,13 +12,15 @@ platform:
 clone_script:
  - cmd: git clone --recursive https://github.com/lamogui/rmeditor ProutStudio
  
+init:
+ - "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Auxiliary/Build/vcvarsall.bat" X86
+ 
 install:
- - set QTDIR=C:\Qt\5.13.1\mingw73_64
- - set PATH=%PATH%;%QTDIR%\bin;C:\Qt\Tools\mingw730_32\bin
+ - set QTDIR=C:\Qt\5.13.0\msvc2017
+ - set PATH=%PATH%;%QTDIR%\bin
  
 build_script:
  - cmd: cd ProutStudio
- - cmd: dir C:\Qt\
- - cmd: dir C:\Qt\Tools\mingw730_32\
+ - cmd: dir C:\Qt\5.13.0\msvc2017\bin
  - cmd: qmake ProutStudio.pro
- - cmd: mingw32-make
+ - cmd: jom
