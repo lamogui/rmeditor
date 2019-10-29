@@ -3,7 +3,7 @@
 #include "logmanager.hpp"
 
 Tunefish4Music::Tunefish4Music(const QString& _filename, double _length, QDomNode _node , QObject* _parent):
-  Music( _filename, _length, _node, _parent)
+	Music( _filename, _length, _node, _parent)
 {
 	eTfPlayerInit(m_player);
 	eTfPlayerSetSampleRate(m_player,44100 );

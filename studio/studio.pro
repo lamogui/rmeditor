@@ -7,14 +7,14 @@ DESTDIR = $$_PRO_FILE_PWD_/../bin/
 
 LIBS += -L$$_PRO_FILE_PWD_/../lib -lrtaudio -ltunefish
 
-win32: LIBS += -luser32 -lAdvapi32 -luuid -lksuser -ldsound -lopengl32 -lkernel32 -lOle32
+win32: LIBS += -lWaveSabre -luser32 -lMsacm32 -lAdvapi32 -luuid -lksuser -ldsound -lopengl32 -lkernel32 -lOle32
 unix: LIBS += -lpulse -lpulse-simple -lasound
 
 release:DEFINES += eRELEASE
 debug:DEFINES += eDEBUG
 win32: DEFINES += eWIN32
 
-INCLUDEPATH += ../rtaudio/ ../tunefish/
+INCLUDEPATH += ../rtaudio/ ../tunefish/ ../WaveSabre/
 
 HEADERS += \
   camera.hpp \
@@ -48,7 +48,8 @@ HEADERS += \
   timeline.hpp \
   timelinedockwidget.hpp \
   timelinewidget.hpp \
-  tunefish4music.hpp
+  tunefish4music.hpp \
+  wavesabremusic.hpp
 
 SOURCES += \
   camera.cpp \
@@ -82,7 +83,8 @@ SOURCES += \
   timeline.cpp \
   timelinedockwidget.cpp \
   timelinewidget.cpp \
-  tunefish4music.cpp
+  tunefish4music.cpp \
+  wavesabremusic.cpp
 
 FORMS += \
   editorwidget.ui \
