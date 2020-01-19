@@ -14,49 +14,54 @@
 #include "timelinewidget.hpp"
 #include "timelinedockwidget.hpp"
 #include "logmanager.hpp"
+#include "styles.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    m_project(nullptr)
+		m_project(nullptr),
+		m_backgroundImage( GetRandomBackground() )
 {
-	  m_ui.setupUi(this);
-		m_ui.progressBar->setVisible(false);
-		m_ui.cancelButton->setVisible(false);
+	m_ui.setupUi(this);
 
-    m_info = new LogDockWidget(this);
-    m_info->getLogWidget()->setPrintTime(false);
+	m_ui.progressBar->setVisible(false);
+	m_ui.cancelButton->setVisible(false);
 
-		m_editor = new EditorWidget(this);
-    m_timeline = new TimelineDockWidget(this);
-    addDockWidget(Qt::BottomDockWidgetArea, m_info);
-    addDockWidget(Qt::BottomDockWidgetArea, m_timeline);
-    addDockWidget(Qt::LeftDockWidgetArea, m_editor);
+	m_info = new LogDockWidget(this);
+	m_info->getLogWidget()->setPrintTime(false);
 
-		connect(m_editor,SIGNAL(rendererChanged(Renderer*)),m_ui.renderWidget,SLOT(setRenderer(Renderer*)));
-		connect(m_timeline,SIGNAL(rendererChanged(Renderer*)),m_ui.renderWidget,SLOT(setRenderer(Renderer*)));
+	m_editor = new EditorWidget(this);
+	m_timeline = new TimelineDockWidget(this);
+	addDockWidget(Qt::BottomDockWidgetArea, m_info);
+	addDockWidget(Qt::BottomDockWidgetArea, m_timeline);
+	addDockWidget(Qt::LeftDockWidgetArea, m_editor);
 
-    //Main window actions
-		m_ui.toolBar->addAction(m_ui.actionNew);
-		m_ui.toolBar->addAction(m_ui.actionOpen);
-		m_ui.toolBar->addAction(m_ui.actionSaveAllShaders);
-		m_ui.toolBar->addSeparator();
-		m_ui.toolBar->addAction(m_ui.actionTake_screenshot);
-		m_ui.toolBar->addSeparator();
-		m_ui.toolBar->addAction(m_ui.actionInsert_camera_keyframe);
-		m_ui.toolBar->addAction(m_ui.actionReset_camera);
+	connect(m_editor,SIGNAL(rendererChanged(Renderer*)),m_ui.renderWidget,SLOT(setRenderer(Renderer*)));
+	connect(m_timeline,SIGNAL(rendererChanged(Renderer*)),m_ui.renderWidget,SLOT(setRenderer(Renderer*)));
+
+	//Main window actions
+	m_ui.toolBar->addAction(m_ui.actionNew);
+	m_ui.toolBar->addAction(m_ui.actionOpen);
+	m_ui.toolBar->addAction(m_ui.actionSaveAllShaders);
+	m_ui.toolBar->addSeparator();
+	m_ui.toolBar->addAction(m_ui.actionTake_screenshot);
+	m_ui.toolBar->addSeparator();
+	m_ui.toolBar->addAction(m_ui.actionInsert_camera_keyframe);
+	m_ui.toolBar->addAction(m_ui.actionReset_camera);
 
 
-		connect(m_ui.actionNew,SIGNAL(triggered()), this, SLOT(newProject()));
-		connect(m_ui.actionOpen,SIGNAL(triggered()), this, SLOT(open()));
-		connect(m_ui.actionSaveAllShaders, SIGNAL(triggered()), this, SLOT(saveAllShaders()));
-		connect(m_ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
-		connect(m_ui.actionReset_camera, SIGNAL(triggered()), m_ui.renderWidget, SLOT(resetCamera()));
-		connect(m_ui.actionTake_screenshot, SIGNAL(triggered()), m_ui.renderWidget, SLOT(takeScreenshot()));
-		connect(m_ui.actionExport_as_video,SIGNAL(triggered()),this,SLOT(exportAsVideo()));
-		connect(m_ui.actionExport_as_Linux_Demo,SIGNAL(triggered()),this,SLOT(exportAsLinuxDemo()));
-		connect(m_ui.actionInsert_camera_keyframe,SIGNAL(triggered()),this,SLOT(insertCameraKeyframe()));
+	connect(m_ui.actionNew,SIGNAL(triggered()), this, SLOT(newProject()));
+	connect(m_ui.actionOpen,SIGNAL(triggered()), this, SLOT(open()));
+	connect(m_ui.actionSaveAllShaders, SIGNAL(triggered()), this, SLOT(saveAllShaders()));
+	connect(m_ui.actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+	connect(m_ui.actionReset_camera, SIGNAL(triggered()), m_ui.renderWidget, SLOT(resetCamera()));
+	connect(m_ui.actionTake_screenshot, SIGNAL(triggered()), m_ui.renderWidget, SLOT(takeScreenshot()));
+	connect(m_ui.actionExport_as_video,SIGNAL(triggered()),this,SLOT(exportAsVideo()));
+	connect(m_ui.actionExport_as_Linux_Demo,SIGNAL(triggered()),this,SLOT(exportAsLinuxDemo()));
+	connect(m_ui.actionInsert_camera_keyframe,SIGNAL(triggered()),this,SLOT(insertCameraKeyframe()));
 
-    showFullScreen();
+
+
+	showFullScreen();
 }
 
 MainWindow::~MainWindow()
@@ -124,6 +129,14 @@ void MainWindow::connectProject()
   connect(m_project,SIGNAL(appendTextEditable(TextEditable*)),m_editor,SLOT(appendTextEditable(TextEditable*)));
   connect(m_project,SIGNAL(demoTimelineChanged(Timeline*)),this,SLOT(setTimeline(Timeline*)));
   m_timeline->setProject(m_project);
+}
+
+void MainWindow::paintEvent(QPaintEvent * _pe) {
+	QPainter paint(this);
+	int widWidth = width();
+	int widHeight = height();
+	QPixmap scaledPixmap = m_backgroundImage.scaled(widWidth, widHeight, Qt::KeepAspectRatioByExpanding);
+	paint.drawPixmap(0, 0, scaledPixmap);
 }
 
 void MainWindow::setTimeline(Timeline *t)

@@ -42,6 +42,7 @@ HEADERS += \
   shader.hpp \
   shadercode.hpp \
   shaderminifier.hpp \
+  styles.hpp \
   texteditable.hpp \
   texteditor.hpp \
   texture.hpp \
@@ -77,6 +78,7 @@ SOURCES += \
   shader.cpp \
   shadercode.cpp \
   shaderminifier.cpp \
+  styles.cpp \
   texteditable.cpp \
   texteditor.cpp \
   texture.cpp \
@@ -93,10 +95,13 @@ FORMS += \
   timelinedockwidget.ui
 
 RESOURCES += \
-  ../icons/resources.qrc
+  ../icons/icons.qrc \
+  ../resources/resources.qrc
 
 RC_FILE += \
   resources.rc
+
+DISTFILES +=
 
 
 

@@ -9,11 +9,16 @@
 #include "scene.hpp"
 #include "texteditor.hpp"
 #include "texteditable.hpp"
+#include "styles.hpp"
 
 EditorWidget::EditorWidget(QWidget * _parent) :
 		QDockWidget(_parent)
 {
 		m_ui.setupUi(this);
+		SetupDockWidgetStyle( *this );
+		m_ui.tab->setStyleSheet("background: transparent;");
+		SetupPushButtonWidgetStyle( *m_ui.saveButton );
+		SetupPushButtonWidgetStyle( *m_ui.buildButton );
 }
 
 void EditorWidget::loadProject(Project &project)
@@ -89,7 +94,7 @@ void EditorWidget::appendTextEditable(TextEditable *te)
     {
       if (editor->textObject() == te)
       {
-				m_ui.tab->setTabText(i,te->fileName());
+				m_ui.tab->setItemText(i,te->fileName());
         //editor->refresh();
         newWidget = false;
         break;
@@ -99,7 +104,8 @@ void EditorWidget::appendTextEditable(TextEditable *te)
   if (newWidget)
   {
 		TextEditor* editor = new TextEditor(*te,m_ui.tab);
-		m_ui.tab->addTab(editor,te->fileName());
+
+		m_ui.tab->addItem(editor,te->fileName());//m_ui.tab->addTab(editor,te->fileName());
     //editor->refresh();
     connect(editor,SIGNAL(saved(TextEditor*,bool)),this,SLOT(onTextEditorSaved(TextEditor*,bool)));
   }
@@ -154,11 +160,11 @@ void EditorWidget::onTextEditorSaved(TextEditor* e, bool saved)
     {
       if (saved)
       {
-				m_ui.tab->setTabText(i,editor->textObject()->fileName());
+				m_ui.tab->setItemText(i,editor->textObject()->fileName());
       }
       else
       {
-				m_ui.tab->setTabText(i,editor->textObject()->fileName() + "*");
+				m_ui.tab->setItemText(i,editor->textObject()->fileName() + "*");
       }
       break;
     }
