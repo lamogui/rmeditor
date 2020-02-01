@@ -12,46 +12,46 @@ TextEditor::TextEditor(TextEditable &textObject, QWidget *parent) :
   m_startLineNumber(0),
   m_saved(true)
 {
-    lineNumberArea = new LineNumberArea(this);
+	m_lineNumberArea = new LineNumberArea(this);
 
-    connect(this,SIGNAL(textChanged()),this,SLOT(onTextEdited()));
-    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
-    connect(&textObject, SIGNAL(startLineNumberChanged(int)), this, SLOT(setStartLineNumber(int)));
-    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
-    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-    connect(m_object,SIGNAL(destroyed(QObject*)),this,SLOT(onDestroyObject(QObject*)),Qt::DirectConnection);
-    connect(m_object,SIGNAL(objectTextChanged(QString)),SLOT(setPlainText(QString)));
+	connect(this, &TextEditor::textChanged,this, &TextEditor::onTextEdited);
+	connect(this, &TextEditor::blockCountChanged, this, &TextEditor::updateLineNumberAreaWidth);
+	connect(m_object, &TextEditable::startLineNumberChanged, this, &TextEditor::setStartLineNumber);
+	connect(this, &TextEditor::updateRequest, this, &TextEditor::updateLineNumberArea);
+	connect(this, &TextEditor::cursorPositionChanged, this, &TextEditor::highlightCurrentLine);
+	connect(m_object,&TextEditable::destroyed,this,&TextEditor::onDestroyObject,Qt::DirectConnection);
+	connect(m_object,&TextEditable::objectTextChanged, this, &TextEditor::setPlainText);
 
-    updateLineNumberAreaWidth(0);
-    highlightCurrentLine();
+	updateLineNumberAreaWidth(0);
+	highlightCurrentLine();
 
-    QFont font("consolas",9);
-    const int tabStop = 2;  // 4 characters
-    QFontMetrics metrics(font);
-    setTabStopWidth(tabStop * metrics.width(' '));
-    setFont(font);
-    setLineWrapMode(QPlainTextEdit::NoWrap);
+	QFont font("consolas",9);
+	const int tabStop = 2;  // 4 characters
+	QFontMetrics metrics(font);
+	setTabStopWidth(tabStop * metrics.width(' '));
+	setFont(font);
+	setLineWrapMode(QPlainTextEdit::NoWrap);
 
-    m_highlighter = new Highlighter(document());
+	m_highlighter = new Highlighter(document());
 
+	m_timer->setSingleShot(true);
+	if (dynamic_cast<FragmentShaderCode*>(m_object) != nullptr)
+	{
+		m_highlighter->defineGLSLFragmentShaderRules();
+		m_timer->setInterval(1000);  //1 second because we want see our result as fast as possible
+		connect(m_timer, SIGNAL(timeout()), this, SLOT(build()));
+		connect(this, SIGNAL(textChanged()), this, SLOT(resetTimer()));
+	}
+	else if (dynamic_cast<Project*>(m_object) != nullptr)
+	{
+		m_highlighter->defineXMLRule();
+	}
 
+	this->setPlainText(m_object->text());
 
-    m_timer->setSingleShot(true);
-    if (dynamic_cast<FragmentShaderCode*>(m_object) != nullptr)
-    {
-      m_highlighter->defineGLSLFragmentShaderRules();
-      m_timer->setInterval(1000);  //1 second because we want see our result as fast as possible
-      connect(m_timer, SIGNAL(timeout()), this, SLOT(build()));
-      connect(this, SIGNAL(textChanged()), this, SLOT(resetTimer()));
-    }
-    else if (dynamic_cast<Project*>(m_object) != nullptr)
-    {
-      m_highlighter->defineXMLRule();
-    }
+	setUndoRedoEnabled(true);
 
-    this->setPlainText(m_object->text());
-
-    setUndoRedoEnabled(true);
+	setStyleSheet("background-color: rgba(0,0,0,120)");
 }
 
 /*
@@ -105,9 +105,9 @@ void TextEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 void TextEditor::updateLineNumberArea(const QRect &rect, int dy)
 {
     if (dy)
-        lineNumberArea->scroll(0, dy);
+				m_lineNumberArea->scroll(0, dy);
     else
-        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+				m_lineNumberArea->update(0, rect.y(), m_lineNumberArea->width(), rect.height());
 
     if (rect.contains(viewport()->rect()))
         updateLineNumberAreaWidth(0);
@@ -120,10 +120,8 @@ void TextEditor::resizeEvent(QResizeEvent *e)
     QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
-    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+		m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
-
-
 
 void TextEditor::highlightCurrentLine()
 {
@@ -148,28 +146,30 @@ void TextEditor::highlightCurrentLine()
 
 void TextEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
-    QPainter painter(lineNumberArea);
-   // painter.fillRect(event->rect(), Qt::black);
+	QColor backgroundColor = palette().light().color();
+	backgroundColor.setAlpha(60);
+	QPainter painter(m_lineNumberArea);
+	painter.fillRect(rect(),backgroundColor);
 
 
-    QTextBlock block = firstVisibleBlock();
-    int blockNumber = block.blockNumber();
-    int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
-    int bottom = top + (int) blockBoundingRect(block).height();
+	QTextBlock block = firstVisibleBlock();
+	int blockNumber = block.blockNumber();
+	int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
+	int bottom = top + (int) blockBoundingRect(block).height();
 
-    while (block.isValid() && top <= event->rect().bottom()) {
-        if (block.isVisible() && bottom >= event->rect().top()) {
-            QString number = QString::number(blockNumber + m_startLineNumber + 1);
-            painter.setPen(Qt::darkGray);
-            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
-                             Qt::AlignRight, number);
-        }
+	while (block.isValid() && top <= event->rect().bottom()) {
+		if (block.isVisible() && bottom >= event->rect().top()) {
+			QString number = QString::number(blockNumber + m_startLineNumber + 1);
+			painter.setPen(Qt::white);
+			painter.drawText(0, top, m_lineNumberArea->width(), fontMetrics().height(),
+											 Qt::AlignRight, number);
+		}
 
-        block = block.next();
-        top = bottom;
-        bottom = top + (int) blockBoundingRect(block).height();
-        ++blockNumber;
-    }
+		block = block.next();
+		top = bottom;
+		bottom = top + (int) blockBoundingRect(block).height();
+		++blockNumber;
+	}
 }
 
 void TextEditor::onDestroyObject(QObject *obj)
@@ -200,5 +200,5 @@ void TextEditor::setStartLineNumber(int n)
 {
   m_startLineNumber = n;
   updateLineNumberAreaWidth(n);
-  lineNumberArea->repaint();
+	m_lineNumberArea->repaint();
 }

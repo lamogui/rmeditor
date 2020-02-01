@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>style.qss</file>
+        <file>background2.png</file>
+        <file>botw2.jpg</file>
+    </qresource>
+</RCC>

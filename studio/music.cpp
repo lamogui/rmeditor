@@ -12,7 +12,11 @@
 
 Music::Music(const QString &_filename, double _length, QDomNode _node, QObject *_parent):
 	NodeFile(_filename,_node,_parent),
-  m_audio(),
+	#ifdef Q_OS_WIN
+	m_audio( RtAudio::WINDOWS_DS ),
+	#else
+	m_audio(),
+	#endif
 	m_length(_length),
   m_playing(false)
 {

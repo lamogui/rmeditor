@@ -1,0 +1,10 @@
+QPushButton{
+  background-color: rgba(255,255,255,128);
+}
+QTextEdit{
+  background-color: rgba(0,0,0,180 );
+}
+QWidget{
+  color: rgb(200,200,200);
+	background: transparent;
+}

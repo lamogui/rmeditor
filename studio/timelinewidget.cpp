@@ -22,7 +22,7 @@ TimelineWidget::TimelineWidget(QWidget *parent, qreal borderheight):
   m_grabTime(false),
   m_scale(1,1)
 {
-  m_updateTimer->setSingleShot(false);
+	m_updateTimer->setSingleShot(false);
 }
 
 void TimelineWidget::setTimeline(Timeline *timeline)

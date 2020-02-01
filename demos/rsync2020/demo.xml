@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rmdemo>
+  <music length="145.0" file="music.tfm" name="music"/>
+  <resources>
+    <texture file="prout.gif" name="prout"/>
+    <texture file="frites.gif" name="frites"/>
+    <texture file="labo.gif" name="labo"/>
+    <texture file="deadline.gif" name="deadline"/>
+    <texture file="hangover.gif" name="hangover"/>
+    <texture file="credits.gif" name="credits"/>
+  </resources>
+  <scenes>
+    <scene file="frite.glsl" name="frite"/>
+    <scene file="frite_klems.glsl" name="frite_klems"/>
+    <scene file="prout.glsl" name="prout"/>
+    <scene file="leon.glsl" name="leon"/>
+    <scene file="belgique.glsl" name="belgique"/>
+    <scene file="drunk.glsl" name="drunk"/>
+  </scenes>
+  <timeline>
+    <track>
+      <sequence length="63" start="183" scene="prout">
+        <camera/>
+      </sequence>
+      <sequence length="238" start="7636" scene="frite_klems">
+        <camera>
+          <keyframe pos_y="0" rot_z="0" rot_w="1" pos_x="0" pos_z="-1.22" frame="4" fov="60" rot_x="0" rot_y="0"/>
+          <keyframe pos_y="-0.0522599" rot_z="-0.0541148" rot_w="0.987509" pos_x="0.81911" pos_z="-1.42848" frame="224" fov="60" rot_x="0.0452621" rot_y="-0.140882"/>
+          <keyframe pos_y="-0.0522599" rot_z="0.197282" rot_w="0.947907" pos_x="0.81911" pos_z="-1.42848" frame="238" fov="180" rot_x="-0.077505" rot_y="-0.237791"/>
+        </camera>
+      </sequence>
+      <sequence length="977" start="630" scene="frite">
+        <camera>
+          <keyframe pos_y="-0.0244222" rot_z="0.224091" rot_w="0.803006" pos_x="0.00824169" pos_z="-0.144206" frame="2" fov="60" rot_x="0.185139" rot_y="0.520276"/>
+          <keyframe pos_y="0" rot_z="0" rot_w="1" pos_x="0" pos_z="-6.91327" frame="977" fov="105" rot_x="0" rot_y="0"/>
+          <keyframe pos_y="-0.470546" rot_z="0.20259" rot_w="0.926804" pos_x="-0.626434" pos_z="-1.36357" frame="375" fov="60" rot_x="-0.0320216" rot_y="0.314591"/>
+        </camera>
+      </sequence>
+      <sequence length="196" start="434" scene="belgique">
+        <camera/>
+      </sequence>
+      <sequence length="1017" start="1637" scene="frite">
+        <camera>
+          <keyframe pos_y="0.0879004" rot_z="0.00411153" rot_w="0.985069" pos_x="2.18797" pos_z="1.98521" frame="0" fov="60" rot_x="-0.0137136" rot_y="0.171556"/>
+          <keyframe pos_y="5.31246" rot_z="0.0599599" rot_w="0.922275" pos_x="32.3374" pos_z="2.01698" frame="1018" fov="62.2859" rot_x="-0.233725" rot_y="0.301956"/>
+        </camera>
+      </sequence>
+      <sequence length="475" start="2654" scene="leon">
+        <camera>
+          <keyframe pos_y="-0.0906532" rot_z="-0.0480013" rot_w="0.474011" pos_x="2.21647" pos_z="1.6879" frame="0" fov="60" rot_x="-0.0192679" rot_y="-0.878997"/>
+          <keyframe pos_y="0.0265214" rot_z="-0.00573464" rot_w="0.973188" pos_x="0.828916" pos_z="-1.66326" frame="481" fov="125" rot_x="0.0261351" rot_y="-0.228438"/>
+        </camera>
+      </sequence>
+      <sequence length="249" start="3129" scene="leon">
+        <camera>
+          <keyframe pos_y="0.0270421" rot_z="0.000418507" rot_w="0.99901" pos_x="-0.572893" pos_z="-1.20918" frame="0" fov="60" rot_x="0.00873965" rot_y="0.0436102"/>
+          <keyframe pos_y="-0.0240726" rot_z="0.0185774" rot_w="0.986593" pos_x="-0.617983" pos_z="-0.59217" frame="249" fov="60" rot_x="0.0116002" rot_y="0.161715"/>
+        </camera>
+      </sequence>
+      <sequence length="205" start="3378" scene="leon">
+        <camera>
+          <keyframe pos_y="-0.120404" rot_z="0.0116642" rot_w="0.178399" pos_x="-0.206655" pos_z="1.57361" frame="2" fov="60" rot_x="0.0403785" rot_y="0.983058"/>
+          <keyframe pos_y="-0.120404" rot_z="0.0139831" rot_w="0.174196" pos_x="-0.206655" pos_z="1.57361" frame="205" fov="30" rot_x="0.0399285" rot_y="0.9838"/>
+        </camera>
+      </sequence>
+      <sequence length="519" start="3622" scene="frite_klems">
+        <camera>
+          <keyframe pos_y="0.0202006" rot_z="0.0272429" rot_w="0.963309" pos_x="-0.366034" pos_z="-0.817895" frame="4" fov="60" rot_x="-0.022912" rot_y="0.266023"/>
+          <keyframe pos_y="-0.0155713" rot_z="-0.0151808" rot_w="0.28452" pos_x="-0.301487" pos_z="0.975348" frame="507" fov="60" rot_x="0.00990301" rot_y="0.958498"/>
+          <keyframe pos_y="-0.0058513" rot_z="0.00405723" rot_w="0.719369" pos_x="-0.770569" pos_z="-0.059427" frame="300" fov="60" rot_x="-0.00440341" rot_y="0.694602"/>
+          <keyframe pos_y="-0.0155713" rot_z="0.0334678" rot_w="0.741804" pos_x="-0.301487" pos_z="0.975348" frame="520" fov="60" rot_x="-0.00963581" rot_y="0.669709"/>
+        </camera>
+      </sequence>
+      <sequence length="473" start="4141" scene="frite_klems">
+        <camera>
+          <keyframe pos_y="-0.0429032" rot_z="0.00813411" rot_w="0.974645" pos_x="0.74051" pos_z="-1.4169" frame="11" fov="60" rot_x="-0.0228486" rot_y="-0.222426"/>
+          <keyframe pos_y="-0.0429032" rot_z="0.00480944" rot_w="0.752544" pos_x="0.74051" pos_z="-1.4169" frame="1" fov="60" rot_x="0.0185065" rot_y="0.658259"/>
+          <keyframe pos_y="0.064063" rot_z="0.0524485" rot_w="0.707107" pos_x="1.03212" pos_z="0.495639" frame="472" fov="60" rot_x="-0.00304651" rot_y="-0.705148"/>
+        </camera>
+      </sequence>
+      <sequence length="1" start="0" scene="prout">
+        <camera/>
+      </sequence>
+      <sequence length="1935" start="4614" scene="drunk">
+        <camera>
+          <keyframe pos_y="0" rot_z="0" rot_w="1" pos_x="0" pos_z="0" frame="2" fov="60" rot_x="0" rot_y="0"/>
+        </camera>
+      </sequence>
+      <sequence length="497" start="6635" scene="frite">
+        <camera>
+          <keyframe pos_y="0" rot_z="0" rot_w="1" pos_x="0" pos_z="0" frame="0" fov="60" rot_x="0" rot_y="0"/>
+        </camera>
+      </sequence>
+      <sequence length="489" start="7134" scene="leon">
+        <camera>
+          <keyframe pos_y="0" rot_z="0" rot_w="1" pos_x="0" pos_z="0" frame="196" fov="60" rot_x="0" rot_y="0"/>
+          <keyframe pos_y="0" rot_z="0" rot_w="1" pos_x="0" pos_z="0" frame="5" fov="60" rot_x="0" rot_y="0"/>
+        </camera>
+      </sequence>
+      <sequence length="261" start="7874" scene="frite_klems">
+        <camera>
+          <keyframe pos_y="-0.0588479" rot_z="-0.0832717" rot_w="0.371668" pos_x="0.116838" pos_z="0.440343" frame="1" fov="60" rot_x="0.151744" rot_y="-0.912084"/>
+          <keyframe pos_y="-0.278282" rot_z="-0.157119" rot_w="-0.254149" pos_x="-0.63227" pos_z="0.564113" frame="15" fov="60" rot_x="0.0872903" rot_y="-0.950313"/>
+          <keyframe pos_y="-0.243194" rot_z="-0.167341" rot_w="-0.460645" pos_x="-0.829443" pos_z="0.246504" frame="249" fov="60" rot_x="0.0452627" rot_y="-0.870491"/>
+          <keyframe pos_y="-0.243194" rot_z="-0.849853" rot_w="-0.136143" pos_x="-0.829443" pos_z="0.246504" frame="262" fov="60" rot_x="0.427955" rot_y="-0.275806"/>
+        </camera>
+      </sequence>
+      <sequence length="250" start="8135" scene="frite_klems">
+        <camera>
+          <keyframe pos_y="-0.160534" rot_z="-0.30775" rot_w="-0.00452506" pos_x="-0.000734746" pos_z="1.22974" frame="15" fov="60" rot_x="-0.0301199" rot_y="-0.950979"/>
+          <keyframe pos_y="-0.295645" rot_z="0.174392" rot_w="0.0151133" pos_x="-0.0258124" pos_z="1.90114" frame="2" fov="60" rot_x="-0.0396099" rot_y="-0.983762"/>
+          <keyframe pos_y="-1.07961" rot_z="-0.309824" rot_w="-0.00459077" pos_x="-0.062731" pos_z="0.558131" frame="234" fov="60" rot_x="-0.03011" rot_y="-0.950305"/>
+          <keyframe pos_y="-0.786743" rot_z="-0.000957131" rot_w="-0.429548" pos_x="-1.45901" pos_z="1.0294" frame="251" fov="60" rot_x="-0.181003" rot_y="-0.884716"/>
+        </camera>
+      </sequence>
+      <sequence length="315" start="8385" scene="frite_klems">
+        <camera>
+          <keyframe pos_y="-0.76186" rot_z="-0.109958" rot_w="0.702441" pos_x="1.82379" pos_z="0.244334" frame="3" fov="60" rot_x="-0.291198" rot_y="-0.64007"/>
+          <keyframe pos_y="0.237428" rot_z="0.118194" rot_w="0.266593" pos_x="0.838622" pos_z="1.34679" frame="21" fov="60" rot_x="-0.268886" rot_y="-0.917963"/>
+          <keyframe pos_y="0.831985" rot_z="0.147538" rot_w="0.0280343" pos_x="0.0710124" pos_z="1.79608" frame="315" fov="60" rot_x="-0.248181" rot_y="-0.957"/>
+        </camera>
+      </sequence>
+    </track>
+  </timeline>
+</rmdemo>
