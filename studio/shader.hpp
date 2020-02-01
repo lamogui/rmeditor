@@ -30,10 +30,6 @@ public:
 
   static const char* getVertexShader();
 
-signals:
-  void error(QString err);
-  void warning(QString warn);
-
 private:
   bool makeShader(const char *txt, GLuint type);
   bool checkShader( int id );

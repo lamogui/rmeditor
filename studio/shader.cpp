@@ -2,6 +2,7 @@
 #include <QMessageBox>
 
 #include "shader.hpp"
+#include "logmanager.hpp"
 
 
 //-----------------------------------------------------------------------------
@@ -113,7 +114,7 @@ bool Shader::checkShader(int id)
         log = new GLchar[logLength];
         glGetShaderInfoLog(id, logLength, &logLength, log);
 
-        emit error(QString(log));
+				perror( Log::Shader, this, log );
         delete[] log;
         return false;
     }
@@ -128,7 +129,7 @@ bool Shader::checkShader(int id)
 
         if(logLength>0)
         {
-          emit warning(QString(log));
+					pwarning( Log::Shader, this, log );
         }
         delete[] log;
     }
